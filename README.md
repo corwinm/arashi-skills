@@ -2,6 +2,10 @@
 
 Dedicated skills package repository for Arashi.
 
+```bash
+npx skills add https://github.com/corwinm/arashi-skills --skill arashi
+```
+
 ## Purpose
 
 This repository provides the Arashi skill package used by `skills.sh` users to:
@@ -37,6 +41,12 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 - Install: `npx skills add https://github.com/corwinm/arashi-skills --skill arashi`
 - Verify: `bash skills/arashi/scripts/validate.sh --check all`
 - Workflow gate only: `bash skills/arashi/scripts/validate.sh --check workflows`
+
+## Skill Entry Point
+
+- Manifest: `skills/arashi/SKILL.md`
+- References index: `skills/arashi/README.md`
+- Examples index: `examples/README.md`
 
 ## Related Repositories
 

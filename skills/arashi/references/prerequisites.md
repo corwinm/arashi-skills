@@ -14,7 +14,7 @@ Run these checks before installation. All required rows must pass.
 
 1. **Prerequisite gate**: required checks pass.
 2. **Install gate**: skill files are available locally after install.
-3. **Workflow gate**: examples and workflow reference files are present.
+3. **Workflow gate**: workflow reference files and `arashi` command are present.
 
 ## Validation Command
 

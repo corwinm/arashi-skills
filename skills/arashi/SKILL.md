@@ -23,27 +23,50 @@ status: draft
 
 # Arashi Skill
 
-Use this skill to install and validate an Arashi-ready workspace, then run documented workflows for common meta-repository tasks.
+Use this skill to install Arashi, validate readiness, and run common multi-repository workflows.
 
-## Quick Start
+## When to Use This Skill
 
-1. Run preflight checks from `references/prerequisites.md`.
-2. Run install and verification commands from `references/commands.md`.
-3. Choose a workflow from `references/workflows.md` and execute the matching example.
-4. If something fails, use `references/troubleshooting.md`.
+Use this skill when the user wants to:
 
-## Entry Commands
+- set up Arashi quickly with a documented, repeatable install flow
+- choose a workflow by difficulty (beginner, intermediate, advanced)
+- validate readiness before running commands across multiple repositories
+- recover from setup, network, or command failures without guesswork
 
-- Install skill package: `npx skills add https://github.com/corwinm/arashi-skills --skill arashi`
-- Verify package readiness: `bash skills/arashi/scripts/validate.sh --check all`
-- Verify workflow readiness only: `bash skills/arashi/scripts/validate.sh --check workflows`
+## Core Commands
+
+```bash
+# install
+npx skills add https://github.com/corwinm/arashi-skills --skill arashi
+
+# full validation
+bash skills/arashi/scripts/validate.sh --check all
+
+# workflow-only validation
+bash skills/arashi/scripts/validate.sh --check workflows
+```
+
+## Usage Rules
+
+When guiding a user, always:
+
+1. Run preflight checks before installation.
+2. Use canonical install and validation commands from this skill.
+3. Confirm expected outcomes after each workflow step.
+4. Route failures through the troubleshooting matrix before retrying.
+
+## Validation Gates
+
+- Preflight gate: checks required commands (`git`, `npx`).
+- Install gate: checks required skill files are present.
+- Workflow gate: checks `arashi` and required workflow references.
 
 ## Workflow Catalog
 
-- First-run install walkthrough: `examples/install-first-run.md`
-- Beginner workflow: `examples/workflow-beginner.md`
-- Intermediate workflow: `examples/workflow-intermediate.md`
-- Advanced workflow: `examples/workflow-advanced.md`
+- Beginner: initialize workspace and inspect status.
+- Intermediate: add repositories and create a feature branch.
+- Advanced: pull and sync repositories safely.
 
 ### Expected Workflow Outcomes
 

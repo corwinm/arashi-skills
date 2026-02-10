@@ -2,6 +2,19 @@
 
 This document defines canonical install, verification, workflow, and publication commands.
 
+## Most Common Commands
+
+```bash
+# install
+npx skills add https://github.com/corwinm/arashi-skills --skill arashi
+
+# full validation
+bash skills/arashi/scripts/validate.sh --check all
+
+# workflow-only readiness
+bash skills/arashi/scripts/validate.sh --check workflows
+```
+
 ## Installation
 
 ```bash
@@ -11,7 +24,7 @@ npx skills add https://github.com/corwinm/arashi-skills --skill arashi
 Expected outcome:
 
 - Command exits `0`.
-- Skill package is listed by your skills tooling.
+- Skill files are available under `skills/arashi/`.
 
 ## Verification
 
@@ -34,11 +47,13 @@ Expected outcome:
 
 ## Workflow Execution
 
-Choose one example and execute commands in order:
+Choose one workflow from `references/workflows.md` and execute commands in order.
 
-- Beginner: `examples/workflow-beginner.md`
-- Intermediate: `examples/workflow-intermediate.md`
-- Advanced: `examples/workflow-advanced.md`
+Order of operations:
+
+1. Run workflow readiness validation.
+2. Execute one workflow from start to finish.
+3. Confirm the documented expected outcomes.
 
 Use workflow readiness check before running examples:
 

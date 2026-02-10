@@ -2,11 +2,17 @@
 
 Use this catalog to choose the right workflow by goal and confidence level.
 
-| Workflow | Difficulty | User Goal | Entry Reference |
-|----------|------------|-----------|-----------------|
-| Beginner | Beginner | Initialize a workspace and inspect current status | `examples/workflow-beginner.md` |
-| Intermediate | Intermediate | Add repositories and create a feature branch across worktrees | `examples/workflow-intermediate.md` |
-| Advanced | Advanced | Recover from branch drift and synchronize repositories safely | `examples/workflow-advanced.md` |
+| Workflow | Difficulty | User Goal |
+|----------|------------|-----------|
+| Beginner | Beginner | Initialize a workspace and inspect current status |
+| Intermediate | Intermediate | Add repositories and create a feature branch across worktrees |
+| Advanced | Advanced | Recover from branch drift and synchronize repositories safely |
+
+## Command Shape by Workflow
+
+- Beginner: `arashi init` -> `arashi status`
+- Intermediate: `arashi add` -> `arashi create` -> `arashi list`
+- Advanced: `arashi pull` -> `arashi sync` -> `arashi status`
 
 ## Selection Guidance
 
@@ -22,4 +28,45 @@ Before running any workflow:
 bash skills/arashi/scripts/validate.sh --check workflows
 ```
 
-Then execute commands from the selected example file in order.
+## Beginner Workflow
+
+```bash
+arashi init
+arashi status
+```
+
+Expected outcomes:
+
+- `.arashi/config.json` exists after `arashi init`.
+- `arashi status` prints repository/worktree status without errors.
+
+## Intermediate Workflow
+
+```bash
+arashi add git@github.com:your-org/frontend.git
+arashi add git@github.com:your-org/backend.git
+arashi create feature/skill-integration
+arashi list
+```
+
+Expected outcomes:
+
+- Repositories are registered in `.arashi/config.json`.
+- New worktrees exist for `feature/skill-integration`.
+- `arashi list` shows active worktree paths.
+
+## Advanced Workflow
+
+```bash
+arashi pull
+arashi sync
+arashi status
+```
+
+Expected outcomes:
+
+- Remotes are fetched and local branches update where possible.
+- Sync avoids partial update states.
+- `arashi status` reports clean or actionable next steps.
+
+After completion, confirm the expected outcomes listed for that workflow before moving to another one.

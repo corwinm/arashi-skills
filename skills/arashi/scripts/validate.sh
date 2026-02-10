@@ -47,19 +47,12 @@ check_preflight() {
 check_install() {
   require_file "$ROOT_DIR/skills/arashi/SKILL.md"
   require_file "$ROOT_DIR/skills/arashi/references/commands.md"
-  if command -v arashi >/dev/null 2>&1; then
-    pass "command available: arashi"
-  else
-    printf '%s\n' "WARN: arashi is not on PATH yet (install may still be in progress)"
-  fi
 }
 
 check_workflows() {
   require_cmd arashi
-  require_file "$ROOT_DIR/examples/workflow-beginner.md"
-  require_file "$ROOT_DIR/examples/workflow-intermediate.md"
-  require_file "$ROOT_DIR/examples/workflow-advanced.md"
   require_file "$ROOT_DIR/skills/arashi/references/workflows.md"
+  require_file "$ROOT_DIR/skills/arashi/references/troubleshooting.md"
 }
 
 case "$TARGET" in
