@@ -6,8 +6,8 @@ Follow this tutorial to go from zero setup to one successful Arashi workflow wit
 
 ```bash
 git --version
-npx --version
-git ls-remote https://github.com/corwinm/arashi-skills.git
+npm --version
+git ls-remote https://github.com/corwinm/arashi.git
 ```
 
 Success criteria:
@@ -15,16 +15,16 @@ Success criteria:
 - All commands return exit code `0`.
 - Network check returns remote references.
 
-## Step 2: Install Skill Package
+## Step 2: Install Arashi CLI
 
 ```bash
-npx skills add https://github.com/corwinm/arashi-skills --skill arashi
+npm install -g arashi
 ```
 
 Success criteria:
 
 - Install command exits `0`.
-- Skill content is present locally.
+- `arashi --version` returns a version string.
 
 ## Step 3: Validate Gates
 
@@ -71,4 +71,4 @@ Recovery path:
 
 ## Completion Criteria
 
-Tutorial is complete when the user can install, validate, run one workflow, simulate a failure, and recover using troubleshooting guidance.
+Tutorial is complete when the user can install Arashi CLI, validate, run one workflow, simulate a failure, and recover using troubleshooting guidance.

@@ -1,9 +1,10 @@
 # Arashi Skill Cheat Sheet
 
-## Install and Validate
+## Install Arashi and Validate
 
 ```bash
-npx skills add https://github.com/corwinm/arashi-skills --skill arashi
+npm install -g arashi
+arashi --version
 bash skills/arashi/scripts/validate.sh --check all
 ```
 
@@ -28,6 +29,15 @@ arashi status
 arashi pull
 arashi sync
 ```
+
+## tmux / sesh Shortcuts (Optional)
+
+```bash
+cd "$(arashi list | fzf)"
+sesh connect "$(arashi list | fzf)"
+```
+
+More shortcuts: `skills/arashi/references/session-shortcuts.md`
 
 ## Fast Recovery Sequence
 

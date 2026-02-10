@@ -31,6 +31,16 @@ require_cmd() {
   fi
 }
 
+require_any_cmd() {
+  for cmd in "$@"; do
+    if command -v "$cmd" >/dev/null 2>&1; then
+      pass "command available: $cmd"
+      return
+    fi
+  done
+  fail "missing command: one of [$*]"
+}
+
 require_file() {
   if [ -f "$1" ]; then
     pass "file present: $1"
@@ -41,17 +51,18 @@ require_file() {
 
 check_preflight() {
   require_cmd git
-  require_cmd npx
+  require_any_cmd npm curl
 }
 
 check_install() {
+  require_cmd arashi
   require_file "$ROOT_DIR/skills/arashi/SKILL.md"
   require_file "$ROOT_DIR/skills/arashi/references/commands.md"
 }
 
 check_workflows() {
-  require_cmd arashi
   require_file "$ROOT_DIR/skills/arashi/references/workflows.md"
+  require_file "$ROOT_DIR/skills/arashi/references/session-shortcuts.md"
   require_file "$ROOT_DIR/skills/arashi/references/troubleshooting.md"
 }
 

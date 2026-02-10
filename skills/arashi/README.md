@@ -15,6 +15,7 @@ This directory contains the canonical Arashi skill definition and all supporting
 - `references/prerequisites.md`: Environment checks and pass criteria
 - `references/commands.md`: Installation, validation, and publication commands
 - `references/workflows.md`: Workflow catalog and selection guidance
+- `references/session-shortcuts.md`: fzf/tmux/sesh navigation shortcuts
 - `references/troubleshooting.md`: Symptom-to-fix matrix
 - `references/tutorial.md`: End-to-end onboarding tutorial
 - `references/publication.md`: Publication policy and readiness gates

@@ -1,12 +1,12 @@
 # Publication Policy and Discoverability
 
-Publication is optional. Repository-based installation is always the baseline distribution path.
+Publication is optional. Repository-based distribution is the baseline path.
 
 ## Policy
 
-- **Default path**: users install via `npx skills add https://github.com/corwinm/arashi-skills --skill arashi`.
+- **Default path**: users discover the skill from repository-based distribution.
 - **Optional listing**: publish/list only when account and platform policy permit.
-- **Fallback**: when listing is not supported, continue with repository install and mark release status as `not_applicable`.
+- **Fallback**: when listing is not supported, continue with repository distribution and mark release status as `not_applicable`.
 
 ## Discoverability Criteria
 

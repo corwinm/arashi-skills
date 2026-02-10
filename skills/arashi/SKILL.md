@@ -8,11 +8,12 @@ owner: corwinm
 license: MIT
 compatibility:
   os: [macos, linux, windows]
-  required_commands: [git, npx]
-  optional_commands: [arashi]
+  required_commands: [git]
+  optional_commands: [npm, curl]
 entry_commands:
-  install: npx skills add https://github.com/corwinm/arashi-skills --skill arashi
-  verify: bash skills/arashi/scripts/validate.sh --check all
+  install_arashi: npm install -g arashi
+  verify_arashi: arashi --version
+  verify_skill: bash skills/arashi/scripts/validate.sh --check all
   workflows:
     beginner: arashi init && arashi status
     intermediate: arashi add <repo-url> && arashi create <branch>
@@ -23,7 +24,7 @@ status: draft
 
 # Arashi Skill
 
-Use this skill to install Arashi, validate readiness, and run common multi-repository workflows.
+This skill is already installed. Use it to install Arashi CLI, validate readiness, and run common multi-repository workflows.
 
 ## When to Use This Skill
 
@@ -37,8 +38,11 @@ Use this skill when the user wants to:
 ## Core Commands
 
 ```bash
-# install
-npx skills add https://github.com/corwinm/arashi-skills --skill arashi
+# install Arashi CLI
+npm install -g arashi
+
+# verify Arashi is available
+arashi --version
 
 # full validation
 bash skills/arashi/scripts/validate.sh --check all
@@ -51,22 +55,23 @@ bash skills/arashi/scripts/validate.sh --check workflows
 
 When guiding a user, always:
 
-1. Run preflight checks before installation.
-2. Use canonical install and validation commands from this skill.
+1. Run preflight checks before installing Arashi CLI.
+2. Use canonical Arashi install and validation commands from this skill.
 3. Confirm expected outcomes after each workflow step.
 4. Route failures through the troubleshooting matrix before retrying.
 
 ## Validation Gates
 
-- Preflight gate: checks required commands (`git`, `npx`).
-- Install gate: checks required skill files are present.
-- Workflow gate: checks `arashi` and required workflow references.
+- Preflight gate: checks required setup commands.
+- Install gate: checks `arashi` and required skill files are present.
+- Workflow gate: checks required workflow references.
 
 ## Workflow Catalog
 
 - Beginner: initialize workspace and inspect status.
 - Intermediate: add repositories and create a feature branch.
 - Advanced: pull and sync repositories safely.
+- Session shortcuts: jump or connect with `fzf` + `sesh`.
 
 ### Expected Workflow Outcomes
 
@@ -79,6 +84,7 @@ When guiding a user, always:
 - Prerequisites: `references/prerequisites.md`
 - Commands: `references/commands.md`
 - Workflows: `references/workflows.md`
+- Session shortcuts: `references/session-shortcuts.md`
 - Tutorial: `references/tutorial.md`
 - Troubleshooting: `references/troubleshooting.md`
 - Publication policy: `references/publication.md`

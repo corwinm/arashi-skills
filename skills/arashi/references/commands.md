@@ -1,12 +1,15 @@
 # Command Reference
 
-This document defines canonical install, verification, workflow, and publication commands.
+This document defines canonical Arashi CLI install, verification, workflow, and publication commands.
 
 ## Most Common Commands
 
 ```bash
-# install
-npx skills add https://github.com/corwinm/arashi-skills --skill arashi
+# install Arashi CLI
+npm install -g arashi
+
+# verify Arashi CLI
+arashi --version
 
 # full validation
 bash skills/arashi/scripts/validate.sh --check all
@@ -17,14 +20,24 @@ bash skills/arashi/scripts/validate.sh --check workflows
 
 ## Installation
 
+Install Arashi CLI with npm:
+
 ```bash
-npx skills add https://github.com/corwinm/arashi-skills --skill arashi
+npm install -g arashi
+```
+
+Alternative install from GitHub Releases:
+
+```bash
+curl -L https://github.com/corwinm/arashi/releases/latest/download/arashi-macos-arm64 -o arashi
+chmod +x arashi
+sudo mv arashi /usr/local/bin/arashi
 ```
 
 Expected outcome:
 
 - Command exits `0`.
-- Skill files are available under `skills/arashi/`.
+- `arashi --version` returns a version string.
 
 ## Verification
 
@@ -55,11 +68,17 @@ Order of operations:
 2. Execute one workflow from start to finish.
 3. Confirm the documented expected outcomes.
 
-Use workflow readiness check before running examples:
+Use workflow readiness check before running workflows:
 
 ```bash
 bash skills/arashi/scripts/validate.sh --check workflows
 ```
+
+## Session Navigation (Optional)
+
+For tmux/sesh and worktree jump shortcuts, use:
+
+- `references/session-shortcuts.md`
 
 ## Publication and Discoverability
 
@@ -70,10 +89,4 @@ git tag -a skill-arashi-v0.1.0 -m "arashi skill package v0.1.0"
 git push origin skill-arashi-v0.1.0
 ```
 
-After release, validate discoverability from a clean environment:
-
-```bash
-npx skills add https://github.com/corwinm/arashi-skills --skill arashi
-```
-
-If listing/publication is unavailable for your account policy, mark status as `not_applicable` in release notes and continue with repository-based install instructions.
+After release, validate that Arashi installation and validation commands remain accurate for new users.
