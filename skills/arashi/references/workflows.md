@@ -26,7 +26,7 @@ Use this catalog to choose the right workflow by goal and confidence level.
 Before running any workflow:
 
 ```bash
-bash skills/arashi/scripts/validate.sh --check workflows
+arashi --version
 ```
 
 ## Beginner Workflow

@@ -1,8 +1,8 @@
-# End-to-End Integration Tutorial
+# End-to-End Tutorial
 
-Follow this tutorial to go from zero setup to one successful Arashi workflow with recovery guidance.
+Follow this tutorial to go from zero setup to one successful Arashi workflow.
 
-## Step 1: Run Preflight
+## Step 1: Preflight
 
 ```bash
 git --version
@@ -12,8 +12,8 @@ git ls-remote https://github.com/corwinm/arashi.git
 
 Success criteria:
 
-- All commands return exit code `0`.
-- Network check returns remote references.
+- commands return exit code `0`
+- network check returns remote refs
 
 ## Step 2: Install Arashi CLI
 
@@ -21,25 +21,27 @@ Success criteria:
 npm install -g arashi
 ```
 
-Success criteria:
-
-- Install command exits `0`.
-- `arashi --version` returns a version string.
-
-## Step 3: Validate Gates
+Alternative:
 
 ```bash
-bash skills/arashi/scripts/validate.sh --check all
+curl -L https://github.com/corwinm/arashi/releases/latest/download/arashi-macos-arm64 -o arashi
+chmod +x arashi
+sudo mv arashi /usr/local/bin/arashi
+```
+
+## Step 3: Verify CLI
+
+```bash
+arashi --version
+arashi --help
 ```
 
 Success criteria:
 
-- Validator prints `PASS` for required checks.
-- Gate run completes in under two minutes on a normal connection.
+- both commands exit `0`
+- help output lists commands
 
 ## Step 4: Run First Workflow
-
-Use the beginner workflow:
 
 ```bash
 arashi init
@@ -48,27 +50,32 @@ arashi status
 
 Success criteria:
 
-- Arashi config exists.
-- Status output renders without errors.
+- `.arashi/config.json` exists after `arashi init`
+- `arashi status` prints repository/worktree status without errors
 
-## Step 5: Simulate and Recover from Failure
-
-Simulate missing command condition by opening a shell where `arashi` is not available, then run:
+## Step 5: Optional Session Shortcut Flow
 
 ```bash
-bash skills/arashi/scripts/validate.sh --check workflows
+cd "$(arashi list | fzf)"
+sesh connect "$(arashi list | fzf)"
 ```
 
-Expected failure:
+Use this step only when `fzf` and `sesh` are installed.
 
-- Validator reports `FAIL: missing command: arashi`.
+## Step 6: Simulate and Recover
+
+If `arashi` is not on `PATH`, run:
+
+```bash
+arashi --version
+```
+
+Expected failure: `command not found`.
 
 Recovery path:
 
-1. Install Arashi via npm or release binary.
-2. Confirm with `arashi --version`.
-3. Re-run workflow validation gate.
+1. reinstall Arashi (`npm install -g arashi`)
+2. open a new shell
+3. rerun `arashi --version`
 
-## Completion Criteria
-
-Tutorial is complete when the user can install Arashi CLI, validate, run one workflow, simulate a failure, and recover using troubleshooting guidance.
+Tutorial is complete when one workflow succeeds end-to-end and failure recovery works.

@@ -1,6 +1,6 @@
 # Command Reference
 
-This document defines canonical Arashi CLI install, verification, workflow, and publication commands.
+Canonical commands for installing and using the Arashi CLI.
 
 ## Most Common Commands
 
@@ -11,16 +11,13 @@ npm install -g arashi
 # verify Arashi CLI
 arashi --version
 
-# full validation
-bash skills/arashi/scripts/validate.sh --check all
-
-# workflow-only readiness
-bash skills/arashi/scripts/validate.sh --check workflows
+# inspect command surface
+arashi --help
 ```
 
 ## Installation
 
-Install Arashi CLI with npm:
+Install with npm:
 
 ```bash
 npm install -g arashi
@@ -36,43 +33,18 @@ sudo mv arashi /usr/local/bin/arashi
 
 Expected outcome:
 
-- Command exits `0`.
-- `arashi --version` returns a version string.
-
-## Verification
-
-Run all validation gates:
-
-```bash
-bash skills/arashi/scripts/validate.sh --check all
-```
-
-Run only install gate:
-
-```bash
-bash skills/arashi/scripts/validate.sh --check install
-```
-
-Expected outcome:
-
-- Required checks print `PASS`.
-- Command exits `0` when gates pass.
+- install command exits `0`
+- `arashi --version` returns a version string
 
 ## Workflow Execution
 
-Choose one workflow from `references/workflows.md` and execute commands in order.
+Choose one workflow from `references/workflows.md`.
 
 Order of operations:
 
-1. Run workflow readiness validation.
+1. Confirm `arashi --version` succeeds.
 2. Execute one workflow from start to finish.
-3. Confirm the documented expected outcomes.
-
-Use workflow readiness check before running workflows:
-
-```bash
-bash skills/arashi/scripts/validate.sh --check workflows
-```
+3. Confirm expected outcomes from the workflow doc.
 
 ## Session Navigation (Optional)
 
@@ -89,4 +61,4 @@ git tag -a skill-arashi-v0.1.0 -m "arashi skill package v0.1.0"
 git push origin skill-arashi-v0.1.0
 ```
 
-After release, validate that Arashi installation and validation commands remain accurate for new users.
+After release, validate that installation and workflow instructions remain accurate for new users.

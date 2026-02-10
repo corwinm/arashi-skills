@@ -7,7 +7,7 @@ This directory contains the canonical Arashi skill definition and all supporting
 - Skill identity and workflow entry points in `SKILL.md`
 - Prerequisite, command, workflow, troubleshooting, publication, and tutorial references
 - User-facing assets such as quick cheat sheets
-- Validation helper scripts used during preflight and release checks
+- Session shortcut guidance for `fzf`, `tmux`, and `sesh`
 
 ## Artifact Index
 
@@ -20,4 +20,3 @@ This directory contains the canonical Arashi skill definition and all supporting
 - `references/tutorial.md`: End-to-end onboarding tutorial
 - `references/publication.md`: Publication policy and readiness gates
 - `assets/cheatsheet.md`: Fast command lookup
-- `scripts/validate.sh`: Validation script for preflight/install/workflow readiness

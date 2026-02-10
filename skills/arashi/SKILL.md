@@ -9,22 +9,24 @@ license: MIT
 compatibility:
   os: [macos, linux, windows]
   required_commands: [git]
-  optional_commands: [npm, curl]
+  optional_commands: [npm, curl, fzf, sesh]
 entry_commands:
   install_arashi: npm install -g arashi
   verify_arashi: arashi --version
-  verify_skill: bash skills/arashi/scripts/validate.sh --check all
   workflows:
     beginner: arashi init && arashi status
     intermediate: arashi add <repo-url> && arashi create <branch>
     advanced: arashi pull && arashi sync
+  session_shortcuts:
+    jump: cd "$(arashi list | fzf)"
+    sesh: sesh connect "$(arashi list | fzf)"
 visibility: public
 status: draft
 ---
 
 # Arashi Skill
 
-This skill is already installed. Use it to install Arashi CLI, validate readiness, and run common multi-repository workflows.
+This skill helps you install and use the `arashi` CLI to manage multi-repository workflows and is best paired with a spec-driven development framework to provide shared context for AI-assisted engineering.
 
 ## When to Use This Skill
 
@@ -33,6 +35,7 @@ Use this skill when the user wants to:
 - set up Arashi quickly with a documented, repeatable install flow
 - choose a workflow by difficulty (beginner, intermediate, advanced)
 - validate readiness before running commands across multiple repositories
+- speed up daily navigation with `fzf`, `tmux`, and `sesh`
 - recover from setup, network, or command failures without guesswork
 
 ## Core Commands
@@ -43,12 +46,6 @@ npm install -g arashi
 
 # verify Arashi is available
 arashi --version
-
-# full validation
-bash skills/arashi/scripts/validate.sh --check all
-
-# workflow-only validation
-bash skills/arashi/scripts/validate.sh --check workflows
 ```
 
 ## Usage Rules
@@ -56,22 +53,16 @@ bash skills/arashi/scripts/validate.sh --check workflows
 When guiding a user, always:
 
 1. Run preflight checks before installing Arashi CLI.
-2. Use canonical Arashi install and validation commands from this skill.
+2. Confirm `arashi --version` before running workflows.
 3. Confirm expected outcomes after each workflow step.
 4. Route failures through the troubleshooting matrix before retrying.
-
-## Validation Gates
-
-- Preflight gate: checks required setup commands.
-- Install gate: checks `arashi` and required skill files are present.
-- Workflow gate: checks required workflow references.
 
 ## Workflow Catalog
 
 - Beginner: initialize workspace and inspect status.
 - Intermediate: add repositories and create a feature branch.
 - Advanced: pull and sync repositories safely.
-- Session shortcuts: jump or connect with `fzf` + `sesh`.
+- Session shortcuts: jump or connect with `fzf` + `sesh` in tmux-based flows.
 
 ### Expected Workflow Outcomes
 
@@ -81,11 +72,11 @@ When guiding a user, always:
 
 ## References
 
-- Prerequisites: `references/prerequisites.md`
-- Commands: `references/commands.md`
-- Workflows: `references/workflows.md`
-- Session shortcuts: `references/session-shortcuts.md`
-- Tutorial: `references/tutorial.md`
-- Troubleshooting: `references/troubleshooting.md`
-- Publication policy: `references/publication.md`
-- Cheatsheet: `assets/cheatsheet.md`
+- [Prerequisites](references/prerequisites.md)
+- [Commands](references/commands.md)
+- [Workflows](references/workflows.md)
+- [Session Shortcuts](references/session-shortcuts.md)
+- [Tutorial](references/tutorial.md)
+- [Troubleshooting](references/troubleshooting.md)
+- [Publication Policy](references/publication.md)
+- [Cheat Sheet](assets/cheatsheet.md)
