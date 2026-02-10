@@ -5,7 +5,7 @@ This document defines canonical install, verification, workflow, and publication
 ## Installation
 
 ```bash
-npx skills add corwinm/arashi-skills
+npx skills add https://github.com/corwinm/arashi-skills --skill arashi
 ```
 
 Expected outcome:
@@ -58,7 +58,7 @@ git push origin skill-arashi-v0.1.0
 After release, validate discoverability from a clean environment:
 
 ```bash
-npx skills add corwinm/arashi-skills
+npx skills add https://github.com/corwinm/arashi-skills --skill arashi
 ```
 
 If listing/publication is unavailable for your account policy, mark status as `not_applicable` in release notes and continue with repository-based install instructions.

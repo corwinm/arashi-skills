@@ -3,7 +3,7 @@
 ## Install and Validate
 
 ```bash
-npx skills add corwinm/arashi-skills
+npx skills add https://github.com/corwinm/arashi-skills --skill arashi
 bash skills/arashi/scripts/validate.sh --check all
 ```
 

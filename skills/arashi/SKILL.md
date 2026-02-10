@@ -11,7 +11,7 @@ compatibility:
   required_commands: [git, npx]
   optional_commands: [arashi]
 entry_commands:
-  install: npx skills add corwinm/arashi-skills
+  install: npx skills add https://github.com/corwinm/arashi-skills --skill arashi
   verify: bash skills/arashi/scripts/validate.sh --check all
   workflows:
     beginner: arashi init && arashi status
@@ -34,7 +34,7 @@ Use this skill to install and validate an Arashi-ready workspace, then run docum
 
 ## Entry Commands
 
-- Install skill package: `npx skills add corwinm/arashi-skills`
+- Install skill package: `npx skills add https://github.com/corwinm/arashi-skills --skill arashi`
 - Verify package readiness: `bash skills/arashi/scripts/validate.sh --check all`
 - Verify workflow readiness only: `bash skills/arashi/scripts/validate.sh --check workflows`
 

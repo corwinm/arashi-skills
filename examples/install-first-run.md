@@ -19,7 +19,7 @@ This walkthrough takes a new user from zero setup to one validated Arashi workfl
 2. Install the skill package:
 
    ```bash
-   npx skills add corwinm/arashi-skills
+   npx skills add https://github.com/corwinm/arashi-skills --skill arashi
    ```
 
 3. Validate installation readiness:

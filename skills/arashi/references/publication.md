@@ -4,7 +4,7 @@ Publication is optional. Repository-based installation is always the baseline di
 
 ## Policy
 
-- **Default path**: users install via `npx skills add corwinm/arashi-skills`.
+- **Default path**: users install via `npx skills add https://github.com/corwinm/arashi-skills --skill arashi`.
 - **Optional listing**: publish/list only when account and platform policy permit.
 - **Fallback**: when listing is not supported, continue with repository install and mark release status as `not_applicable`.
 

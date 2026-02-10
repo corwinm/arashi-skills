@@ -18,7 +18,7 @@ Success criteria:
 ## Step 2: Install Skill Package
 
 ```bash
-npx skills add corwinm/arashi-skills
+npx skills add https://github.com/corwinm/arashi-skills --skill arashi
 ```
 
 Success criteria:

@@ -34,7 +34,7 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 
 ## Canonical Commands
 
-- Install: `npx skills add corwinm/arashi-skills`
+- Install: `npx skills add https://github.com/corwinm/arashi-skills --skill arashi`
 - Verify: `bash skills/arashi/scripts/validate.sh --check all`
 - Workflow gate only: `bash skills/arashi/scripts/validate.sh --check workflows`
 
