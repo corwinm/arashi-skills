@@ -1,9 +1,3 @@
-```text
-◢▲◣  ▓█▀█  ▓█▀▄  ▓█▀█  ▓█▀▀  ▓█░█  ▓█
-◥▲◤  ▓█▀█  ▓█▀▄  ▓█▀█  ▓▀▀█  ▓█▀█  ▓█
-     ▓▀░▀  ▓▀░▀  ▓▀░▀  ▀▀▀▀  ▓▀░▀  ▓▀
-```
-
 # arashi-skills
 
 Dedicated skills package repository for Arashi.
