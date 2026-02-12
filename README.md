@@ -37,7 +37,8 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 ## Canonical Commands
 
 - Install: `npx skills add https://github.com/corwinm/arashi-skills --skill arashi`
-- Install Arashi CLI: `npm install -g arashi`
+- Install Arashi CLI (macOS/Linux): `curl -fsSL https://arashi.haphazard.dev/install | bash`
+- Install Arashi CLI fallback (all platforms): `npm install -g arashi`
 - Verify Arashi CLI: `arashi --version`
 
 ## Skill Entry Point

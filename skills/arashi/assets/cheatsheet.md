@@ -3,7 +3,8 @@
 ## Install and Verify Arashi CLI
 
 ```bash
-npm install -g arashi
+curl -fsSL https://arashi.haphazard.dev/install | bash
+npm install -g arashi # fallback
 arashi --version
 arashi --help
 ```

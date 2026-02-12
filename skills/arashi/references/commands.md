@@ -5,7 +5,10 @@ Canonical commands for installing and using the Arashi CLI.
 ## Most Common Commands
 
 ```bash
-# install Arashi CLI
+# install Arashi CLI (macOS/Linux)
+curl -fsSL https://arashi.haphazard.dev/install | bash
+
+# fallback install (all platforms)
 npm install -g arashi
 
 # verify Arashi CLI
@@ -17,13 +20,25 @@ arashi --help
 
 ## Installation
 
-Install with npm:
+Install with curl script (official direct install on macOS/Linux):
+
+```bash
+curl -fsSL https://arashi.haphazard.dev/install | bash
+```
+
+Optional pinned install:
+
+```bash
+curl -fsSL https://arashi.haphazard.dev/install | ARASHI_VERSION=1.4.0 bash
+```
+
+Fallback install with npm (all platforms):
 
 ```bash
 npm install -g arashi
 ```
 
-Alternative install from GitHub Releases:
+Alternative manual install from GitHub Releases:
 
 ```bash
 curl -L https://github.com/corwinm/arashi/releases/latest/download/arashi-macos-arm64 -o arashi

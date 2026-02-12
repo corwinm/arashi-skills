@@ -9,9 +9,10 @@ license: MIT
 compatibility:
   os: [macos, linux, windows]
   required_commands: [git]
-  optional_commands: [npm, curl, fzf, sesh]
+  optional_commands: [npm, curl, bash, fzf, sesh]
 entry_commands:
-  install_arashi: npm install -g arashi
+  install_arashi: "curl -fsSL https://arashi.haphazard.dev/install | bash"
+  install_arashi_fallback: npm install -g arashi
   verify_arashi: arashi --version
   workflows:
     beginner: arashi init && arashi status
@@ -41,7 +42,10 @@ Use this skill when the user wants to:
 ## Core Commands
 
 ```bash
-# install Arashi CLI
+# install Arashi CLI (macOS/Linux)
+curl -fsSL https://arashi.haphazard.dev/install | bash
+
+# fallback install (all platforms)
 npm install -g arashi
 
 # verify Arashi is available
@@ -53,9 +57,10 @@ arashi --version
 When guiding a user, always:
 
 1. Run preflight checks before installing Arashi CLI.
-2. Confirm `arashi --version` before running workflows.
-3. Confirm expected outcomes after each workflow step.
-4. Route failures through the troubleshooting matrix before retrying.
+2. Use curl installer on macOS/Linux and npm fallback on Windows or constrained environments.
+3. Confirm `arashi --version` before running workflows.
+4. Confirm expected outcomes after each workflow step.
+5. Route failures through the troubleshooting matrix before retrying.
 
 ## Workflow Catalog
 
