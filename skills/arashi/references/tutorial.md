@@ -6,7 +6,8 @@ Follow this tutorial to go from zero setup to one successful Arashi workflow.
 
 ```bash
 git --version
-npm --version
+curl --version
+command -v shasum || command -v sha256sum || command -v openssl
 git ls-remote https://github.com/corwinm/arashi.git
 ```
 
@@ -18,15 +19,13 @@ Success criteria:
 ## Step 2: Install Arashi CLI
 
 ```bash
-npm install -g arashi
+curl -fsSL https://arashi.haphazard.dev/install | bash
 ```
 
-Alternative:
+Fallback (all platforms):
 
 ```bash
-curl -L https://github.com/corwinm/arashi/releases/latest/download/arashi-macos-arm64 -o arashi
-chmod +x arashi
-sudo mv arashi /usr/local/bin/arashi
+npm install -g arashi
 ```
 
 ## Step 3: Verify CLI
@@ -74,8 +73,9 @@ Expected failure: `command not found`.
 
 Recovery path:
 
-1. reinstall Arashi (`npm install -g arashi`)
+1. reinstall Arashi (`curl -fsSL https://arashi.haphazard.dev/install | bash`)
 2. open a new shell
-3. rerun `arashi --version`
+3. if curl path is unavailable, use fallback `npm install -g arashi`
+4. rerun `arashi --version`
 
 Tutorial is complete when one workflow succeeds end-to-end and failure recovery works.
