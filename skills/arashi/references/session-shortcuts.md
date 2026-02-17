@@ -14,10 +14,18 @@ Use these optional shortcuts to move quickly between Arashi worktrees.
 cd "$(arashi list | fzf)"
 ```
 
+## Switch with Arashi
+
+```bash
+arashi switch
+arashi switch --repos docs
+arashi switch --all
+```
+
 ## Connect with sesh
 
 ```bash
-sesh connect "$(arashi list | fzf)"
+arashi switch --sesh
 ```
 
 ## Optional Keybinds
@@ -39,4 +47,5 @@ bindkey -s '^s' 'sesh connect $(arashi list | fzf)\n'
 ## Expected Outcomes
 
 - `cd` shortcut changes shell to the selected worktree path.
-- `sesh connect` creates or switches to a matching tmux session.
+- `arashi switch` opens a terminal context for a selected worktree.
+- `arashi switch --sesh` creates or switches via sesh in tmux.

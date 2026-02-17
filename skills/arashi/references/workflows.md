@@ -11,7 +11,7 @@ Use this catalog to choose the right workflow by goal and confidence level.
 ## Command Shape by Workflow
 
 - Beginner: `arashi init` -> `arashi status`
-- Intermediate: `arashi add` -> `arashi create` -> `arashi list`
+- Intermediate: `arashi add` -> `arashi create` -> `arashi switch`
 - Advanced: `arashi pull` -> `arashi sync` -> `arashi status`
 
 ## Selection Guidance
@@ -47,14 +47,14 @@ Expected outcomes:
 arashi add git@github.com:your-org/frontend.git
 arashi add git@github.com:your-org/backend.git
 arashi create feature/skill-integration
-arashi list
+arashi switch feature/skill-integration
 ```
 
 Expected outcomes:
 
 - Repositories are registered in `.arashi/config.json`.
 - New worktrees exist for `feature/skill-integration`.
-- `arashi list` shows active worktree paths.
+- `arashi switch` opens the selected worktree in a new terminal context.
 
 ## Advanced Workflow
 

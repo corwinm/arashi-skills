@@ -40,6 +40,7 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 - Install Arashi CLI (macOS/Linux): `curl -fsSL https://arashi.haphazard.dev/install | bash`
 - Install Arashi CLI fallback (all platforms): `npm install -g arashi`
 - Verify Arashi CLI: `arashi --version`
+- Switch worktrees: `arashi switch [--repos|--all] [filter]`
 
 ## Skill Entry Point
 

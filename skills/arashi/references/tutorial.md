@@ -55,11 +55,12 @@ Success criteria:
 ## Step 5: Optional Session Shortcut Flow
 
 ```bash
-cd "$(arashi list | fzf)"
-sesh connect "$(arashi list | fzf)"
+arashi switch
+arashi switch --repos docs
+arashi switch --sesh
 ```
 
-Use this step only when `fzf` and `sesh` are installed.
+Use `--sesh` only when running inside tmux with `sesh` installed.
 
 ## Step 6: Simulate and Recover
 
