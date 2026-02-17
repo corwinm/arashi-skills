@@ -16,6 +16,9 @@ arashi init
 arashi add <repo-url>
 arashi create <branch>
 arashi list
+arashi switch
+arashi switch --repos <repo-name>
+arashi switch --all
 arashi status
 arashi pull
 arashi sync

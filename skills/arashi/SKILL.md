@@ -9,14 +9,14 @@ license: MIT
 compatibility:
   os: [macos, linux, windows]
   required_commands: [git]
-  optional_commands: [npm, curl, bash, fzf, sesh]
+  optional_commands: [npm, curl, bash, fzf, tmux, sesh]
 entry_commands:
   install_arashi: "curl -fsSL https://arashi.haphazard.dev/install | bash"
   install_arashi_fallback: npm install -g arashi
   verify_arashi: arashi --version
   workflows:
     beginner: arashi init && arashi status
-    intermediate: arashi add <repo-url> && arashi create <branch>
+    intermediate: arashi add <repo-url> && arashi create <branch> && arashi switch <branch>
     advanced: arashi pull && arashi sync
   session_shortcuts:
     jump: cd "$(arashi list | fzf)"
@@ -36,6 +36,7 @@ Use this skill when the user wants to:
 - set up Arashi quickly with a documented, repeatable install flow
 - choose a workflow by difficulty (beginner, intermediate, advanced)
 - validate readiness before running commands across multiple repositories
+- switch quickly between parent and child worktrees with `arashi switch`
 - speed up daily navigation with `fzf`, `tmux`, and `sesh`
 - recover from setup, network, or command failures without guesswork
 
@@ -67,7 +68,7 @@ When guiding a user, always:
 - Beginner: initialize workspace and inspect status.
 - Intermediate: add repositories and create a feature branch.
 - Advanced: pull and sync repositories safely.
-- Session shortcuts: jump or connect with `fzf` + `sesh` in tmux-based flows.
+- Session shortcuts: jump or connect with `arashi switch`, `fzf`, and `sesh` in tmux-based flows.
 
 ### Expected Workflow Outcomes
 

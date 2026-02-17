@@ -61,6 +61,30 @@ Order of operations:
 2. Execute one workflow from start to finish.
 3. Confirm expected outcomes from the workflow doc.
 
+## Worktree Switching
+
+Use `arashi switch` to open a terminal context for an existing worktree.
+
+```bash
+# parent workspace worktrees (default)
+arashi switch
+
+# child repositories in current workspace only
+arashi switch --repos docs
+
+# include parent workspaces + nested child repo worktrees
+arashi switch --all
+
+# sesh mode inside tmux
+arashi switch --sesh
+```
+
+Expected outcomes:
+
+- command exits `0` and opens the selected target in a new context
+- `--repos` matches repository names first (exact match preferred)
+- `--repos` with no matches lists available child repositories
+
 ## Session Navigation (Optional)
 
 For tmux/sesh and worktree jump shortcuts, use:
