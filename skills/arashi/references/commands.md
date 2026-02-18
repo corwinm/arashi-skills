@@ -85,6 +85,23 @@ Expected outcomes:
 - `--repos` matches repository names first (exact match preferred)
 - `--repos` with no matches lists available child repositories
 
+## Remove Cleanup Hooks
+
+Use remove lifecycle hooks to automate teardown around `arashi remove`.
+
+```bash
+# create a pre-remove hook from template
+cp .arashi/hooks/pre-remove.sh.example .arashi/hooks/pre-remove.sh
+chmod +x .arashi/hooks/pre-remove.sh
+
+# optional post-remove finalizer
+cp .arashi/hooks/post-remove.sh.example .arashi/hooks/post-remove.sh
+chmod +x .arashi/hooks/post-remove.sh
+```
+
+`pre-remove.sh` runs before destructive remove actions and can abort the command when it exits non-zero.
+`post-remove.sh` runs after remove actions are attempted and can perform final cleanup (for example tmux/session teardown).
+
 ## Session Navigation (Optional)
 
 For tmux/sesh and worktree jump shortcuts, use:

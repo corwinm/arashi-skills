@@ -24,6 +24,17 @@ arashi pull
 arashi sync
 ```
 
+## Remove Hook Setup
+
+```bash
+cp .arashi/hooks/pre-remove.sh.example .arashi/hooks/pre-remove.sh
+chmod +x .arashi/hooks/pre-remove.sh
+
+# optional post-remove cleanup
+cp .arashi/hooks/post-remove.sh.example .arashi/hooks/post-remove.sh
+chmod +x .arashi/hooks/post-remove.sh
+```
+
 ## tmux / sesh Shortcuts (Optional)
 
 ```bash

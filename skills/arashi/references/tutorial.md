@@ -62,7 +62,20 @@ arashi switch --sesh
 
 Use `--sesh` only when running inside tmux with `sesh` installed.
 
-## Step 6: Simulate and Recover
+## Step 6: Optional Remove Hook Setup
+
+```bash
+cp .arashi/hooks/pre-remove.sh.example .arashi/hooks/pre-remove.sh
+chmod +x .arashi/hooks/pre-remove.sh
+
+# optional final cleanup hook
+cp .arashi/hooks/post-remove.sh.example .arashi/hooks/post-remove.sh
+chmod +x .arashi/hooks/post-remove.sh
+```
+
+Use these hooks to automate teardown tasks (for example tmux session cleanup) around `arashi remove`.
+
+## Step 7: Simulate and Recover
 
 If `arashi` is not on `PATH`, run:
 
