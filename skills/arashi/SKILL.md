@@ -38,6 +38,7 @@ Use this skill when the user wants to:
 - validate readiness before running commands across multiple repositories
 - switch quickly between parent and child worktrees with `arashi switch`
 - speed up daily navigation with `fzf`, `tmux`, and `sesh`
+- automate cleanup around `arashi remove` with lifecycle hooks
 - recover from setup, network, or command failures without guesswork
 
 ## Core Commands
@@ -62,6 +63,7 @@ When guiding a user, always:
 3. Confirm `arashi --version` before running workflows.
 4. Confirm expected outcomes after each workflow step.
 5. Route failures through the troubleshooting matrix before retrying.
+6. For remove cleanup automation, use `pre-remove.sh` and `post-remove.sh` hook templates in `.arashi/hooks/`.
 
 ## Workflow Catalog
 

@@ -19,6 +19,7 @@ Use this catalog to choose the right workflow by goal and confidence level.
 - Start with **Beginner** if this is your first Arashi skill session.
 - Choose **Intermediate** if you already have repositories and need cross-repo branch creation.
 - Choose **Advanced** if you need sync and recovery controls.
+- If you automate teardown on branch removal, set up `pre-remove.sh` / `post-remove.sh` from the hook templates.
 - If you use tmux/sesh, apply shortcuts from `references/session-shortcuts.md`.
 
 ## Workflow Entry Commands
