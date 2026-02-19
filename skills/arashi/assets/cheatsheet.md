@@ -14,6 +14,7 @@ arashi --help
 ```bash
 arashi init
 arashi add <repo-url>
+arashi clone [--all]
 arashi create <branch>
 arashi list
 arashi switch
