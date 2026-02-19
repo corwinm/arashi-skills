@@ -5,13 +5,13 @@ Use this catalog to choose the right workflow by goal and confidence level.
 | Workflow | Difficulty | User Goal |
 |----------|------------|-----------|
 | Beginner | Beginner | Initialize a workspace and inspect current status |
-| Intermediate | Intermediate | Add repositories and create a feature branch across worktrees |
+| Intermediate | Intermediate | Clone missing repositories and create a feature branch across worktrees |
 | Advanced | Advanced | Recover from branch drift and synchronize repositories safely |
 
 ## Command Shape by Workflow
 
 - Beginner: `arashi init` -> `arashi status`
-- Intermediate: `arashi add` -> `arashi clone --all` -> `arashi create` -> `arashi switch`
+- Intermediate: `arashi clone --all` -> `arashi create` -> `arashi switch`
 - Advanced: `arashi pull` -> `arashi sync` -> `arashi status`
 
 ## Selection Guidance
@@ -45,8 +45,6 @@ Expected outcomes:
 ## Intermediate Workflow
 
 ```bash
-arashi add git@github.com:your-org/frontend.git
-arashi add git@github.com:your-org/backend.git
 arashi clone --all
 arashi create feature/skill-integration
 arashi switch feature/skill-integration
@@ -54,7 +52,7 @@ arashi switch feature/skill-integration
 
 Expected outcomes:
 
-- Repositories are registered in `.arashi/config.json` and any missing clones are materialized.
+- Missing configured repositories are materialized locally.
 - New worktrees exist for `feature/skill-integration`.
 - `arashi switch` opens the selected worktree in a new terminal context.
 
