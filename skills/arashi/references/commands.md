@@ -61,6 +61,24 @@ Order of operations:
 2. Execute one workflow from start to finish.
 3. Confirm expected outcomes from the workflow doc.
 
+## Repository Cloning and Recovery
+
+Use `arashi clone` to clone configured repositories that are missing locally.
+
+```bash
+# interactively choose missing repositories
+arashi clone
+
+# clone all missing repositories
+arashi clone --all
+```
+
+Expected outcomes:
+
+- command exits `0` when clone operations succeed
+- already-present repositories are skipped
+- `arashi status` no longer reports missing repository spawn errors
+
 ## Worktree Switching
 
 Use `arashi switch` to open a terminal context for an existing worktree.

@@ -16,7 +16,7 @@ entry_commands:
   verify_arashi: arashi --version
   workflows:
     beginner: arashi init && arashi status
-    intermediate: arashi add <repo-url> && arashi create <branch> && arashi switch <branch>
+    intermediate: arashi clone --all && arashi create <branch> && arashi switch <branch>
     advanced: arashi pull && arashi sync
   session_shortcuts:
     jump: cd "$(arashi list | fzf)"
@@ -68,14 +68,14 @@ When guiding a user, always:
 ## Workflow Catalog
 
 - Beginner: initialize workspace and inspect status.
-- Intermediate: add repositories and create a feature branch.
+- Intermediate: clone missing repositories and create a feature branch.
 - Advanced: pull and sync repositories safely.
 - Session shortcuts: jump or connect with `arashi switch`, `fzf`, and `sesh` in tmux-based flows.
 
 ### Expected Workflow Outcomes
 
 - **Beginner**: workspace initialized and status visible.
-- **Intermediate**: repositories added and feature branch worktrees created.
+- **Intermediate**: missing clones recovered and feature branch worktrees created.
 - **Advanced**: repositories synchronized with clear status after reconciliation.
 
 ## References
