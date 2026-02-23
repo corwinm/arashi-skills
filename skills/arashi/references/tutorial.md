@@ -76,13 +76,22 @@ Use `--no-default-launch` when your workspace config has switch launch defaults 
 ## Step 6: Optional Remove Hook Setup
 
 ```bash
+# workspace-root hook
 cp .arashi/hooks/pre-remove.sh.example .arashi/hooks/pre-remove.sh
 
 # optional final cleanup hook
 cp .arashi/hooks/post-remove.sh.example .arashi/hooks/post-remove.sh
+
+# optional repo-scoped hook
+mkdir -p repos/<repo>/.arashi/hooks
+cp .arashi/hooks/pre-remove.sh.example repos/<repo>/.arashi/hooks/pre-remove.sh
+
+# optional global shared hook
+mkdir -p ~/.arashi/hooks
+cp .arashi/hooks/pre-remove.sh.example ~/.arashi/hooks/pre-remove.sh
 ```
 
-Before enabling these hooks, review script contents and keep commands limited to trusted repo-local operations.
+Before enabling these hooks, review script contents and keep commands limited to trusted operations for each scope.
 Use these hooks to automate teardown tasks (for example tmux session cleanup) around `arashi remove`.
 
 ## Step 7: Simulate and Recover
