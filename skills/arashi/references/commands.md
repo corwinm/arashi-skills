@@ -5,11 +5,8 @@ Canonical commands for installing and using the Arashi CLI.
 ## Most Common Commands
 
 ```bash
-# install Arashi CLI (macOS/Linux)
-curl -fsSL https://arashi.haphazard.dev/install | bash
-
-# fallback install (all platforms)
-npm install -g arashi
+# install Arashi CLI (pinned)
+npm install --global arashi@1.7.0
 
 # verify Arashi CLI
 arashi --version
@@ -20,36 +17,33 @@ arashi --help
 
 ## Installation
 
-Install with curl script (official direct install on macOS/Linux):
+Preferred pinned install with npm (all platforms):
 
 ```bash
-curl -fsSL https://arashi.haphazard.dev/install | bash
+npm install --global arashi@1.7.0
 ```
 
-Optional pinned install:
+Verified release artifact flow (macOS/Linux) without pipe-to-shell:
 
 ```bash
-curl -fsSL https://arashi.haphazard.dev/install | ARASHI_VERSION=1.4.0 bash
+ARASHI_VERSION="1.7.0"
+ARASHI_ASSET="arashi-macos-arm64"
+curl -L "https://github.com/corwinm/arashi/releases/download/v${ARASHI_VERSION}/${ARASHI_ASSET}" -o "${ARASHI_ASSET}"
+curl -L "https://github.com/corwinm/arashi/releases/download/v${ARASHI_VERSION}/arashi-checksums.txt" -o arashi-checksums.txt
+grep " ${ARASHI_ASSET}$" arashi-checksums.txt | shasum -a 256 -c -
+install -m 0755 "${ARASHI_ASSET}" "$HOME/.local/bin/arashi"
 ```
 
-Fallback install with npm (all platforms):
+Notes:
 
-```bash
-npm install -g arashi
-```
-
-Alternative manual install from GitHub Releases:
-
-```bash
-curl -L https://github.com/corwinm/arashi/releases/latest/download/arashi-macos-arm64 -o arashi
-chmod +x arashi
-sudo mv arashi /usr/local/bin/arashi
-```
+- choose the correct `${ARASHI_ASSET}` for your platform
+- ensure `$HOME/.local/bin` is on `PATH`
+- avoid privileged installs unless your environment policy requires them
 
 Expected outcome:
 
 - install command exits `0`
-- `arashi --version` returns a version string
+- `arashi --version` returns `1.7.0` (or chosen pinned version)
 
 ## Workflow Execution
 
@@ -72,13 +66,13 @@ arashi init
 Use a custom repositories directory:
 
 ```bash
-arashi init --repos-dir ../workspace-repos
+arashi init --repos-dir ./workspace-repos
 ```
 
 Use a custom worktree base directory:
 
 ```bash
-arashi init --worktrees-dir ../workspace-worktrees
+arashi init --worktrees-dir ./workspace-worktrees
 ```
 
 Expected outcomes:
@@ -169,12 +163,12 @@ Use remove lifecycle hooks to automate teardown around `arashi remove`.
 ```bash
 # create a pre-remove hook from template
 cp .arashi/hooks/pre-remove.sh.example .arashi/hooks/pre-remove.sh
-chmod +x .arashi/hooks/pre-remove.sh
 
 # optional post-remove finalizer
 cp .arashi/hooks/post-remove.sh.example .arashi/hooks/post-remove.sh
-chmod +x .arashi/hooks/post-remove.sh
 ```
+
+Before enabling either hook, review script contents and ensure only repository-local commands are executed.
 
 `pre-remove.sh` runs before destructive remove actions and can abort the command when it exits non-zero.
 `post-remove.sh` runs after remove actions are attempted and can perform final cleanup (for example tmux/session teardown).

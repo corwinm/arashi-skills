@@ -8,6 +8,7 @@ This directory contains the canonical Arashi skill definition and all supporting
 - Prerequisite, command, workflow, troubleshooting, publication, and tutorial references
 - User-facing assets such as quick cheat sheets
 - Session shortcut guidance for `fzf`, `tmux`, and `sesh`
+- In-skill security guidance for safe install and command usage
 
 ## Artifact Index
 

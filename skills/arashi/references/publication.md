@@ -21,16 +21,18 @@ Release can be considered discoverable when all criteria are met:
 
 - [ ] `SKILL.md` frontmatter is complete and current.
 - [ ] All references linked from `SKILL.md` exist.
-- [ ] Arashi install and verification commands are current.
+- [ ] Arashi install and verification commands are pinned and current.
 - [ ] Workflow documentation is present and up to date.
 - [ ] Troubleshooting matrix includes prerequisite, network, and command failures.
+- [ ] Repository security checks pass according to local policy.
 
 ## Verification Steps
 
 1. Create a release tag in this repository.
-2. From a clean environment, install Arashi CLI.
-3. Run `arashi --version` and one documented workflow.
-4. Record outcomes.
+2. Run the canonical security gate and confirm pass output.
+3. From a clean environment, install Arashi CLI using pinned command guidance.
+4. Run `arashi --version` and one documented workflow.
+5. Record outcomes.
 
 If any step fails because listing support is unavailable, record publication status as `not_applicable` with the blocking policy details.
 

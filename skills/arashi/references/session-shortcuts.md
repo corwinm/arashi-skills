@@ -8,10 +8,13 @@ Use these optional shortcuts to move quickly between Arashi worktrees.
 - `fzf` installed for interactive selection
 - `sesh` installed for tmux session management (optional)
 
-## Jump to a Worktree
+## Safe Worktree Selection
+
+List available paths and select one explicitly:
 
 ```bash
-cd "$(arashi list | fzf)"
+arashi list
+cd -- "<selected-worktree-path>"
 ```
 
 ## Switch with Arashi
@@ -31,23 +34,12 @@ arashi switch --sesh
 
 ## Optional Keybinds
 
-Bash (Ctrl+G for jump, Ctrl+S for sesh):
-
-```bash
-bind '"\C-g":"cd \$(arashi list | fzf)\n"'
-bind '"\C-s":"sesh connect \$(arashi list | fzf)\n"'
-```
-
-Zsh (Ctrl+G for jump, Ctrl+S for sesh):
-
-```zsh
-bindkey -s '^g' 'cd $(arashi list | fzf)\n'
-bindkey -s '^s' 'sesh connect $(arashi list | fzf)\n'
-```
+If you create shell keybinds, prefer wrappers that validate selected paths before changing directories.
+Avoid command-substitution keybinds that execute unsanitized output directly.
 
 ## Expected Outcomes
 
-- `cd` shortcut changes shell to the selected worktree path.
+- selection flow changes shell to the selected worktree path.
 - `arashi switch` opens a terminal context for a selected worktree.
 - `arashi switch --sesh` creates or switches via sesh in tmux.
 - `arashi switch --no-default-launch` bypasses configured switch launch defaults for one run.

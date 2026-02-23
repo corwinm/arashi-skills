@@ -9,18 +9,18 @@ license: MIT
 compatibility:
   os: [macos, linux, windows]
   required_commands: [git]
-  optional_commands: [npm, curl, bash, fzf, tmux, sesh]
+  optional_commands: [npm, node, fzf, tmux, sesh]
 entry_commands:
-  install_arashi: "curl -fsSL https://arashi.haphazard.dev/install | bash"
-  install_arashi_fallback: npm install -g arashi
+  install_arashi: npm install --global arashi@1.7.0
+  install_arashi_verified_release: "see references/commands.md: verified release artifact flow"
   verify_arashi: arashi --version
   workflows:
     beginner: arashi init && arashi status
     intermediate: arashi clone --all && arashi create <branch> && arashi switch <branch>
     advanced: arashi pull && arashi sync
   session_shortcuts:
-    jump: cd "$(arashi list | fzf)"
-    sesh: sesh connect "$(arashi list | fzf)"
+    list: arashi list
+    switch: arashi switch
 visibility: public
 status: draft
 ---
@@ -44,11 +44,8 @@ Use this skill when the user wants to:
 ## Core Commands
 
 ```bash
-# install Arashi CLI (macOS/Linux)
-curl -fsSL https://arashi.haphazard.dev/install | bash
-
-# fallback install (all platforms)
-npm install -g arashi
+# install Arashi CLI (deterministic pinned install)
+npm install --global arashi@1.7.0
 
 # verify Arashi is available
 arashi --version
@@ -59,11 +56,11 @@ arashi --version
 When guiding a user, always:
 
 1. Run preflight checks before installing Arashi CLI.
-2. Use curl installer on macOS/Linux and npm fallback on Windows or constrained environments.
+2. Use a pinned install command (`arashi@<version>`) and avoid pipe-to-shell installers.
 3. Confirm `arashi --version` before running workflows.
 4. Confirm expected outcomes after each workflow step.
 5. Route failures through the troubleshooting matrix before retrying.
-6. For remove cleanup automation, use `pre-remove.sh` and `post-remove.sh` hook templates in `.arashi/hooks/`.
+6. Review hook templates before enabling `pre-remove.sh` or `post-remove.sh`, and keep them repo-local.
 
 ## Workflow Catalog
 
