@@ -62,9 +62,11 @@ If you use `arashi init --worktrees-dir <path>`, add that custom location to `.g
 arashi switch
 arashi switch --repos docs
 arashi switch --sesh
+arashi switch --no-default-launch
 ```
 
 Use `--sesh` only when running inside tmux with `sesh` installed.
+Use `--no-default-launch` when your workspace config has switch launch defaults you want to skip for one invocation.
 
 ## Step 6: Optional Remove Hook Setup
 
