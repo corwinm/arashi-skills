@@ -50,7 +50,11 @@ arashi status
 Success criteria:
 
 - `.arashi/config.json` exists after `arashi init`
+- `.arashi/config.json` includes `worktreesDir` (default `.arashi/worktrees`)
+- `.gitignore` includes `.arashi/worktrees/` when using default worktree location
 - `arashi status` prints repository/worktree status without errors
+
+If you use `arashi init --worktrees-dir <path>`, add that custom location to `.gitignore` manually when needed.
 
 ## Step 5: Optional Session Shortcut Flow
 

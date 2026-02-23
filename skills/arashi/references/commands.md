@@ -61,6 +61,33 @@ Order of operations:
 2. Execute one workflow from start to finish.
 3. Confirm expected outcomes from the workflow doc.
 
+## Workspace Initialization
+
+Initialize with defaults:
+
+```bash
+arashi init
+```
+
+Use a custom repositories directory:
+
+```bash
+arashi init --repos-dir ../workspace-repos
+```
+
+Use a custom worktree base directory:
+
+```bash
+arashi init --worktrees-dir ../workspace-worktrees
+```
+
+Expected outcomes:
+
+- `.arashi/config.json` includes `reposDir` and `worktreesDir`.
+- default `worktreesDir` is `.arashi/worktrees` when the option is omitted.
+- `.gitignore` always includes the configured repositories directory.
+- `.gitignore` auto-includes `.arashi/worktrees/` only when default `worktreesDir` is used.
+
 ## Repository Cloning and Recovery
 
 Use `arashi clone` to clone configured repositories that are missing locally.
