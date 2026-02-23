@@ -37,11 +37,19 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 ## Canonical Commands
 
 - Install: `npx skills add https://github.com/corwinm/arashi-skills --skill arashi`
-- Install Arashi CLI (macOS/Linux): `curl -fsSL https://arashi.haphazard.dev/install | bash`
-- Install Arashi CLI fallback (all platforms): `npm install -g arashi`
+- Install Arashi CLI (pinned): `npm install --global arashi@1.7.0`
+- Verified release artifact flow: see `skills/arashi/references/commands.md`
 - Verify Arashi CLI: `arashi --version`
 - Switch worktrees: `arashi switch [--repos|--all] [--no-default-launch] [filter]`
 - Configure command defaults: set `.arashi/config.json` `defaults.create` / `defaults.switch`
+
+## Security Compliance
+
+- Canonical gate command: `node scripts/security-gate.mjs --root . --exceptions security/audit-exceptions.json`
+- Policy and thresholds: `security/policy.md`
+- Baseline findings and remediation tracking: `security/baseline-findings.md`
+- Exception metadata file: `security/audit-exceptions.json`
+- Exception workflow: `security/exceptions.md`
 
 ## Skill Entry Point
 

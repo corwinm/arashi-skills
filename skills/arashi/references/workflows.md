@@ -30,6 +30,8 @@ Before running any workflow:
 arashi --version
 ```
 
+If your team enforces repository security checks, run them before executing workflows.
+
 ## Beginner Workflow
 
 ```bash

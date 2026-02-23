@@ -3,8 +3,7 @@
 ## Install and Verify Arashi CLI
 
 ```bash
-curl -fsSL https://arashi.haphazard.dev/install | bash
-npm install -g arashi # fallback
+npm install --global arashi@1.7.0
 arashi --version
 arashi --help
 ```
@@ -31,18 +30,17 @@ arashi sync
 
 ```bash
 cp .arashi/hooks/pre-remove.sh.example .arashi/hooks/pre-remove.sh
-chmod +x .arashi/hooks/pre-remove.sh
 
 # optional post-remove cleanup
 cp .arashi/hooks/post-remove.sh.example .arashi/hooks/post-remove.sh
-chmod +x .arashi/hooks/post-remove.sh
 ```
 
 ## tmux / sesh Shortcuts (Optional)
 
 ```bash
-cd "$(arashi list | fzf)"
-sesh connect "$(arashi list | fzf)"
+arashi list
+cd -- "<selected-worktree-path>"
+sesh connect "<selected-worktree-path>"
 ```
 
 More shortcuts: `skills/arashi/references/session-shortcuts.md`

@@ -6,7 +6,7 @@ Follow this tutorial to go from zero setup to one successful Arashi workflow.
 
 ```bash
 git --version
-curl --version
+npm --version
 command -v shasum || command -v sha256sum || command -v openssl
 git ls-remote https://github.com/corwinm/arashi.git
 ```
@@ -19,13 +19,18 @@ Success criteria:
 ## Step 2: Install Arashi CLI
 
 ```bash
-curl -fsSL https://arashi.haphazard.dev/install | bash
+npm install --global arashi@1.7.0
 ```
 
-Fallback (all platforms):
+Optional verified release artifact flow (macOS/Linux):
 
 ```bash
-npm install -g arashi
+ARASHI_VERSION="1.7.0"
+ARASHI_ASSET="arashi-macos-arm64"
+curl -L "https://github.com/corwinm/arashi/releases/download/v${ARASHI_VERSION}/${ARASHI_ASSET}" -o "${ARASHI_ASSET}"
+curl -L "https://github.com/corwinm/arashi/releases/download/v${ARASHI_VERSION}/arashi-checksums.txt" -o arashi-checksums.txt
+grep " ${ARASHI_ASSET}$" arashi-checksums.txt | shasum -a 256 -c -
+install -m 0755 "${ARASHI_ASSET}" "$HOME/.local/bin/arashi"
 ```
 
 ## Step 3: Verify CLI
@@ -37,7 +42,7 @@ arashi --help
 
 Success criteria:
 
-- both commands exit `0`
+- all commands exit `0`
 - help output lists commands
 
 ## Step 4: Run First Workflow
@@ -72,13 +77,12 @@ Use `--no-default-launch` when your workspace config has switch launch defaults 
 
 ```bash
 cp .arashi/hooks/pre-remove.sh.example .arashi/hooks/pre-remove.sh
-chmod +x .arashi/hooks/pre-remove.sh
 
 # optional final cleanup hook
 cp .arashi/hooks/post-remove.sh.example .arashi/hooks/post-remove.sh
-chmod +x .arashi/hooks/post-remove.sh
 ```
 
+Before enabling these hooks, review script contents and keep commands limited to trusted repo-local operations.
 Use these hooks to automate teardown tasks (for example tmux session cleanup) around `arashi remove`.
 
 ## Step 7: Simulate and Recover
@@ -93,9 +97,9 @@ Expected failure: `command not found`.
 
 Recovery path:
 
-1. reinstall Arashi (`curl -fsSL https://arashi.haphazard.dev/install | bash`)
+1. reinstall Arashi (`npm install --global arashi@1.7.0`)
 2. open a new shell
-3. if curl path is unavailable, use fallback `npm install -g arashi`
+3. if npm path is unavailable, use verified release artifact install from Step 2
 4. rerun `arashi --version`
 
 Tutorial is complete when one workflow succeeds end-to-end and failure recovery works.
