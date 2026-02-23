@@ -20,6 +20,7 @@ cd "$(arashi list | fzf)"
 arashi switch
 arashi switch --repos docs
 arashi switch --all
+arashi switch --no-default-launch
 ```
 
 ## Connect with sesh
@@ -49,3 +50,4 @@ bindkey -s '^s' 'sesh connect $(arashi list | fzf)\n'
 - `cd` shortcut changes shell to the selected worktree path.
 - `arashi switch` opens a terminal context for a selected worktree.
 - `arashi switch --sesh` creates or switches via sesh in tmux.
+- `arashi switch --no-default-launch` bypasses configured switch launch defaults for one run.

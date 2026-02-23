@@ -122,6 +122,9 @@ arashi switch --all
 
 # sesh mode inside tmux
 arashi switch --sesh
+
+# bypass configured switch launch defaults for one run
+arashi switch --no-default-launch
 ```
 
 Expected outcomes:
@@ -129,6 +132,35 @@ Expected outcomes:
 - command exits `0` and opens the selected target in a new context
 - `--repos` matches repository names first (exact match preferred)
 - `--repos` with no matches lists available child repositories
+
+## Create Defaults and Overrides
+
+Use command defaults in `.arashi/config.json` to control post-create switch/launch behavior:
+
+```json
+{
+  "defaults": {
+    "create": {
+      "switch": true,
+      "launch": true,
+      "launchMode": "sesh"
+    },
+    "switch": {
+      "launchMode": "sesh"
+    }
+  }
+}
+```
+
+Use one-off CLI overrides when needed:
+
+```bash
+arashi create feature-auth --launch
+arashi create feature-auth --no-launch
+arashi create feature-auth --no-switch
+```
+
+Precedence for create/switch launch behavior is: explicit flag > opt-out flag > config default > built-in default.
 
 ## Remove Cleanup Hooks
 

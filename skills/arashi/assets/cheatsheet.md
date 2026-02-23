@@ -16,10 +16,12 @@ arashi init
 arashi add <repo-url>
 arashi clone [--all]
 arashi create <branch>
+arashi create <branch> [--launch|--no-launch] [--switch|--no-switch] [--sesh]
 arashi list
 arashi switch
 arashi switch --repos <repo-name>
 arashi switch --all
+arashi switch --no-default-launch
 arashi status
 arashi pull
 arashi sync
