@@ -60,7 +60,7 @@ When guiding a user, always:
 3. Confirm `arashi --version` before running workflows.
 4. Confirm expected outcomes after each workflow step.
 5. Route failures through the troubleshooting matrix before retrying.
-6. Review hook templates before enabling `pre-remove.sh` or `post-remove.sh`, and keep them repo-local.
+6. Review hook scripts before enabling `pre-remove.sh` or `post-remove.sh` across repository, workspace, or global hook scopes.
 
 ## Workflow Catalog
 
