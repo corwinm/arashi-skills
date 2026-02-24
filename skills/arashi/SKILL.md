@@ -2,7 +2,7 @@
 name: arashi
 display_name: Arashi Worktree Orchestration
 description: Guided workflows for managing multi-repository feature branches with Arashi.
-version: 0.1.0
+version: 0.2.0
 repository: https://github.com/corwinm/arashi-skills
 owner: corwinm
 license: MIT
