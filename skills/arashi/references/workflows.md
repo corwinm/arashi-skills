@@ -44,7 +44,7 @@ Expected outcomes:
 - `.arashi/config.json` exists after `arashi init`.
 - `.arashi/config.json` records `worktreesDir` (default `.arashi/worktrees`).
 - `.gitignore` includes the configured repositories directory.
-- worktree paths (default and custom) are not auto-included in `.gitignore`.
+- `.gitignore` includes the normalized managed worktree directory entry when using the default location or a safe repository-relative subdirectory.
 - `arashi status` prints repository/worktree status without errors.
 
 ## Intermediate Workflow
