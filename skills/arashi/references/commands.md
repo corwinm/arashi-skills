@@ -80,7 +80,7 @@ Expected outcomes:
 - `.arashi/config.json` includes `reposDir` and `worktreesDir`.
 - default `worktreesDir` is `.arashi/worktrees` when the option is omitted.
 - `.gitignore` always includes the configured repositories directory.
-- `.gitignore` auto-includes `.arashi/worktrees/` only when default `worktreesDir` is used.
+- worktree paths (default and custom) are not auto-included in `.gitignore`.
 
 ## Repository Cloning and Recovery
 
