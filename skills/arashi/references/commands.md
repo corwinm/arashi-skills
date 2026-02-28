@@ -5,9 +5,6 @@ Canonical commands for installing and using the Arashi CLI.
 ## Most Common Commands
 
 ```bash
-# install Arashi CLI (pinned)
-npm install --global arashi@1.7.0
-
 # verify Arashi CLI
 arashi --version
 
@@ -17,33 +14,16 @@ arashi --help
 
 ## Installation
 
-Preferred pinned install with npm (all platforms):
+Installation instructions are maintained on the Arashi website:
 
-```bash
-npm install --global arashi@1.7.0
-```
+- https://arashi.haphazard.dev
 
-Verified release artifact flow (macOS/Linux) without pipe-to-shell:
-
-```bash
-ARASHI_VERSION="1.7.0"
-ARASHI_ASSET="arashi-macos-arm64"
-curl -L "https://github.com/corwinm/arashi/releases/download/v${ARASHI_VERSION}/${ARASHI_ASSET}" -o "${ARASHI_ASSET}"
-curl -L "https://github.com/corwinm/arashi/releases/download/v${ARASHI_VERSION}/arashi-checksums.txt" -o arashi-checksums.txt
-grep " ${ARASHI_ASSET}$" arashi-checksums.txt | shasum -a 256 -c -
-install -m 0755 "${ARASHI_ASSET}" "$HOME/.local/bin/arashi"
-```
-
-Notes:
-
-- choose the correct `${ARASHI_ASSET}` for your platform
-- ensure `$HOME/.local/bin` is on `PATH`
-- avoid privileged installs unless your environment policy requires them
+Use the website flow for your platform and environment policy.
 
 Expected outcome:
 
-- install command exits `0`
-- `arashi --version` returns `1.7.0` (or chosen pinned version)
+- `arashi --version` exits `0`
+- `arashi --help` exits `0`
 
 ## Workflow Execution
 
@@ -182,6 +162,7 @@ cp .arashi/hooks/pre-remove.sh.example ~/.arashi/hooks/<repo>/pre-remove.sh
 ```
 
 Before enabling hooks, review script contents and ensure commands are safe for their scope.
+Only use hook scripts from trusted repositories and verify file provenance before making scripts executable.
 
 For each targeted repository, remove hooks run in order:
 

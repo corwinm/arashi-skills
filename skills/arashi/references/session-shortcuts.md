@@ -17,6 +17,16 @@ arashi list
 cd -- "<selected-worktree-path>"
 ```
 
+If you want an `fzf` helper, keep selection and execution as separate steps:
+
+```bash
+arashi list | fzf > /tmp/arashi-selected-worktree
+read -r selected_worktree < /tmp/arashi-selected-worktree
+cd -- "$selected_worktree"
+```
+
+This avoids inline command substitution and keeps quoting explicit.
+
 ## Switch with Arashi
 
 ```bash

@@ -2,7 +2,7 @@
 name: arashi
 display_name: Arashi Worktree Orchestration
 description: Guided workflows for managing multi-repository feature branches with Arashi.
-version: 0.2.0
+version: 0.2.1
 repository: https://github.com/corwinm/arashi-skills
 owner: corwinm
 license: MIT
@@ -11,8 +11,7 @@ compatibility:
   required_commands: [git]
   optional_commands: [npm, node, fzf, tmux, sesh]
 entry_commands:
-  install_arashi: npm install --global arashi@1.7.0
-  install_arashi_verified_release: "see references/commands.md: verified release artifact flow"
+  install_arashi: "see https://arashi.haphazard.dev for installation instructions"
   verify_arashi: arashi --version
   workflows:
     beginner: arashi init && arashi status
@@ -43,12 +42,14 @@ Use this skill when the user wants to:
 
 ## Core Commands
 
-```bash
-# install Arashi CLI (deterministic pinned install)
-npm install --global arashi@1.7.0
+Installation guidance: https://arashi.haphazard.dev
 
+```bash
 # verify Arashi is available
 arashi --version
+
+# inspect command surface
+arashi --help
 ```
 
 ## Usage Rules
@@ -56,11 +57,12 @@ arashi --version
 When guiding a user, always:
 
 1. Run preflight checks before installing Arashi CLI.
-2. Use a pinned install command (`arashi@<version>`) and avoid pipe-to-shell installers.
+2. Point users to the website install guide instead of embedding installer commands in the skill.
 3. Confirm `arashi --version` before running workflows.
 4. Confirm expected outcomes after each workflow step.
 5. Route failures through the troubleshooting matrix before retrying.
-6. Review hook scripts before enabling `pre-remove.sh` or `post-remove.sh` across repository, workspace, or global hook scopes.
+6. Verify provenance/checksums for downloaded binaries before execution.
+7. Review hook scripts before enabling `pre-remove.sh` or `post-remove.sh` across repository, workspace, or global hook scopes.
 
 ## Workflow Catalog
 
