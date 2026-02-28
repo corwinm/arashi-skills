@@ -2,8 +2,9 @@
 
 ## Install and Verify Arashi CLI
 
+Install instructions: https://arashi.haphazard.dev
+
 ```bash
-npm install --global arashi@1.7.0
 arashi --version
 arashi --help
 ```

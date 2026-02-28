@@ -31,3 +31,9 @@ High-risk command patterns identified in docs before this change:
 - No pipe-to-shell install instructions in published skill content
 - Security gate enforced in both PR and release workflows
 - Exceptions managed only through `security/audit-exceptions.json` with owner and expiration metadata
+
+## Verification Snapshot (Issue #124)
+
+- Validation command: `node scripts/security-gate.mjs --root . --exceptions security/audit-exceptions.json`
+- Expected result after remediation: PASS with `Findings: 0`
+- Focus checks: remove pipe-to-shell installers, avoid `sudo mv` guidance, keep install commands pinned, and keep worktree-selection examples free of unsafe inline substitution

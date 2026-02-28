@@ -37,8 +37,7 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 ## Canonical Commands
 
 - Install: `npx skills add https://github.com/corwinm/arashi-skills --skill arashi`
-- Install Arashi CLI (pinned): `npm install --global arashi@1.7.0`
-- Verified release artifact flow: see `skills/arashi/references/commands.md`
+- Arashi CLI install guide: `https://arashi.haphazard.dev`
 - Verify Arashi CLI: `arashi --version`
 - Switch worktrees: `arashi switch [--repos|--all] [--no-default-launch] [filter]`
 - Configure command defaults: set `.arashi/config.json` `defaults.create` / `defaults.switch`
