@@ -36,6 +36,7 @@ Use this skill when the user wants to:
 - choose a workflow by difficulty (beginner, intermediate, advanced)
 - validate readiness before running commands across multiple repositories
 - switch quickly between parent and child worktrees with `arashi switch`
+- force one-off IDE launches with `arashi switch --vscode|--cursor|--kiro`
 - speed up daily navigation with `fzf`, `tmux`, and `sesh`
 - automate cleanup around `arashi remove` with lifecycle hooks
 - recover from setup, network, or command failures without guesswork
@@ -70,6 +71,7 @@ When guiding a user, always:
 - Intermediate: clone missing repositories and create a feature branch.
 - Advanced: pull and sync repositories safely.
 - Session shortcuts: jump or connect with `arashi switch`, `fzf`, and `sesh` in tmux-based flows.
+- Compatible editor hosts can route `arashi switch` into VS Code, Cursor, or Kiro without changing workspace defaults.
 
 ### Expected Workflow Outcomes
 

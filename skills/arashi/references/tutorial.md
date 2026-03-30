@@ -51,11 +51,13 @@ Success criteria:
 ```bash
 arashi switch
 arashi switch --repos docs
+arashi switch --cursor feature-auth
 arashi switch --sesh
 arashi switch --no-default-launch
 ```
 
 Use `--sesh` only when running inside tmux with `sesh` installed.
+Use `--vscode`, `--cursor`, or `--kiro` when you want a one-off IDE launch without changing workspace defaults.
 Use `--no-default-launch` when your workspace config has switch launch defaults you want to skip for one invocation.
 
 ## Step 6: Optional Remove Hook Setup

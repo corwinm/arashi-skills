@@ -95,6 +95,11 @@ arashi switch --repos docs
 # include parent workspaces + nested child repo worktrees
 arashi switch --all
 
+# force Cursor / VS Code / Kiro for one run
+arashi switch --cursor feature-auth
+arashi switch --vscode feature-auth
+arashi switch --kiro feature-auth
+
 # sesh mode inside tmux
 arashi switch --sesh
 
@@ -107,6 +112,8 @@ Expected outcomes:
 - command exits `0` and opens the selected target in a new context
 - `--repos` matches repository names first (exact match preferred)
 - `--repos` with no matches lists available child repositories
+- `--vscode`, `--cursor`, and `--kiro` override configured switch defaults for a single invocation
+- compatible editor hosts can pass the matching switch flag automatically when running Arashi through the extension
 
 ## Create Defaults and Overrides
 
@@ -136,6 +143,7 @@ arashi create feature-auth --no-switch
 ```
 
 Precedence for create/switch launch behavior is: explicit flag > opt-out flag > config default > built-in default.
+For `switch`, IDE-integrated terminals also prefer the matching IDE launcher when no explicit override is provided.
 
 ## Remove Cleanup Hooks
 
