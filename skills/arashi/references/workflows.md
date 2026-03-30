@@ -60,6 +60,7 @@ Expected outcomes:
 - Missing configured repositories are materialized locally.
 - New worktrees exist for `feature/skill-integration`.
 - `arashi switch` opens the selected worktree in a new terminal context.
+- Add `--vscode`, `--cursor`, or `--kiro` when you want the switch step to open directly in that IDE.
 
 ## Advanced Workflow
 

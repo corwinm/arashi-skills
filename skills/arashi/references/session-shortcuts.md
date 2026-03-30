@@ -33,6 +33,7 @@ This avoids inline command substitution and keeps quoting explicit.
 arashi switch
 arashi switch --repos docs
 arashi switch --all
+arashi switch --cursor feature-auth
 arashi switch --no-default-launch
 ```
 
@@ -51,5 +52,6 @@ Avoid command-substitution keybinds that execute unsanitized output directly.
 
 - selection flow changes shell to the selected worktree path.
 - `arashi switch` opens a terminal context for a selected worktree.
+- `arashi switch --vscode|--cursor|--kiro` forces that IDE for one switch invocation.
 - `arashi switch --sesh` creates or switches via sesh in tmux.
 - `arashi switch --no-default-launch` bypasses configured switch launch defaults for one run.

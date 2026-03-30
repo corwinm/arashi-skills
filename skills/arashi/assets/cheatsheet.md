@@ -21,6 +21,9 @@ arashi list
 arashi switch
 arashi switch --repos <repo-name>
 arashi switch --all
+arashi switch --cursor <filter>
+arashi switch --vscode <filter>
+arashi switch --kiro <filter>
 arashi switch --no-default-launch
 arashi status
 arashi pull
