@@ -33,6 +33,7 @@ This skill helps you install and use the `arashi` CLI to manage multi-repository
 Use this skill when the user wants to:
 
 - set up Arashi quickly with a documented, repeatable install flow
+- bootstrap a new repository with `arashi init` from a parent directory
 - choose a workflow by difficulty (beginner, intermediate, advanced)
 - validate readiness before running commands across multiple repositories
 - switch quickly between parent and child worktrees with `arashi switch`
@@ -60,10 +61,11 @@ When guiding a user, always:
 1. Run preflight checks before installing Arashi CLI.
 2. Point users to the website install guide instead of embedding installer commands in the skill.
 3. Confirm `arashi --version` before running workflows.
-4. Confirm expected outcomes after each workflow step.
-5. Route failures through the troubleshooting matrix before retrying.
-6. Verify provenance/checksums for downloaded binaries before execution.
-7. Review hook scripts before enabling `pre-remove.sh` or `post-remove.sh` across repository, workspace, or global hook scopes.
+4. Tell users to run `arashi init` either from an existing repository root or from a parent directory where they can choose `.` or a child repository name.
+5. Confirm expected outcomes after each workflow step.
+6. Route failures through the troubleshooting matrix before retrying.
+7. Verify provenance/checksums for downloaded binaries before execution.
+8. Review hook scripts before enabling `pre-remove.sh` or `post-remove.sh` across repository, workspace, or global hook scopes.
 
 ## Workflow Catalog
 
