@@ -11,6 +11,8 @@ arashi --help
 
 ## Core Workflow Commands
 
+Run `arashi init` inside an existing repository root, or from a parent directory and answer the repository target prompt with `.` or a child name.
+
 ```bash
 arashi init
 arashi add <repo-url>

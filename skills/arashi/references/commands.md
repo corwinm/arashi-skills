@@ -37,10 +37,31 @@ Order of operations:
 
 ## Workspace Initialization
 
-Initialize with defaults:
+Run `arashi init` from an existing repository root, or from a non-repository parent directory when you want Arashi to create the repository during setup.
+
+Initialize an existing repository with defaults:
 
 ```bash
 arashi init
+```
+
+Bootstrap the current directory as a new repository:
+
+```bash
+mkdir my-arashi-workspace
+cd my-arashi-workspace
+arashi init
+# prompt: Repository target ('.' for current directory or a child directory name) -> .
+```
+
+Bootstrap a child repository from a parent directory:
+
+```bash
+mkdir scratch
+cd scratch
+arashi init
+# prompt: Repository target ('.' for current directory or a child directory name) -> my-arashi-repo
+cd my-arashi-repo
 ```
 
 Use a custom repositories directory:
@@ -59,6 +80,7 @@ Expected outcomes:
 
 - `.arashi/config.json` includes `reposDir` and `worktreesDir`.
 - default `worktreesDir` is `.arashi/worktrees` when the option is omitted.
+- bootstrap mode accepts only `.` or a direct child directory name.
 - `.gitignore` always includes the configured repositories directory.
 - `.gitignore` auto-includes the normalized managed worktree directory entry when using the default location or a safe repository-relative subdirectory.
 - `.gitignore` skips auto-adding worktree entries for `.` and parent-traversal (`../`) `worktreesDir` values.

@@ -10,7 +10,7 @@ Use this matrix to map symptoms to root cause and a deterministic fix.
 | `arashi: command not found` | Arashi not installed or install location not on `PATH` | Install Arashi using the website guide at `https://arashi.haphazard.dev`, ensure install location is on `PATH`, then rerun `arashi --version`. |
 | Website install steps fail | Network access, permissions, or package manager configuration issue | Retry from stable network, confirm toolchain requirements, and follow the fallback path documented on the website. |
 | Repository security checks fail on exception metadata | Exception entry is stale or malformed | Remediate findings or renew exceptions with owner, rationale, and valid expiry metadata. |
-| `arashi init` fails | Directory not writable or invalid workspace location | Ensure directory is writable and rerun `arashi init` in the intended root. |
+| `arashi init` fails | Directory not writable, unsupported bootstrap target, or wrong starting location | Ensure the directory is writable, run `arashi init` from the intended repository root or parent directory, and use `.` or a direct child directory name when prompted. |
 | `arashi create` fails due to branch conflict | Branch already exists with incompatible worktree state | Use a unique branch name or remove conflicting worktree, then retry. |
 | `sesh connect` fails | `sesh` missing or tmux not configured | Install/configure sesh and tmux, or use plain `cd` shortcut flow. |
 
