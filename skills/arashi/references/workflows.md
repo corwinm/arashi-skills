@@ -34,6 +34,11 @@ If your team enforces repository security checks, run them before executing work
 
 ## Beginner Workflow
 
+Run `arashi init` from one of two valid starting points:
+
+- inside an existing repository root you want to manage
+- inside a non-repository parent directory, then enter `.` or a child repository name when prompted
+
 ```bash
 arashi init
 arashi status
@@ -43,6 +48,7 @@ Expected outcomes:
 
 - `.arashi/config.json` exists after `arashi init`.
 - `.arashi/config.json` records `worktreesDir` (default `.arashi/worktrees`).
+- bootstrap mode accepts `.` for the current directory and a direct child repository name for child-directory creation.
 - `.gitignore` includes the configured repositories directory.
 - `.gitignore` includes the normalized managed worktree directory entry when using the default location or a safe repository-relative subdirectory.
 - `arashi status` prints repository/worktree status without errors.

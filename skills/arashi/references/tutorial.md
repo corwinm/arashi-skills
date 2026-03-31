@@ -36,6 +36,34 @@ Success criteria:
 
 ## Step 4: Run First Workflow
 
+Choose where you want the workspace repository to live before running `arashi init`:
+
+- Existing repository flow: `cd` into the repository root and run `arashi init` there.
+- New repository flow: `cd` into a parent directory, run `arashi init`, then enter `.` or a child name when prompted.
+
+Bootstrap the current directory:
+
+```bash
+mkdir my-arashi-workspace
+cd my-arashi-workspace
+arashi init
+# prompt: Repository target ('.' for current directory or a child directory name) -> .
+arashi status
+```
+
+Bootstrap a child directory from a parent folder:
+
+```bash
+mkdir scratch
+cd scratch
+arashi init
+# prompt: Repository target ('.' for current directory or a child directory name) -> my-arashi-repo
+cd my-arashi-repo
+arashi status
+```
+
+If you already have a repository, the shorter flow still works:
+
 ```bash
 arashi init
 arashi status
@@ -45,6 +73,7 @@ Success criteria:
 
 - `.arashi/config.json` exists after `arashi init`
 - `.arashi/config.json` includes `worktreesDir` (default `.arashi/worktrees`)
+- the repository target prompt accepts `.` for the current directory and a simple child name for child-directory bootstrap
 - `.gitignore` includes the normalized managed worktree directory entry when using the default location or a safe repository-relative subdirectory
 - `arashi status` prints repository/worktree status without errors
 
