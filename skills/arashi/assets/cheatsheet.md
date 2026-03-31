@@ -19,8 +19,11 @@ arashi add <repo-url>
 arashi clone [--all]
 arashi create <branch>
 arashi create <branch> [--launch|--no-launch] [--switch|--no-switch] [--sesh]
+arashi shell install
+arashi shell init <bash|zsh|fish>
 arashi list
 arashi switch
+arashi switch --cd <filter>
 arashi switch --repos <repo-name>
 arashi switch --all
 arashi switch --cursor <filter>
