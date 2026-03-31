@@ -83,7 +83,7 @@ Expected outcomes:
 
 ## Worktree Switching
 
-Use `arashi switch` to open a terminal context for an existing worktree.
+Use `arashi switch` to open a terminal context for an existing worktree, or change the current shell directory when shell integration is active.
 
 ```bash
 # parent workspace worktrees (default)
@@ -100,6 +100,12 @@ arashi switch --cursor feature-auth
 arashi switch --vscode feature-auth
 arashi switch --kiro feature-auth
 
+# request parent-shell cd when shell integration is active
+arashi switch --cd feature-auth
+
+# force launch behavior for one run
+arashi switch --no-cd
+
 # sesh mode inside tmux
 arashi switch --sesh
 
@@ -110,9 +116,11 @@ arashi switch --no-default-launch
 Expected outcomes:
 
 - command exits `0` and opens the selected target in a new context
+- `arashi switch --cd` changes the current shell directory when invoked through the installed shell wrapper
 - `--repos` matches repository names first (exact match preferred)
 - `--repos` with no matches lists available child repositories
 - `--vscode`, `--cursor`, and `--kiro` override configured switch defaults for a single invocation
+- when shell integration is inactive, `--cd` warns and falls back to launch behavior instead of failing solely because the parent shell cannot be changed directly
 - compatible editor hosts can pass the matching switch flag automatically when running Arashi through the extension
 
 ## Create Defaults and Overrides
@@ -128,6 +136,7 @@ Use command defaults in `.arashi/config.json` to control post-create switch/laun
       "launchMode": "sesh"
     },
     "switch": {
+      "mode": "auto",
       "launchMode": "sesh"
     }
   }
@@ -141,6 +150,8 @@ arashi create feature-auth --launch
 arashi create feature-auth --no-launch
 arashi create feature-auth --no-switch
 ```
+
+Use `arashi shell install` to enable parent-shell switching for bash, zsh, or fish, or `arashi shell init <shell>` for manual setup.
 
 Precedence for create/switch launch behavior is: explicit flag > opt-out flag > config default > built-in default.
 For `switch`, IDE-integrated terminals also prefer the matching IDE launcher when no explicit override is provided.

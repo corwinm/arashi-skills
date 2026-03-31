@@ -20,6 +20,8 @@ Use the website install guide and follow the instructions for your platform:
 
 - https://arashi.haphazard.dev
 
+If you use the official curl installer, it can offer shell integration during install so `arashi switch --cd` works without an extra setup step. For unattended installs, use `ARASHI_SHELL_INTEGRATION=yes` or `ARASHI_SHELL_INTEGRATION=no`.
+
 ## Step 3: Verify CLI
 
 ```bash

@@ -39,7 +39,9 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 - Install: `npx skills add https://github.com/corwinm/arashi-skills --skill arashi`
 - Arashi CLI install guide: `https://arashi.haphazard.dev`
 - Verify Arashi CLI: `arashi --version`
-- Switch worktrees: `arashi switch [--repos|--all] [--vscode|--cursor|--kiro|--sesh] [--no-default-launch] [filter]`
+- Official curl installer can offer shell integration during install; use `ARASHI_SHELL_INTEGRATION=yes|no` for unattended runs
+- Enable shell integration: `arashi shell install` or `arashi shell init <bash|zsh|fish>`
+- Switch worktrees: `arashi switch [--repos|--all] [--cd|--no-cd] [--vscode|--cursor|--kiro|--sesh] [--no-default-launch] [filter]`
 - Configure command defaults: set `.arashi/config.json` `defaults.create` / `defaults.switch`
 
 ## Security Compliance

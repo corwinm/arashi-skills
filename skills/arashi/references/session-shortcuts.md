@@ -30,7 +30,9 @@ This avoids inline command substitution and keeps quoting explicit.
 ## Switch with Arashi
 
 ```bash
+arashi shell install
 arashi switch
+arashi switch --cd feature-auth
 arashi switch --repos docs
 arashi switch --all
 arashi switch --cursor feature-auth
@@ -52,6 +54,8 @@ Avoid command-substitution keybinds that execute unsanitized output directly.
 
 - selection flow changes shell to the selected worktree path.
 - `arashi switch` opens a terminal context for a selected worktree.
+- `arashi switch --cd` changes the current shell directory when shell integration is active.
 - `arashi switch --vscode|--cursor|--kiro` forces that IDE for one switch invocation.
 - `arashi switch --sesh` creates or switches via sesh in tmux.
+- if shell integration is inactive, `arashi switch --cd` warns and falls back to launch behavior.
 - `arashi switch --no-default-launch` bypasses configured switch launch defaults for one run.
