@@ -117,6 +117,9 @@ arashi switch --repos docs
 # include parent workspaces + nested child repo worktrees
 arashi switch --all
 
+# select one exact worktree by full path
+arashi switch --path /path/to/worktree
+
 # force Cursor / VS Code / Kiro for one run
 arashi switch --cursor feature-auth
 arashi switch --vscode feature-auth
@@ -134,8 +137,10 @@ Expected outcomes:
 - command exits `0` and opens the selected target in a new context
 - `--repos` matches repository names first (exact match preferred)
 - `--repos` with no matches lists available child repositories
+- `--path` matches one exact worktree path and skips fuzzy branch/path matching
 - `--vscode`, `--cursor`, and `--kiro` override configured switch defaults for a single invocation
 - compatible editor hosts can pass the matching switch flag automatically when running Arashi through the extension
+- extension-driven switch selections use exact path mode so duplicate branch names do not create ambiguous CLI matches
 
 ## Create Defaults and Overrides
 
