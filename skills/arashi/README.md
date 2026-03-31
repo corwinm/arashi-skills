@@ -21,3 +21,10 @@ This directory contains the canonical Arashi skill definition and all supporting
 - `references/tutorial.md`: End-to-end onboarding tutorial
 - `references/publication.md`: Publication policy and readiness gates
 - `assets/cheatsheet.md`: Fast command lookup
+
+## Related Docs
+
+- Workflow guides: `https://arashi.haphazard.dev/workflows/`
+- Hooks and config guide: `https://arashi.haphazard.dev/workflows/hooks-and-config/`
+- Integrations guide: `https://arashi.haphazard.dev/workflows/integrations/`
+- Agents and specs guide: `https://arashi.haphazard.dev/workflows/agents-and-specs/`

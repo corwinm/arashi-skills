@@ -21,6 +21,9 @@ Use this catalog to choose the right workflow by goal and confidence level.
 - Choose **Advanced** if you need sync and recovery controls.
 - If you automate teardown on branch removal, configure `pre-remove.sh` / `post-remove.sh` in repository, workspace, or global hook scopes.
 - If you use tmux/sesh, apply shortcuts from `references/session-shortcuts.md`.
+- For hooks and command defaults, see `https://arashi.haphazard.dev/workflows/hooks-and-config/`.
+- For editor and terminal comparison guidance, see `https://arashi.haphazard.dev/workflows/integrations/`.
+- For agent-assisted planning and implementation boundaries, see `https://arashi.haphazard.dev/workflows/agents-and-specs/`.
 
 ## Workflow Entry Commands
 

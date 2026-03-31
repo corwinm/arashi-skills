@@ -44,6 +44,13 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 - Switch worktrees: `arashi switch [--repos|--all] [--cd|--no-cd] [--vscode|--cursor|--kiro|--sesh] [--no-default-launch] [filter]`
 - Configure command defaults: set `.arashi/config.json` `defaults.create` / `defaults.switch`
 
+## Workflow Docs
+
+- Overview: `https://arashi.haphazard.dev/workflows/`
+- Hooks and configuration defaults: `https://arashi.haphazard.dev/workflows/hooks-and-config/`
+- Integrations for VSCode, tmux, and sesh: `https://arashi.haphazard.dev/workflows/integrations/`
+- Agent-assisted planning and implementation boundaries: `https://arashi.haphazard.dev/workflows/agents-and-specs/`
+
 ## Security Compliance
 
 - Canonical gate command: `node scripts/security-gate.mjs --root . --exceptions security/audit-exceptions.json`
