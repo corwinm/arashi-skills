@@ -25,6 +25,8 @@ This directory contains the canonical Arashi skill definition and all supporting
 ## Related Docs
 
 - Workflow guides: `https://arashi.haphazard.dev/workflows/`
-- Hooks and config guide: `https://arashi.haphazard.dev/workflows/hooks-and-config/`
-- Integrations guide: `https://arashi.haphazard.dev/workflows/integrations/`
-- Agents and specs guide: `https://arashi.haphazard.dev/workflows/agents-and-specs/`
+- Hooks guide: `https://arashi.haphazard.dev/workflows/hooks/`
+- Config guide: `https://arashi.haphazard.dev/workflows/config/`
+- VS Code guide: `https://arashi.haphazard.dev/workflows/vscode/`
+- tmux and sesh guide: `https://arashi.haphazard.dev/workflows/tmux-and-sesh/`
+- Agents guide: `https://arashi.haphazard.dev/workflows/agents-and-specs/`
