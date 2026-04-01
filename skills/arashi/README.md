@@ -21,3 +21,12 @@ This directory contains the canonical Arashi skill definition and all supporting
 - `references/tutorial.md`: End-to-end onboarding tutorial
 - `references/publication.md`: Publication policy and readiness gates
 - `assets/cheatsheet.md`: Fast command lookup
+
+## Related Docs
+
+- Workflow guides: `https://arashi.haphazard.dev/workflows/`
+- Hooks guide: `https://arashi.haphazard.dev/workflows/hooks/`
+- Config guide: `https://arashi.haphazard.dev/workflows/config/`
+- VS Code guide: `https://arashi.haphazard.dev/workflows/vscode/`
+- tmux and sesh guide: `https://arashi.haphazard.dev/workflows/tmux-and-sesh/`
+- Agents guide: `https://arashi.haphazard.dev/workflows/agents-and-specs/`
