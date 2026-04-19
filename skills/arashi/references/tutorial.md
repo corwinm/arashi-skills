@@ -32,6 +32,7 @@ arashi --help
 Success criteria:
 
 - all commands exit `0`
+- if `arashi --version` exits immediately or returns `137`, stop and reinstall using a pinned version from the website guide
 - help output lists commands
 
 ## Step 4: Run First Workflow

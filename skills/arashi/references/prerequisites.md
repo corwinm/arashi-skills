@@ -20,4 +20,4 @@ arashi --version
 
 Expected result: commands exit `0` and `arashi` is available on `PATH`.
 
-If `arashi --version` fails, install Arashi by following https://arashi.haphazard.dev. The official curl installer can also offer shell integration during install; use `ARASHI_SHELL_INTEGRATION=yes|no` for unattended runs.
+If `arashi --version` fails, install Arashi by following https://arashi.haphazard.dev. If it exits immediately or returns `137`, reinstall with a pinned release from the website guide. The official curl installer can also offer shell integration during install; use `ARASHI_SHELL_INTEGRATION=yes|no` for unattended runs.

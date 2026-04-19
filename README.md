@@ -40,6 +40,7 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 - Arashi CLI install guide: `https://arashi.haphazard.dev`
 - Verify Arashi CLI: `arashi --version`
 - Official curl installer can offer shell integration during install; use `ARASHI_SHELL_INTEGRATION=yes|no` for unattended runs
+- If verification exits immediately or returns code `137`, reinstall with a pinned release and report the bad release artifact
 - Enable shell integration: `arashi shell install` or `arashi shell init <bash|zsh|fish>`
 - Switch worktrees: `arashi switch [--repos|--all] [--cd|--no-cd] [--vscode|--cursor|--kiro|--sesh] [--no-default-launch] [filter]`
 - Configure command defaults: set `.arashi/config.json` `defaults.create` / `defaults.switch`
