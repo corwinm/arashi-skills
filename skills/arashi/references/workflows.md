@@ -19,23 +19,19 @@ Use this catalog to choose the right workflow by goal and confidence level.
 - Start with **Beginner** if this is your first Arashi skill session.
 - Choose **Intermediate** if you already have repositories and need cross-repo branch creation.
 - Choose **Advanced** if you need sync and recovery controls.
-- If you automate teardown on branch removal, configure `pre-remove.sh` / `post-remove.sh` in repository, workspace, or global hook scopes.
-- If you use tmux/sesh, apply shortcuts from `references/session-shortcuts.md`.
-- For hooks, see `https://arashi.haphazard.dev/workflows/hooks/`.
+- If you automate teardown on branch removal, use [Hooks](hooks.md).
+- If you use tmux/sesh, apply shortcuts from [Session Shortcuts](session-shortcuts.md).
+- For the latest hooks docs, see `https://arashi.haphazard.dev/workflows/hooks/`.
 - For command defaults and shell-aware switching behavior, see `https://arashi.haphazard.dev/workflows/config/`.
 - For VS Code and VS Code-based editor workflows, see `https://arashi.haphazard.dev/workflows/vscode/`.
 - For tmux and sesh workflows, see `https://arashi.haphazard.dev/workflows/tmux-and-sesh/`.
 - For agent guidance in a meta-repo, see `https://arashi.haphazard.dev/workflows/agents-and-specs/`.
 
-## Workflow Entry Commands
+## Workflow Entry Guidance
 
-Before running any workflow:
+Assume Arashi is available unless the user is installing it or a command is not working as expected.
 
-```bash
-arashi --version
-```
-
-If your team enforces repository security checks, run them before executing workflows.
+When a workflow needs command-specific options, inspect `arashi <command> --help` before recommending or running flags. If your team enforces repository security checks, run them before executing workflows.
 
 ## Beginner Workflow
 
@@ -71,7 +67,7 @@ Expected outcomes:
 - Missing configured repositories are materialized locally.
 - New worktrees exist for `feature/skill-integration`.
 - `arashi switch` opens the selected worktree in a new terminal context.
-- Add `--vscode`, `--cursor`, or `--kiro` when you want the switch step to open directly in that IDE.
+- Use `arashi switch --help` to confirm current editor launch flags before choosing an IDE-specific switch option.
 
 ## Advanced Workflow
 

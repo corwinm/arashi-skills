@@ -6,10 +6,13 @@ This repository contains the Arashi skill package and supporting references.
 
 - Keep skill definitions under `skills/`.
 - Keep supporting scripts, policy, and security files in their existing top-level directories.
-- Update skill references when workflow guidance or canonical docs links change.
+- Keep `skills/arashi/SKILL.md` minimal: routing, policy, and links only.
+- Update skill references when detailed workflow guidance or canonical docs links change.
 
 ## Working Rules
 
 - Keep commands deterministic and copy-pasteable.
-- Update `skills/arashi/SKILL.md` first when the skill behavior changes, then sync supporting references.
+- Treat `arashi --help` and `arashi <command> --help` as the source of truth for current command parameters.
+- Update the smallest affected reference first for detailed procedural changes.
+- Update `skills/arashi/SKILL.md` only when skill routing, operating policy, or reference links change.
 - Keep skill references self-contained and aligned with the canonical docs site.
