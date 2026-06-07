@@ -1,6 +1,6 @@
 # Command Reference
 
-Canonical commands for installing and using the Arashi CLI.
+Common command patterns for installing and using the Arashi CLI.
 
 ## Most Common Commands
 
@@ -27,13 +27,13 @@ Expected outcome:
 
 ## Workflow Execution
 
-Choose one workflow from `references/workflows.md`.
+Choose one workflow from [Workflows](workflows.md).
 
 Order of operations:
 
-1. Confirm `arashi --version` succeeds.
-2. Execute one workflow from start to finish.
-3. Confirm expected outcomes from the workflow doc.
+1. Execute one workflow from start to finish.
+2. Confirm expected outcomes from the workflow doc.
+3. If a command is missing or behaves unexpectedly, verify setup with `arashi --version` and use [Troubleshooting](troubleshooting.md).
 
 ## Workspace Initialization
 
@@ -170,7 +170,7 @@ Use command defaults in `.arashi/config.json` to control post-create switch/laun
 }
 ```
 
-Use one-off CLI overrides when needed:
+Use one-off CLI overrides when you want a single `arashi create` run to differ from configured defaults, such as launching immediately or skipping the post-create switch. Common examples include:
 
 ```bash
 arashi create feature-auth --launch
@@ -185,46 +185,11 @@ For `switch`, IDE-integrated terminals also prefer the matching IDE launcher whe
 
 ## Remove Cleanup Hooks
 
-Use remove lifecycle hooks to automate teardown around `arashi remove`.
-
-```bash
-# workspace-root hooks
-cp .arashi/hooks/pre-remove.sh.example .arashi/hooks/pre-remove.sh
-
-# optional post-remove finalizer
-cp .arashi/hooks/post-remove.sh.example .arashi/hooks/post-remove.sh
-
-# repo-scoped hook (runs for one child repo)
-mkdir -p repos/<repo>/.arashi/hooks
-cp .arashi/hooks/pre-remove.sh.example repos/<repo>/.arashi/hooks/pre-remove.sh
-
-# global shared hook (all repos)
-mkdir -p ~/.arashi/hooks
-cp .arashi/hooks/pre-remove.sh.example ~/.arashi/hooks/pre-remove.sh
-
-# global repo-targeted hook
-mkdir -p ~/.arashi/hooks/<repo>
-cp .arashi/hooks/pre-remove.sh.example ~/.arashi/hooks/<repo>/pre-remove.sh
-```
-
-Before enabling hooks, review script contents and ensure commands are safe for their scope.
-Only use hook scripts from trusted repositories and verify file provenance before making scripts executable.
-
-For each targeted repository, remove hooks run in order:
-
-1. `repos/<repo>/.arashi/hooks/<lifecycle>.sh`
-2. `.arashi/hooks/<lifecycle>.sh`
-3. `~/.arashi/hooks/<repo>/<lifecycle>.sh`
-4. `~/.arashi/hooks/<lifecycle>.sh`
-
-`pre-remove.sh` runs before destructive remove actions and can abort the command when it exits non-zero.
-`post-remove.sh` runs after remove actions are attempted and can perform final cleanup (for example tmux/session teardown).
+Use [Hooks](hooks.md) for remove lifecycle hook setup and safety guidance.
 
 ## Session Navigation (Optional)
 
-For tmux/sesh and worktree jump shortcuts, use:
-
-- `references/session-shortcuts.md`
+For tmux/sesh and worktree jump shortcuts, use [Session Shortcuts](session-shortcuts.md).
 
 ## Publication and Discoverability
 

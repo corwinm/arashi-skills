@@ -30,25 +30,27 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 ## Contribution Notes
 
 1. Keep commands deterministic and copy-pasteable across macOS, Linux, and Windows terminals.
-2. Update `skills/arashi/SKILL.md` first, then sync linked references.
-3. Include expected outcomes for every workflow or troubleshooting instruction.
-4. Keep skill references self-contained under `skills/arashi/`.
+2. Update the smallest affected reference first for detailed workflow, command, troubleshooting, or shortcut instructions.
+3. Update `skills/arashi/SKILL.md` only when skill routing, operating policy, or reference links change.
+4. Include expected outcomes for every workflow or troubleshooting instruction.
+5. Keep skill references self-contained under `skills/arashi/`.
 
 ## Canonical Commands
 
-- Install: `npx skills add https://github.com/corwinm/arashi-skills --skill arashi`
+- Install skill: `npx skills add https://github.com/corwinm/arashi-skills --skill arashi`
 - Arashi CLI install guide: `https://arashi.haphazard.dev`
 - Verify Arashi CLI: `arashi --version`
+- Discover commands and current parameters: `arashi --help` and `arashi <command> --help`
+- Use installed CLI help output as the source of truth for current flags before documenting or recommending command parameters.
 - Official curl installer can offer shell integration during install; use `ARASHI_SHELL_INTEGRATION=yes|no` for unattended runs
 - If verification exits immediately or returns code `137`, reinstall with a pinned release and report the bad release artifact
-- Enable shell integration: `arashi shell install` or `arashi shell init <bash|zsh|fish>`
-- Switch worktrees: `arashi switch [--repos|--all] [--cd|--no-cd] [--vscode|--cursor|--kiro|--sesh] [--no-default-launch] [filter]`
 - Configure command defaults: set `.arashi/config.json` `defaults.create` / `defaults.switch`
 
 ## Workflow Docs
 
 - Overview: `https://arashi.haphazard.dev/workflows/`
-- Hooks: `https://arashi.haphazard.dev/workflows/hooks/`
+- Hooks reference: `skills/arashi/references/hooks.md`
+- Hooks docs: `https://arashi.haphazard.dev/workflows/hooks/`
 - Config: `https://arashi.haphazard.dev/workflows/config/`
 - VS Code and VS Code-based editors: `https://arashi.haphazard.dev/workflows/vscode/`
 - tmux and sesh: `https://arashi.haphazard.dev/workflows/tmux-and-sesh/`

@@ -13,6 +13,7 @@ compatibility:
 entry_commands:
   install_arashi: "see https://arashi.haphazard.dev for installation instructions"
   verify_arashi: arashi --version
+  discover_commands: arashi --help
   workflows:
     beginner: arashi init && arashi status
     intermediate: arashi clone --all && arashi create <branch> && arashi switch <branch>
@@ -26,69 +27,51 @@ status: draft
 
 # Arashi Skill
 
-This skill helps you install and use the `arashi` CLI to manage multi-repository workflows and is best paired with a spec-driven development framework to provide shared context for AI-assisted engineering.
+Guidance for helping users manage multi-repository feature branches and worktrees with the `arashi` CLI.
 
-## When to Use This Skill
+## Common Requests
 
-Use this skill when the user wants to:
+Users may ask for help with:
 
-- set up Arashi quickly with a documented, repeatable install flow
-- bootstrap a new repository with `arashi init` from a parent directory
-- choose a workflow by difficulty (beginner, intermediate, advanced)
-- validate readiness before running commands across multiple repositories
-- switch quickly between parent and child worktrees with `arashi switch`
-- enable parent-shell switching with `arashi shell install` when `cd` behavior is preferred
-- force one-off IDE launches with `arashi switch --vscode|--cursor|--kiro`
-- speed up daily navigation with `fzf`, `tmux`, and `sesh`
-- automate cleanup around `arashi remove` with lifecycle hooks
-- recover from setup, network, or command failures without guesswork
+- installing, verifying, or troubleshooting the Arashi CLI
+- initializing or inspecting an Arashi workspace
+- cloning repositories, creating branches, switching worktrees, pulling, syncing, or removing worktrees
+- shell integration, editor launch behavior, tmux/sesh shortcuts, or remove lifecycle hooks
+- agent workflows for Arashi-managed meta-repositories
 
-## Core Commands
+## Start Here
 
-Installation guidance: https://arashi.haphazard.dev
+Assume Arashi is already installed unless the user is installing it or a command is not working as expected.
 
-```bash
-# verify Arashi is available
-arashi --version
+1. Choose the relevant guide: [Workflows](references/workflows.md), [Commands](references/commands.md), or [Session Shortcuts](references/session-shortcuts.md)
+2. For command parameters, inspect current help output when needed: `arashi <command> --help`
+3. For CLI setup or command failures, use [Prerequisites](references/prerequisites.md) and [Troubleshooting](references/troubleshooting.md)
 
-# inspect command surface
-arashi --help
-```
+## Operating Rules
 
-## Usage Rules
-
-When guiding a user, always:
-
-1. Run preflight checks before installing Arashi CLI.
-2. Point users to the website install guide instead of embedding installer commands in the skill.
-3. Confirm `arashi --version` before running workflows.
-4. Tell users to run `arashi init` either from an existing repository root or from a parent directory where they can choose `.` or a child repository name.
-5. Confirm expected outcomes after each workflow step.
-6. Route failures through the troubleshooting matrix before retrying.
-7. Verify provenance/checksums for downloaded binaries before execution.
-8. Review hook scripts before enabling `pre-remove.sh` or `post-remove.sh` across repository, workspace, or global hook scopes.
-
-## Workflow Catalog
-
-- Beginner: initialize workspace and inspect status.
-- Intermediate: clone missing repositories and create a feature branch.
-- Advanced: pull and sync repositories safely.
-- Session shortcuts: jump or connect with `arashi switch`, `arashi switch --cd`, `fzf`, and `sesh` in tmux-based flows.
-- Compatible editor hosts can route `arashi switch` into VS Code, Cursor, or Kiro without changing workspace defaults.
-
-### Expected Workflow Outcomes
-
-- **Beginner**: workspace initialized and status visible.
-- **Intermediate**: missing clones recovered and feature branch worktrees created.
-- **Advanced**: repositories synchronized with clear status after reconciliation.
+- Check the docs site for the latest install instructions: https://arashi.haphazard.dev.
+- Use `arashi --help` and `arashi <command> --help` when current command parameters are needed.
+- Prefer linked references over duplicating detailed workflow instructions here.
+- Use the [Hooks](references/hooks.md) reference for remove lifecycle hook guidance.
 
 ## References
 
 - [Prerequisites](references/prerequisites.md)
 - [Commands](references/commands.md)
 - [Workflows](references/workflows.md)
+- [Hooks](references/hooks.md)
 - [Session Shortcuts](references/session-shortcuts.md)
 - [Tutorial](references/tutorial.md)
 - [Troubleshooting](references/troubleshooting.md)
 - [Publication Policy](references/publication.md)
 - [Cheat Sheet](assets/cheatsheet.md)
+
+## Canonical Docs
+
+- Arashi docs: https://arashi.haphazard.dev
+- Workflow guides: https://arashi.haphazard.dev/workflows/
+- Hooks guide: https://arashi.haphazard.dev/workflows/hooks/
+- Config guide: https://arashi.haphazard.dev/workflows/config/
+- VS Code guide: https://arashi.haphazard.dev/workflows/vscode/
+- tmux and sesh guide: https://arashi.haphazard.dev/workflows/tmux-and-sesh/
+- Agents guide: https://arashi.haphazard.dev/workflows/agents-and-specs/

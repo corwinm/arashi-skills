@@ -29,6 +29,8 @@ This avoids inline command substitution and keeps quoting explicit.
 
 ## Switch with Arashi
 
+Use `arashi shell --help` and `arashi switch --help` to confirm current shell and switch options. Common examples include:
+
 ```bash
 arashi shell install
 arashi switch

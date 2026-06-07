@@ -4,23 +4,24 @@ This directory contains the canonical Arashi skill definition and all supporting
 
 ## Scope
 
-- Skill identity and workflow entry points in `SKILL.md`
-- Prerequisite, command, workflow, troubleshooting, publication, and tutorial references
+- Skill identity, routing, operating policy, and reference links in `SKILL.md`
+- Detailed prerequisite, command, workflow, troubleshooting, publication, and tutorial references
 - User-facing assets such as quick cheat sheets
 - Session shortcut guidance for `fzf`, `tmux`, and `sesh`
 - In-skill security guidance for safe install and command usage
 
 ## Artifact Index
 
-- `SKILL.md`: Canonical skill manifest and top-level instructions
+- `SKILL.md`: Canonical skill manifest with minimal routing, operating policy, and links
 - `references/prerequisites.md`: Environment checks and pass criteria
 - `references/commands.md`: Verification, workflow, and publication commands
 - `references/workflows.md`: Workflow catalog and selection guidance
+- `references/hooks.md`: Remove lifecycle hook setup and safety guidance
 - `references/session-shortcuts.md`: fzf/tmux/sesh navigation shortcuts
 - `references/troubleshooting.md`: Symptom-to-fix matrix
 - `references/tutorial.md`: End-to-end onboarding tutorial
 - `references/publication.md`: Publication policy and readiness gates
-- `assets/cheatsheet.md`: Fast command lookup
+- `assets/cheatsheet.md`: Lightweight reference index
 
 ## Related Docs
 
