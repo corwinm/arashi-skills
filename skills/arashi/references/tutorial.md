@@ -127,8 +127,9 @@ Expected failure: `command not found`.
 Recovery path:
 
 1. reinstall Arashi using the website instructions (`https://arashi.haphazard.dev`)
-2. open a new shell
-3. ensure the installed binary location is on `PATH`
-4. rerun `arashi --version`
+2. for npm installs, run `arashi install` to preinstall the platform binary
+3. open a new shell
+4. ensure the installed binary location is on `PATH`
+5. rerun `arashi --version`
 
 Tutorial is complete when one workflow succeeds end-to-end and failure recovery works.
