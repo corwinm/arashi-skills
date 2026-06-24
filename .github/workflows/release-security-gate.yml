@@ -13,12 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: "20"
+          node-version: "24"
 
       - name: Run security gate
         run: node scripts/security-gate.mjs --root . --exceptions security/audit-exceptions.json
@@ -29,7 +29,7 @@ jobs:
       - security-gate
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Create skill artifact
         run: tar -czf arashi-skill-package.tar.gz skills/ README.md LICENSE security/
