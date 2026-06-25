@@ -33,7 +33,7 @@ Use the docs site for current install-method guidance. The CLI can also check up
 # check without changing files
 arashi update --check
 
-# show the selected package-manager command or manual release guidance
+# show the selected package-manager command or installer invocation
 arashi update --dry-run
 
 # run a supported npm-managed update non-interactively
@@ -43,8 +43,8 @@ arashi update --yes
 Expected outcomes:
 
 - npm-managed installs update only when Arashi can confidently detect a supported package manager.
-- direct binary/manual installs print the latest release asset to download instead of replacing files automatically.
-- ambiguous installs do not mutate files; follow the printed manual commands or release guidance.
+- official curl installer installs rerun the installer against the current binary directory when `--yes` is passed.
+- ambiguous npm-managed installs do not mutate files; follow the printed manual commands.
 
 ## Workflow Execution
 
