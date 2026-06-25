@@ -25,6 +25,27 @@ Expected outcome:
 - `arashi --version` exits `0`
 - `arashi --help` exits `0`
 
+## Updating Arashi
+
+Use the docs site for current install-method guidance. The CLI can also check update availability:
+
+```bash
+# check without changing files
+arashi update --check
+
+# show the selected package-manager command or manual release guidance
+arashi update --dry-run
+
+# run a supported npm-managed update non-interactively
+arashi update --yes
+```
+
+Expected outcomes:
+
+- npm-managed installs update only when Arashi can confidently detect a supported package manager.
+- direct binary/manual installs print the latest release asset to download instead of replacing files automatically.
+- ambiguous installs do not mutate files; follow the printed manual commands or release guidance.
+
 ## Workflow Execution
 
 Choose one workflow from [Workflows](workflows.md).
