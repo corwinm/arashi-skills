@@ -56,6 +56,39 @@ Order of operations:
 2. Confirm expected outcomes from the workflow doc.
 3. If a command is missing or behaves unexpectedly, verify setup with `arashi --version` and use [Troubleshooting](troubleshooting.md).
 
+## JSON Output for Automation
+
+Prefer `--json` when you need to parse Arashi command results for decisions, reports, editor integrations, or follow-up commands. Human-readable output is for users; JSON output is for agents and scripts.
+
+Expected JSON-mode behavior:
+
+- stdout is exactly one JSON document when the command accepts `--json` and reaches command-level execution.
+- success envelopes include `ok: true`, `command`, `schemaVersion: 1`, command-specific `data`, and `warnings`.
+- command-level failures exit non-zero and include `ok: false`, `command`, `schemaVersion: 1`, `error`, and `warnings`.
+- JSON mode does not prompt; missing selections or confirmations return structured errors such as `INTERACTIVE_INPUT_REQUIRED`.
+
+Use JSON mode for automation-relevant commands including `add`, `clone`, `create`, `init`, `list`, `pull`, `remove`, `setup`, `status`, `sync`, and `update`.
+
+Unsupported launch, shell-code, or interactive modes return a structured error instead of mixing human output into JSON:
+
+```json
+{
+  "ok": false,
+  "command": "switch",
+  "schemaVersion": 1,
+  "error": {
+    "code": "JSON_UNSUPPORTED_FOR_MODE",
+    "message": "JSON output is not supported for this mode",
+    "details": {
+      "mode": "launch"
+    }
+  },
+  "warnings": []
+}
+```
+
+When `error.code` is `JSON_UNSUPPORTED_FOR_MODE`, retry with a non-launching or non-interactive mode if available. Otherwise run without `--json` only when the user wants the human-facing action, such as opening an editor, changing a shell, or emitting shell integration code.
+
 ## Workspace Initialization
 
 Run `arashi init` from an existing repository root, or from a non-repository parent directory when you want Arashi to create the repository during setup.
