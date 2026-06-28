@@ -51,6 +51,7 @@ Assume Arashi is already installed unless the user is installing it or a command
 
 - Check the docs site for the latest install instructions: https://arashi.haphazard.dev.
 - Use `arashi --help` and `arashi <command> --help` when current command parameters are needed.
+- Prefer `--json` for parsed command output, and handle `JSON_UNSUPPORTED_FOR_MODE` as a structured refusal for launch, shell-code, or interactive modes.
 - Prefer linked references over duplicating detailed workflow instructions here.
 - Use the [Hooks](references/hooks.md) reference for remove lifecycle hook guidance.
 
