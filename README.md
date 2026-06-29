@@ -49,12 +49,15 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 ## Workflow Docs
 
 - Overview: `https://arashi.haphazard.dev/workflows/`
+- Curated agent docs: `https://arashi.haphazard.dev/llms.txt`
+- Full Markdown docs export: `https://arashi.haphazard.dev/llms-full.txt`
 - Hooks reference: `skills/arashi/references/hooks.md`
 - Hooks docs: `https://arashi.haphazard.dev/workflows/hooks/`
 - Config: `https://arashi.haphazard.dev/workflows/config/`
 - VS Code and VS Code-based editors: `https://arashi.haphazard.dev/workflows/vscode/`
 - tmux and sesh: `https://arashi.haphazard.dev/workflows/tmux-and-sesh/`
 - Agents: `https://arashi.haphazard.dev/workflows/agents-and-specs/`
+- Agents Markdown: `https://arashi.haphazard.dev/workflows/agents-and-specs.md`
 
 ## Security Compliance
 

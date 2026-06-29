@@ -25,13 +25,16 @@ Use this catalog to choose the right workflow by goal and confidence level.
 - For command defaults and shell-aware switching behavior, see `https://arashi.haphazard.dev/workflows/config/`.
 - For VS Code and VS Code-based editor workflows, see `https://arashi.haphazard.dev/workflows/vscode/`.
 - For tmux and sesh workflows, see `https://arashi.haphazard.dev/workflows/tmux-and-sesh/`.
-- For agent guidance in a meta-repo, see `https://arashi.haphazard.dev/workflows/agents-and-specs/`.
+- For agent guidance in a meta-repo, see `https://arashi.haphazard.dev/workflows/agents-and-specs/` or fetch the Markdown form at `https://arashi.haphazard.dev/workflows/agents-and-specs.md`.
+- For compact agent context across the docs, start with `https://arashi.haphazard.dev/llms.txt`; use `https://arashi.haphazard.dev/llms-full.txt` for a broader Markdown export.
 
 ## Workflow Entry Guidance
 
 Assume Arashi is available unless the user is installing it or a command is not working as expected.
 
 When a workflow needs command-specific options, inspect `arashi <command> --help` before recommending or running flags. If your team enforces repository security checks, run them before executing workflows.
+
+When operating as an agent in a meta-repo, start with `arashi status`, identify the owning child repository, keep implementation in `repos/<project>/`, keep shared planning in the meta-repo, and validate each affected repo before handoff.
 
 ## Beginner Workflow
 
