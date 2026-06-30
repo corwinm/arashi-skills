@@ -50,6 +50,8 @@ Assume Arashi is already installed unless the user is installing it or a command
 ## Operating Rules
 
 - Check the docs site for the latest install instructions: https://arashi.haphazard.dev.
+- For compact agent context, prefer the curated LLM entrypoint: https://arashi.haphazard.dev/llms.txt.
+- For broad Markdown context, use the full export: https://arashi.haphazard.dev/llms-full.txt.
 - Use `arashi --help` and `arashi <command> --help` when current command parameters are needed.
 - Prefer `--json` for parsed command output, and handle `JSON_UNSUPPORTED_FOR_MODE` as a structured refusal for launch, shell-code, or interactive modes.
 - Prefer linked references over duplicating detailed workflow instructions here.
@@ -70,9 +72,12 @@ Assume Arashi is already installed unless the user is installing it or a command
 ## Canonical Docs
 
 - Arashi docs: https://arashi.haphazard.dev
+- LLM entrypoint: https://arashi.haphazard.dev/llms.txt
+- Full Markdown export: https://arashi.haphazard.dev/llms-full.txt
 - Workflow guides: https://arashi.haphazard.dev/workflows/
 - Hooks guide: https://arashi.haphazard.dev/workflows/hooks/
 - Config guide: https://arashi.haphazard.dev/workflows/config/
 - VS Code guide: https://arashi.haphazard.dev/workflows/vscode/
 - tmux and sesh guide: https://arashi.haphazard.dev/workflows/tmux-and-sesh/
 - Agents guide: https://arashi.haphazard.dev/workflows/agents-and-specs/
+- Agents guide Markdown: https://arashi.haphazard.dev/workflows/agents-and-specs.md
