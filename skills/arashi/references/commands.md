@@ -67,7 +67,7 @@ Expected JSON-mode behavior:
 - command-level failures exit non-zero and include `ok: false`, `command`, `schemaVersion: 1`, `error`, and `warnings`.
 - JSON mode does not prompt; missing selections or confirmations return structured errors such as `INTERACTIVE_INPUT_REQUIRED`.
 
-Use JSON mode for automation-relevant commands including `add`, `clone`, `create`, `init`, `list`, `pull`, `remove`, `setup`, `status`, `sync`, and `update`.
+Use JSON mode for automation-relevant commands including `add`, `clone`, `create`, `init`, `list`, `move`, `pull`, `remove`, `setup`, `status`, `sync`, and `update`.
 
 Unsupported launch, shell-code, or interactive modes return a structured error instead of mixing human output into JSON:
 
@@ -230,8 +230,25 @@ Use one-off CLI overrides when you want a single `arashi create` run to differ f
 arashi create feature-auth --launch
 arashi create feature-auth --no-launch
 arashi create feature-auth --no-switch
+arashi create feature-auth --move-changes
 ```
 
+If work starts before the right coordinated worktree exists, move compatible uncommitted edits into the target workspace:
+
+```bash
+# after creating the target worktree
+arashi move --to feature-auth
+
+# explicit source and target for unattended automation
+arashi move --from main --to feature-auth --json
+```
+
+Expected outcomes:
+
+- `arashi create <branch>` leaves existing uncommitted changes in place and prints move guidance when compatible changed repositories are detected.
+- `arashi create <branch> --json` includes dirty-workspace guidance as structured data, not human text.
+- `arashi create <branch> --move-changes` moves compatible staged, unstaged, and untracked changes after successful worktree creation.
+- `arashi move` refuses dirty target repositories and reports recovery commands if a stash-backed transfer needs manual recovery.
 Use `arashi shell install` to enable parent-shell switching for bash, zsh, or fish, or `arashi shell init <shell>` for manual setup.
 
 Precedence for create/switch launch behavior is: explicit flag > opt-out flag > config default > built-in default.
