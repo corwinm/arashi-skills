@@ -13,6 +13,7 @@ Use this matrix to map symptoms to root cause and a deterministic fix.
 | Repository security checks fail on exception metadata | Exception entry is stale or malformed | Remediate findings or renew exceptions with owner, rationale, and valid expiry metadata. |
 | `arashi init` fails | Directory not writable, unsupported bootstrap target, or wrong starting location | Ensure the directory is writable, run `arashi init` from the intended repository root or parent directory, and use `.` or a direct child directory name when prompted. |
 | `arashi create` fails due to branch conflict | Branch already exists with incompatible worktree state | Use a unique branch name or remove conflicting worktree, then retry. |
+| `arashi remove` reports stale/prunable metadata | Git has a worktree record for a missing directory | Run `arashi prune --dry-run --json` to inspect, then `arashi prune --json` to clean stale metadata. |
 | `sesh connect` fails | `sesh` missing or tmux not configured | Install/configure sesh and tmux, or use plain `cd` shortcut flow. |
 
 ## Recovery Playbook

@@ -67,7 +67,7 @@ Expected JSON-mode behavior:
 - command-level failures exit non-zero and include `ok: false`, `command`, `schemaVersion: 1`, `error`, and `warnings`.
 - JSON mode does not prompt; missing selections or confirmations return structured errors such as `INTERACTIVE_INPUT_REQUIRED`.
 
-Use JSON mode for automation-relevant commands including `add`, `clone`, `create`, `init`, `list`, `move`, `pull`, `remove`, `setup`, `status`, `sync`, and `update`.
+Use JSON mode for automation-relevant commands including `add`, `clone`, `create`, `init`, `list`, `move`, `prune`, `pull`, `remove`, `setup`, `status`, `sync`, and `update`.
 
 Unsupported launch, shell-code, or interactive modes return a structured error instead of mixing human output into JSON:
 
@@ -257,6 +257,24 @@ For `switch`, IDE-integrated terminals also prefer the matching IDE launcher whe
 ## Remove Cleanup Hooks
 
 Use [Hooks](hooks.md) for remove lifecycle hook setup and safety guidance.
+
+## Stale Worktree Metadata Cleanup
+
+Use `arashi prune` when Git reports prunable worktree metadata, usually after a worktree directory was removed manually or a Git worktree record points at a missing path.
+
+```bash
+# inspect stale metadata without changing Git records
+arashi prune --dry-run --json
+
+# clean stale metadata across the workspace
+arashi prune --json
+```
+
+Expected outcomes:
+
+- `arashi prune --dry-run` reports prunable entries and reasons without mutating Git metadata.
+- `arashi prune` cleans stale Git worktree records in the main repository and configured child repositories.
+- `arashi remove` excludes prunable records and points users to `arashi prune`; do not use `remove` for already-missing worktrees.
 
 ## Session Navigation (Optional)
 
