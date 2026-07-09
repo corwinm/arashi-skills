@@ -36,6 +36,7 @@ Users may ask for help with:
 - installing, verifying, or troubleshooting the Arashi CLI
 - initializing or inspecting an Arashi workspace
 - cloning repositories, creating branches, switching worktrees, pulling, syncing, or removing worktrees
+- repeated multi-repo inspection or validation with `arashi exec`
 - shell integration, editor launch behavior, tmux/sesh shortcuts, or remove lifecycle hooks
 - agent workflows for Arashi-managed meta-repositories
 
@@ -54,6 +55,7 @@ Assume Arashi is already installed unless the user is installing it or a command
 - For broad Markdown context, use the full export: https://arashi.haphazard.dev/llms-full.txt.
 - Use `arashi --help` and `arashi <command> --help` when current command parameters are needed.
 - Prefer `--json` for parsed command output, and handle `JSON_UNSUPPORTED_FOR_MODE` as a structured refusal for launch, shell-code, or interactive modes.
+- Use `arashi exec` for repeated non-interactive multi-repo inspection or validation; use explicit `--only` filters for mutating, expensive, network-heavy, or long-running child commands.
 - Prefer linked references over duplicating detailed workflow instructions here.
 - Use the [Hooks](references/hooks.md) reference for remove lifecycle hook guidance.
 
