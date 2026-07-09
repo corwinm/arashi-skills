@@ -56,7 +56,8 @@ Assume Arashi is already installed unless the user is installing it or a command
 - Use `arashi --help` and `arashi <command> --help` when current command parameters are needed.
 - Prefer `arashi doctor --json` for structured workspace health diagnostics before lower-level `status`, `prune`, or `clone` troubleshooting.
 - Prefer `--json` for parsed command output, and handle `JSON_UNSUPPORTED_FOR_MODE` as a structured refusal for launch, shell-code, or interactive modes.
-- Use `arashi exec` for repeated non-interactive multi-repo inspection or validation; use explicit `--only` filters for mutating, expensive, network-heavy, or long-running child commands.
+- Use `arashi exec` for repeated non-interactive multi-repo inspection or validation; prefer `--group <group>` for known semantic sets and use explicit `--only` filters for one-off repository lists.
+- For mutating, expensive, network-heavy, or long-running multi-repo commands, apply an explicit `--group` or `--only` filter unless the user asked for every managed repository.
 - Prefer linked references over duplicating detailed workflow instructions here.
 - Use the [Hooks](references/hooks.md) reference for remove lifecycle hook guidance.
 
