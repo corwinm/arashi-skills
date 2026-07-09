@@ -67,7 +67,31 @@ Expected JSON-mode behavior:
 - command-level failures exit non-zero and include `ok: false`, `command`, `schemaVersion: 1`, `error`, and `warnings`.
 - JSON mode does not prompt; missing selections or confirmations return structured errors such as `INTERACTIVE_INPUT_REQUIRED`.
 
-Use JSON mode for automation-relevant commands including `add`, `clone`, `create`, `doctor`, `exec`, `init`, `list`, `move`, `prune`, `pull`, `push`, `remove`, `setup`, `status`, `sync`, and `update`.
+Use JSON mode for automation-relevant commands including `add`, `clone`, `create`, `doctor`, `exec`, `handoff`, `init`, `list`, `move`, `prune`, `pull`, `push`, `remove`, `setup`, `status`, `sync`, and `update`.
+
+## Handoff Reports
+
+Use `arashi handoff` when an agent needs to pause, switch with another worker, request review, or leave dirty coordinated work with explicit context.
+
+```bash
+# Markdown report for chat, issues, or PR comments
+arashi handoff \
+  --link https://github.com/corwinm/arashi-arashi/issues/186 \
+  --validation "bun run test — passed" \
+  --todo "watch CI" \
+  --risk "Windows matrix pending" \
+  --next-command "gh pr checks 123 --repo corwinm/arashi"
+
+# Parseable report for another agent or script
+arashi handoff --json --link https://github.com/corwinm/arashi-arashi/issues/186
+```
+
+Expected outcomes:
+
+- Markdown mode includes workspace path/branch, current repository context, per-repository status, dirty or error repositories needing attention, related links, validation evidence, todos, risks, and next commands.
+- JSON mode emits one envelope with `command: "handoff"`, workspace metadata, per-repository status records, supplied context arrays, warnings, and generated next-command hints.
+- `arashi handoff` is read-only: it does not run validation commands, stage files, commit, push, delete worktrees, or write report files by default.
+- Only pass `--validation` entries for commands that actually ran; put pending or unverified checks in `--todo` or `--risk`.
 
 ## Repository Group Filters
 

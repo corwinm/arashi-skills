@@ -13,7 +13,7 @@ Use this catalog to choose the right workflow by goal and confidence level.
 - Beginner: `arashi init` -> `arashi status`
 - Intermediate: `arashi clone --all` -> `arashi create` -> `arashi switch`
 - Advanced: `arashi pull` -> `arashi sync` -> `arashi status` -> `arashi push --set-upstream`
-- Agent inspection/validation: `arashi doctor --json` -> `arashi status` -> `arashi exec -- git status --short` -> `arashi exec --group <group> -- <validation-command>` or `arashi exec --only <repo> -- <validation-command>`
+- Agent inspection/validation/handoff: `arashi doctor --json` -> `arashi status` -> `arashi exec -- git status --short` -> `arashi exec --group <group> -- <validation-command>` or `arashi exec --only <repo> -- <validation-command>` -> `arashi handoff --link <issue-or-pr> --validation "<command> — <result>"`
 
 ## Selection Guidance
 
@@ -21,6 +21,7 @@ Use this catalog to choose the right workflow by goal and confidence level.
 - Choose **Intermediate** if you already have repositories and need cross-repo branch creation.
 - Choose **Advanced** if you need sync and recovery controls.
 - Use `arashi exec` for repeated non-interactive inspection or validation across managed repositories, especially agent handoff checks.
+- Use `arashi handoff` before pausing non-trivial work, switching agents, requesting review, or leaving dirty coordinated work; include links, validation evidence, remaining tasks, risks, and next commands explicitly.
 - For mutating, expensive, network-heavy, or long-running multi-repo commands, use explicit filters instead of relying on the default all-repository selection. Prefer `--group <group>` for known semantic sets such as `core`, `docs`, `extensions`, `agents`, or `infra`; use `--only <repo>` or a narrow comma-separated list for one-off selections.
 - When both `--group` and `--only` are supplied, Arashi intersects them, so the group narrows the explicit repository list.
 - If you automate teardown on branch removal, use [Hooks](hooks.md).
@@ -38,7 +39,7 @@ Assume Arashi is available unless the user is installing it or a command is not 
 
 When a workflow needs command-specific options, inspect `arashi <command> --help` before recommending or running flags. If your team enforces repository security checks, run them before executing workflows.
 
-When operating as an agent in a meta-repo, start with `arashi doctor --json` for structured workspace health diagnostics, then use `arashi status` for human-readable status as needed. Identify the owning child repository, keep implementation in `repos/<project>/`, keep shared planning in the meta-repo, and validate each affected repo before handoff. Use `arashi exec -- git status --short` for broad inspection, `arashi exec --dirty -- git diff --stat` for changed repositories, `arashi exec --group <group> -- <validation-command>` for known semantic sets, and `arashi exec --only <repo> -- <validation-command>` for targeted one-off validation.
+When operating as an agent in a meta-repo, start with `arashi doctor --json` for structured workspace health diagnostics, then use `arashi status` for human-readable status as needed. Identify the owning child repository, keep implementation in `repos/<project>/`, keep shared planning in the meta-repo, and validate each affected repo before handoff. Use `arashi exec -- git status --short` for broad inspection, `arashi exec --dirty -- git diff --stat` for changed repositories, `arashi exec --group <group> -- <validation-command>` for known semantic sets, and `arashi exec --only <repo> -- <validation-command>` for targeted one-off validation. Before pausing or transferring context, run `arashi handoff` with supplied `--link`, `--validation`, `--todo`, `--risk`, and `--next-command` entries; use `--json` when another agent or script will parse the report.
 
 ## Beginner Workflow
 
