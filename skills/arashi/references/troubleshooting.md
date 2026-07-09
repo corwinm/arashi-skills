@@ -13,13 +13,16 @@ Use this matrix to map symptoms to root cause and a deterministic fix.
 | Repository security checks fail on exception metadata | Exception entry is stale or malformed | Remediate findings or renew exceptions with owner, rationale, and valid expiry metadata. |
 | `arashi init` fails | Directory not writable, unsupported bootstrap target, or wrong starting location | Ensure the directory is writable, run `arashi init` from the intended repository root or parent directory, and use `.` or a direct child directory name when prompted. |
 | `arashi create` fails due to branch conflict | Branch already exists with incompatible worktree state | Use a unique branch name or remove conflicting worktree, then retry. |
-| `arashi remove` reports stale/prunable metadata | Git has a worktree record for a missing directory | Run `arashi prune --dry-run --json` to inspect, then `arashi prune --json` to clean stale metadata. |
+| Workspace health, clone, status, or prune symptoms are unclear | Configuration, repository state, stale worktree metadata, hooks, shell integration, or install/update drift | Run `arashi doctor --json` first and follow the structured finding severities and suggested commands. |
+| `arashi remove` reports stale/prunable metadata | Git has a worktree record for a missing directory | Run `arashi doctor --json` first; if it reports stale metadata, use `arashi prune --dry-run --json` to inspect, then `arashi prune --json` to clean. |
 | `sesh connect` fails | `sesh` missing or tmux not configured | Install/configure sesh and tmux, or use plain `cd` shortcut flow. |
 
 ## Recovery Playbook
 
 1. confirm prerequisites from `references/prerequisites.md`
 2. confirm `arashi --version` succeeds
-3. run your repository's configured security checks
-4. rerun the failing workflow command
-5. verify expected outcomes in `references/workflows.md`
+3. run `arashi doctor --json` for structured, non-mutating workspace health diagnostics
+4. run lower-level follow-up commands such as `arashi status`, `arashi clone`, or `arashi prune --dry-run --json` only when doctor findings or the symptom point to them
+5. run your repository's configured security checks
+6. rerun the failing workflow command
+7. verify expected outcomes in `references/workflows.md`

@@ -13,7 +13,7 @@ Use this catalog to choose the right workflow by goal and confidence level.
 - Beginner: `arashi init` -> `arashi status`
 - Intermediate: `arashi clone --all` -> `arashi create` -> `arashi switch`
 - Advanced: `arashi pull` -> `arashi sync` -> `arashi status` -> `arashi push --set-upstream`
-- Agent inspection/validation: `arashi status` -> `arashi exec -- git status --short` -> `arashi exec --only <repo> -- <validation-command>`
+- Agent inspection/validation: `arashi doctor --json` -> `arashi status` -> `arashi exec -- git status --short` -> `arashi exec --only <repo> -- <validation-command>`
 
 ## Selection Guidance
 
@@ -37,7 +37,7 @@ Assume Arashi is available unless the user is installing it or a command is not 
 
 When a workflow needs command-specific options, inspect `arashi <command> --help` before recommending or running flags. If your team enforces repository security checks, run them before executing workflows.
 
-When operating as an agent in a meta-repo, start with `arashi status`, identify the owning child repository, keep implementation in `repos/<project>/`, keep shared planning in the meta-repo, and validate each affected repo before handoff. Use `arashi exec -- git status --short` for broad inspection, `arashi exec --dirty -- git diff --stat` for changed repositories, and `arashi exec --only <repo> -- <validation-command>` for targeted validation.
+When operating as an agent in a meta-repo, start with `arashi doctor --json` for structured workspace health diagnostics, then use `arashi status` for human-readable status as needed. Identify the owning child repository, keep implementation in `repos/<project>/`, keep shared planning in the meta-repo, and validate each affected repo before handoff. Use `arashi exec -- git status --short` for broad inspection, `arashi exec --dirty -- git diff --stat` for changed repositories, and `arashi exec --only <repo> -- <validation-command>` for targeted validation.
 
 ## Beginner Workflow
 
