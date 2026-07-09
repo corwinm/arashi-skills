@@ -69,6 +69,38 @@ Expected JSON-mode behavior:
 
 Use JSON mode for automation-relevant commands including `add`, `clone`, `create`, `doctor`, `exec`, `init`, `list`, `move`, `prune`, `pull`, `push`, `remove`, `setup`, `status`, `sync`, and `update`.
 
+## Repository Group Filters
+
+Workspaces can declare semantic repository sets with `repos.<name>.groups` arrays in `.arashi/config.json`:
+
+```json
+{
+  "repos": {
+    "arashi": { "path": "repos/arashi", "groups": ["core"] },
+    "arashi-docs": { "path": "repos/arashi-docs", "groups": ["docs"] },
+    "arashi-vscode": { "path": "repos/arashi-vscode", "groups": ["extensions"] },
+    "arashi-skills": { "path": "repos/arashi-skills", "groups": ["agents", "docs"] },
+    "deploy": { "path": "repos/deploy", "groups": ["infra"] }
+  }
+}
+```
+
+Common group names include `core`, `docs`, `extensions`, `agents`, and `infra`. Use `--group <group>` on repo-selecting commands when a known semantic set matches the task better than enumerating repositories with `--only`.
+
+Examples:
+
+```bash
+arashi status --group docs
+arashi create feat/docs-refresh --group docs --no-launch --no-switch
+arashi exec --group docs -- bun run validate
+arashi pull --group infra --json
+arashi setup --group extensions
+arashi sync --group agents
+arashi push --group core --set-upstream --dry-run
+```
+
+`--group` composes with `--only` by intersection. If both are supplied, a repository must match the explicit name filter and belong to at least one requested group. For example, `arashi exec --only arashi,arashi-docs --group docs -- bun run validate` runs only in `arashi-docs` when `arashi-docs` is the only named repository in the `docs` group. Unknown groups and valid filters that produce an empty intersection are reported as selection errors before mutating commands run.
+
 Unsupported launch, shell-code, or interactive modes return a structured error instead of mixing human output into JSON:
 
 ```json
@@ -102,6 +134,9 @@ arashi push --set-upstream
 
 # publish only one affected child repo
 arashi push --only arashi-docs --set-upstream
+
+# publish changed docs repositories only
+arashi push --group docs --set-upstream
 
 # parse push results in automation
 arashi push --set-upstream --json
@@ -198,6 +233,9 @@ arashi exec --dirty -- git diff --stat
 # validate one known repository with structured output for agents/scripts
 arashi exec --only arashi-docs --json -- bun run validate
 
+# validate a known semantic group
+arashi exec --group docs -- bun run validate
+
 # run tests with bounded concurrency and stop scheduling new repos after a failure
 arashi exec --only arashi,arashi-docs --jobs 2 --fail-fast -- bun run test
 
@@ -208,7 +246,8 @@ arashi exec --only arashi -- bun run test -- --watch=false
 Safety guidance for agents:
 
 - Prefer `arashi exec` for repeated multi-repo validation and inspection (`git status --short`, `git diff --stat`, `bun run test`, `bun run lint`, docs validation).
-- Use explicit filters (`--only <repo>` or a narrow comma-separated list) for mutating, expensive, network-heavy, or long-running commands. Do not fan out those commands to every managed repository unless the user asked for all repositories.
+- Use explicit filters for mutating, expensive, network-heavy, or long-running commands. Prefer `--group <group>` for known semantic sets and `--only <repo>` or a narrow comma-separated list for one-off selections. Do not fan out those commands to every managed repository unless the user asked for all repositories.
+- Remember that `--group` intersects with `--only` and narrows the explicit repository list when both are supplied.
 - Use `--dirty` when the command should inspect only repositories with local changes.
 - Keep execution serial by default. Add `--jobs <n>` only when the command is safe to run concurrently and shared resources such as package-manager caches, ports, databases, or generated artifacts will not conflict.
 - Add `--fail-fast` for expensive validation when later repository runs are not useful after the first failure. Already-running jobs may still finish when combined with `--jobs`.
