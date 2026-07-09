@@ -13,12 +13,15 @@ Use this catalog to choose the right workflow by goal and confidence level.
 - Beginner: `arashi init` -> `arashi status`
 - Intermediate: `arashi clone --all` -> `arashi create` -> `arashi switch`
 - Advanced: `arashi pull` -> `arashi sync` -> `arashi status`
+- Agent inspection/validation: `arashi status` -> `arashi exec -- git status --short` -> `arashi exec --only <repo> -- <validation-command>`
 
 ## Selection Guidance
 
 - Start with **Beginner** if this is your first Arashi skill session.
 - Choose **Intermediate** if you already have repositories and need cross-repo branch creation.
 - Choose **Advanced** if you need sync and recovery controls.
+- Use `arashi exec` for repeated non-interactive inspection or validation across managed repositories, especially agent handoff checks.
+- For mutating, expensive, network-heavy, or long-running `arashi exec` child commands, use explicit filters such as `--only <repo>` or a narrow comma-separated list instead of relying on the default all-repository selection.
 - If you automate teardown on branch removal, use [Hooks](hooks.md).
 - If you use tmux/sesh, apply shortcuts from [Session Shortcuts](session-shortcuts.md).
 - For the latest hooks docs, see `https://arashi.haphazard.dev/workflows/hooks/`.
@@ -34,7 +37,7 @@ Assume Arashi is available unless the user is installing it or a command is not 
 
 When a workflow needs command-specific options, inspect `arashi <command> --help` before recommending or running flags. If your team enforces repository security checks, run them before executing workflows.
 
-When operating as an agent in a meta-repo, start with `arashi status`, identify the owning child repository, keep implementation in `repos/<project>/`, keep shared planning in the meta-repo, and validate each affected repo before handoff.
+When operating as an agent in a meta-repo, start with `arashi status`, identify the owning child repository, keep implementation in `repos/<project>/`, keep shared planning in the meta-repo, and validate each affected repo before handoff. Use `arashi exec -- git status --short` for broad inspection, `arashi exec --dirty -- git diff --stat` for changed repositories, and `arashi exec --only <repo> -- <validation-command>` for targeted validation.
 
 ## Beginner Workflow
 

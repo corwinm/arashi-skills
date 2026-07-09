@@ -67,7 +67,7 @@ Expected JSON-mode behavior:
 - command-level failures exit non-zero and include `ok: false`, `command`, `schemaVersion: 1`, `error`, and `warnings`.
 - JSON mode does not prompt; missing selections or confirmations return structured errors such as `INTERACTIVE_INPUT_REQUIRED`.
 
-Use JSON mode for automation-relevant commands including `add`, `clone`, `create`, `init`, `list`, `move`, `prune`, `pull`, `remove`, `setup`, `status`, `sync`, and `update`.
+Use JSON mode for automation-relevant commands including `add`, `clone`, `create`, `exec`, `init`, `list`, `move`, `prune`, `pull`, `remove`, `setup`, `status`, `sync`, and `update`.
 
 Unsupported launch, shell-code, or interactive modes return a structured error instead of mixing human output into JSON:
 
@@ -156,6 +156,44 @@ Expected outcomes:
 - command exits `0` when clone operations succeed
 - already-present repositories are skipped
 - `arashi status` no longer reports missing repository spawn errors
+
+## Multi-Repository Command Execution
+
+Use `arashi exec` when you need to run the same non-interactive inspection or validation command from each selected managed repository. Put the child command after `--`; Arashi options must come before that delimiter, and child command options must come after it.
+
+```bash
+# inspect working-tree changes across selected managed repositories
+arashi exec -- git status --short
+
+# inspect only repositories with local changes
+arashi exec --dirty -- git diff --stat
+
+# validate one known repository with structured output for agents/scripts
+arashi exec --only arashi-docs --json -- bun run validate
+
+# run tests with bounded concurrency and stop scheduling new repos after a failure
+arashi exec --only arashi,arashi-docs --jobs 2 --fail-fast -- bun run test
+
+# pass flags to the child command after the delimiter
+arashi exec --only arashi -- bun run test -- --watch=false
+```
+
+Safety guidance for agents:
+
+- Prefer `arashi exec` for repeated multi-repo validation and inspection (`git status --short`, `git diff --stat`, `bun run test`, `bun run lint`, docs validation).
+- Use explicit filters (`--only <repo>` or a narrow comma-separated list) for mutating, expensive, network-heavy, or long-running commands. Do not fan out those commands to every managed repository unless the user asked for all repositories.
+- Use `--dirty` when the command should inspect only repositories with local changes.
+- Keep execution serial by default. Add `--jobs <n>` only when the command is safe to run concurrently and shared resources such as package-manager caches, ports, databases, or generated artifacts will not conflict.
+- Add `--fail-fast` for expensive validation when later repository runs are not useful after the first failure. Already-running jobs may still finish when combined with `--jobs`.
+- Prefer `--json` when an agent or script needs to parse per-repository stdout, stderr, child exit status, duration, selected repositories, or aggregate totals. Any child command failure makes the `arashi exec` process exit non-zero.
+
+Expected outcomes:
+
+- each child command runs with the selected repository path as its working directory
+- human output is grouped by repository and ends with an aggregate summary
+- `--only` errors for requested repositories that are not configured or locally present
+- `--dirty` exits successfully without running the child command when no dirty repositories match
+- invalid options, missing child command arguments, and invalid `--jobs` values fail before repository commands execute
 
 ## Worktree Switching
 
