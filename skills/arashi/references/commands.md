@@ -67,7 +67,7 @@ Expected JSON-mode behavior:
 - command-level failures exit non-zero and include `ok: false`, `command`, `schemaVersion: 1`, `error`, and `warnings`.
 - JSON mode does not prompt; missing selections or confirmations return structured errors such as `INTERACTIVE_INPUT_REQUIRED`.
 
-Use JSON mode for automation-relevant commands including `add`, `clone`, `create`, `exec`, `init`, `list`, `move`, `prune`, `pull`, `remove`, `setup`, `status`, `sync`, and `update`.
+Use JSON mode for automation-relevant commands including `add`, `clone`, `create`, `exec`, `init`, `list`, `move`, `prune`, `pull`, `push`, `remove`, `setup`, `status`, `sync`, and `update`.
 
 Unsupported launch, shell-code, or interactive modes return a structured error instead of mixing human output into JSON:
 
@@ -88,6 +88,31 @@ Unsupported launch, shell-code, or interactive modes return a structured error i
 ```
 
 When `error.code` is `JSON_UNSUPPORTED_FOR_MODE`, retry with a non-launching or non-interactive mode if available. Otherwise run without `--json` only when the user wants the human-facing action, such as opening an editor, changing a shell, or emitting shell integration code.
+
+## Publishing Coordinated Branches
+
+Use `arashi push` after committing implementation changes and before opening cross-repo PRs.
+
+```bash
+# preview first when publishing a new coordinated branch
+arashi push --set-upstream --dry-run
+
+# publish eligible changed repositories and set upstreams where needed
+arashi push --set-upstream
+
+# publish only one affected child repo
+arashi push --only arashi-docs --set-upstream
+
+# parse push results in automation
+arashi push --set-upstream --json
+```
+
+Expected outcomes:
+
+- changed repositories with publishable local branch commits are pushed
+- clean or intentionally untouched child repositories are skipped with reasons
+- `--dry-run` previews without mutating remotes
+- `--json` emits one envelope with per-repository results, totals, and warnings for skipped repositories
 
 ## Workspace Initialization
 
