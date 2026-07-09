@@ -12,7 +12,7 @@ Use this catalog to choose the right workflow by goal and confidence level.
 
 - Beginner: `arashi init` -> `arashi status`
 - Intermediate: `arashi clone --all` -> `arashi create` -> `arashi switch`
-- Advanced: `arashi pull` -> `arashi sync` -> `arashi status`
+- Advanced: `arashi pull` -> `arashi sync` -> `arashi status` -> `arashi push --set-upstream`
 - Agent inspection/validation: `arashi status` -> `arashi exec -- git status --short` -> `arashi exec --only <repo> -- <validation-command>`
 
 ## Selection Guidance
@@ -81,6 +81,7 @@ Expected outcomes:
 arashi pull
 arashi sync
 arashi status
+arashi push --set-upstream
 ```
 
 Expected outcomes:
@@ -88,5 +89,6 @@ Expected outcomes:
 - Remotes are fetched and local branches update where possible.
 - Sync avoids partial update states.
 - `arashi status` reports clean or actionable next steps.
+- Eligible changed repositories are published before PR creation; untouched child repositories are skipped instead of getting manufactured remote branches.
 
 After completion, confirm the expected outcomes listed for that workflow before moving to another one.
