@@ -35,7 +35,7 @@ jobs:
         run: tar -czf arashi-skill-package.tar.gz skills/ README.md LICENSE security/
 
       - name: Upload skill artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: arashi-skill-package
           path: arashi-skill-package.tar.gz
