@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "description": "Machine-readable coverage policy for top-level Arashi CLI commands. Curated usage guidance remains in references/.",
+  "commands": [
+    { "name": "add", "status": "covered", "reference": "references/commands.md" },
+    { "name": "clone", "status": "covered", "reference": "references/commands.md" },
+    { "name": "create", "status": "covered", "reference": "references/commands.md" },
+    { "name": "doctor", "status": "covered", "reference": "references/commands.md" },
+    { "name": "exec", "status": "covered", "reference": "references/commands.md" },
+    { "name": "handoff", "status": "covered", "reference": "references/commands.md" },
+    {
+      "name": "install",
+      "status": "excluded",
+      "reason": "Bootstrap-only command used by the installer before normal CLI operation; installation guidance is maintained as a platform-aware website flow rather than a runtime skill workflow."
+    },
+    { "name": "init", "status": "covered", "reference": "references/commands.md" },
+    { "name": "list", "status": "covered", "reference": "references/commands.md" },
+    { "name": "move", "status": "covered", "reference": "references/commands.md" },
+    { "name": "prune", "status": "covered", "reference": "references/commands.md" },
+    { "name": "pull", "status": "covered", "reference": "references/commands.md" },
+    { "name": "push", "status": "covered", "reference": "references/commands.md" },
+    { "name": "remove", "status": "covered", "reference": "references/commands.md" },
+    { "name": "setup", "status": "covered", "reference": "references/commands.md" },
+    { "name": "shell", "status": "covered", "reference": "references/commands.md" },
+    { "name": "shell init", "status": "covered", "reference": "references/commands.md" },
+    { "name": "shell install", "status": "covered", "reference": "references/commands.md" },
+    { "name": "status", "status": "covered", "reference": "references/commands.md" },
+    { "name": "switch", "status": "covered", "reference": "references/commands.md" },
+    { "name": "sync", "status": "covered", "reference": "references/commands.md" },
+    { "name": "update", "status": "covered", "reference": "references/commands.md" }
+  ]
+}

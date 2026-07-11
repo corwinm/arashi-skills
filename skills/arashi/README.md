@@ -23,6 +23,12 @@ This directory contains the canonical Arashi skill definition and all supporting
 - `references/publication.md`: Publication policy and readiness gates
 - `assets/cheatsheet.md`: Lightweight reference index
 
+## Command Contract Maintenance
+
+The repository-level `contracts/command-coverage.json` file is synchronized with the CLI's top-level command contract. Every command must have exactly one entry: use `covered` with a valid reference relative to `skills/arashi/`, or `excluded` with a stable, non-empty `reason`. The manifest is intentionally outside `skills/` so installed skills do not ship maintainer-only validation metadata, and it remains separate from the curated prose in `references/`; do not turn the prose into an exhaustive generated command catalog.
+
+`install` is intentionally excluded because it is a bootstrap-only installer command, not a normal post-install workflow. Keep platform-aware installation guidance on the canonical docs site and preserve that rationale in the manifest.
+
 ## Related Docs
 
 - Workflow guides: `https://arashi.haphazard.dev/workflows/`
