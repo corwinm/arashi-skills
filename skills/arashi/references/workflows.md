@@ -42,6 +42,8 @@ When a workflow needs command-specific options, inspect `arashi <command> --help
 
 When operating as an agent in a meta-repo, start with `arashi doctor --json` for structured workspace health diagnostics, then use `arashi status` for human-readable status as needed. Identify the owning child repository, keep implementation in `repos/<project>/`, keep shared planning in the meta-repo, and validate each affected repo before handoff. Use `arashi exec -- git status --short` for broad inspection, `arashi exec --dirty -- git diff --stat` for changed repositories, `arashi exec --group <group> -- <validation-command>` for known semantic sets, and `arashi exec --only <repo> -- <validation-command>` for targeted one-off validation. Before pausing or transferring context, run `arashi handoff` with supplied `--link`, `--validation`, `--todo`, `--risk`, and `--next-command` entries; use `--json` when another agent or script will parse the report.
 
+Expect configured initialization and configuration-backed lifecycle commands (`init`, `pull`, `clone`, `add`, and `create`) to reconcile safe configured repository and worktree directory rules before materialization. Preserve effective rules reported by Git, default missing rules to repository-local excludes, and never change global Git configuration. Use `arashi init --ignore-scope tracked` only for an intentional shared `.gitignore` rule, `--ignore-scope none` only for intentional non-mutation, and `--ignore-scope local` to restore the clone-local default. `init` reconciles before writing `.arashi/config.json`; subsequent lifecycle commands consume that file. Do not treat this as the zero-config behavior tracked by issue #212.
+
 ## Beginner Workflow
 
 Run `arashi init` from one of two valid starting points:
@@ -59,8 +61,9 @@ Expected outcomes:
 - `.arashi/config.json` exists after `arashi init`.
 - `.arashi/config.json` records `worktreesDir` (default `.arashi/worktrees`).
 - bootstrap mode accepts `.` for the current directory and a direct child repository name for child-directory creation.
-- `.gitignore` includes the configured repositories directory.
-- `.gitignore` includes the normalized managed worktree directory entry when using the default location or a safe repository-relative subdirectory.
+- Git checks safe configured `reposDir` and `worktreesDir` paths against all effective ignore sources.
+- missing safe rules default to the repository-local exclude file; tracked `.gitignore` changes only after explicit `--ignore-scope tracked` selection.
+- existing effective tracked, local, or global rules remain unchanged and are not duplicated.
 - `arashi status` prints repository/worktree status without errors.
 
 ## Intermediate Workflow
@@ -73,6 +76,7 @@ arashi switch feature/skill-integration
 
 Expected outcomes:
 
+- Ignore reconciliation completes before missing configured repositories or worktrees are materialized.
 - Missing configured repositories are materialized locally.
 - New worktrees exist for `feature/skill-integration`.
 - `arashi switch` opens the selected worktree in a new terminal context.
@@ -90,6 +94,7 @@ arashi push --set-upstream
 Expected outcomes:
 
 - Remotes are fetched and local branches update where possible.
+- If the selected parent pull changes configured managed paths, Arashi reloads configuration and reconciles those paths before continuing selected child pulls.
 - Sync avoids partial update states.
 - `arashi status` reports clean or actionable next steps.
 - Eligible changed repositories are published before PR creation; untouched child repositories are skipped instead of getting manufactured remote branches.
