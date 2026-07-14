@@ -29,6 +29,7 @@ Use this catalog to choose the right workflow by goal and confidence level.
 - For the latest hooks docs, see `https://arashi.haphazard.dev/workflows/hooks/`.
 - For command defaults and shell-aware switching behavior, see `https://arashi.haphazard.dev/workflows/config/`.
 - For VS Code and VS Code-based editor workflows, see `https://arashi.haphazard.dev/workflows/vscode/`.
+- For cmux workspace launching, requirements, and troubleshooting, see `https://arashi.haphazard.dev/workflows/cmux/`.
 - For tmux and sesh workflows, see `https://arashi.haphazard.dev/workflows/tmux-and-sesh/`.
 - For agent guidance in a meta-repo, see `https://arashi.haphazard.dev/workflows/agents-and-specs/` or fetch the Markdown form at `https://arashi.haphazard.dev/workflows/agents-and-specs.md`.
 - For compact agent context across the docs, start with `https://arashi.haphazard.dev/llms.txt`; use `https://arashi.haphazard.dev/llms-full.txt` for a broader Markdown export.

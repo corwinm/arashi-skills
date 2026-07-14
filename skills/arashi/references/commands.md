@@ -323,6 +323,11 @@ arashi switch --no-default-launch
 Expected outcomes:
 
 - command exits `0` and opens the selected target in a new context
+- in a cmux-managed terminal, automatic launch creates and focuses a cmux workspace at the exact selected worktree
+- Arashi recognizes cmux from a non-empty `CMUX_WORKSPACE_ID` or `CMUX_SURFACE_ID`; `CMUX_SOCKET_PATH` alone does not activate cmux behavior
+- cmux launch requires cmux v0.64.18 or newer, the `cmux workspace create` command, and local socket access
+- cmux command, socket, malformed JSON, or missing workspace identifier failures return `LAUNCH_FAILED` without opening standalone Ghostty
+- explicit IDE or sesh launch choices keep precedence, and an active tmux session nested inside cmux keeps tmux behavior
 - `arashi switch --cd` changes the current shell directory when invoked through the installed shell wrapper
 - `--repos` matches repository names first (exact match preferred)
 - `--repos` with no matches lists available child repositories
@@ -381,6 +386,17 @@ Use `arashi shell install` to enable parent-shell switching for bash, zsh, or fi
 
 Precedence for create/switch launch behavior is: explicit flag > opt-out flag > config default > built-in default.
 For `switch`, IDE-integrated terminals also prefer the matching IDE launcher when no explicit override is provided.
+For cmux, both `switch` launch behavior and `create --launch` use the same automatic workspace launcher. If worktree creation succeeds but cmux launch fails, preserve the created worktrees, report the launch error, and do not claim the context opened successfully.
+
+### cmux troubleshooting and agent safety
+
+- Do not invent or export `CMUX_WORKSPACE_ID` / `CMUX_SURFACE_ID` to force cmux behavior; run from an actual cmux-managed terminal.
+- Do not treat `CMUX_SOCKET_PATH` alone as proof of an active cmux terminal.
+- Verify the required CLI contract with `cmux workspace create --help`; update to cmux v0.64.18 or newer if the namespaced command, `--cwd`, `--focus`, or `--json` is unavailable.
+- If cmux reports socket access failure, check that access is not **Off**. The default **cmux processes only** mode is sufficient for an Arashi process launched inside cmux.
+- Treat `LAUNCH_FAILED` as a real failed launch. Do not retry by opening Ghostty manually unless the user asks for a different terminal.
+- For unattended agent workflows, continue to use `--no-launch --no-switch`; automatic cmux launching is interactive user-facing behavior.
+- Canonical workflow reference: `https://arashi.haphazard.dev/workflows/cmux/`.
 
 ## Remove Cleanup Hooks
 
