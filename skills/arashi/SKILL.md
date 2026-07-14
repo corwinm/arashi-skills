@@ -55,6 +55,9 @@ Assume Arashi is already installed unless the user is installing it or a command
 - For broad Markdown context, use the full export: https://arashi.haphazard.dev/llms-full.txt.
 - Use `arashi --help` and `arashi <command> --help` when current command parameters are needed.
 - Prefer `arashi doctor --json` for structured workspace health diagnostics before lower-level `status`, `prune`, or `clone` troubleshooting.
+- In configured workspaces, expect `init`, `pull`, `clone`, `add`, and `create` to reconcile safe repository and worktree directory ignore rules through Git. The default scope is repository-local; preserve any existing effective tracked, local, or global rule.
+- Use `arashi init --ignore-scope tracked` only for an intentional team-visible `.gitignore` rule, or `--ignore-scope none` for explicit non-mutation. Never create or modify global Git ignore configuration for Arashi.
+- Do not infer configured-workspace ignore reconciliation for zero-config operation; configless workspace behavior remains separate under issue #212.
 - Prefer `--json` for parsed command output, and handle `JSON_UNSUPPORTED_FOR_MODE` as a structured refusal for launch, shell-code, or interactive modes.
 - Use `arashi exec` for repeated non-interactive multi-repo inspection or validation; prefer `--group <group>` for known semantic sets and use explicit `--only` filters for one-off repository lists.
 - For mutating, expensive, network-heavy, or long-running multi-repo commands, apply an explicit `--group` or `--only` filter unless the user asked for every managed repository.

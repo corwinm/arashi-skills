@@ -66,6 +66,8 @@ Expected JSON-mode behavior:
 - success envelopes include `ok: true`, `command`, `schemaVersion: 1`, command-specific `data`, and `warnings`.
 - command-level failures exit non-zero and include `ok: false`, `command`, `schemaVersion: 1`, `error`, and `warnings`.
 - JSON mode does not prompt; missing selections or confirmations return structured errors such as `INTERACTIVE_INPUT_REQUIRED`.
+- configured `init`, `pull`, `clone`, `add`, and `create` results include managed-ignore inspection or reconciliation details in their existing envelope, including effective scope, sources, per-path status, planned or applied changes, warnings, unsafe skips, and final changed state.
+- `arashi doctor --json` reports managed-ignore problems as stable diagnostic findings rather than repairing them.
 
 Use JSON mode for automation-relevant commands including `add`, `clone`, `create`, `doctor`, `exec`, `handoff`, `init`, `list`, `move`, `prune`, `pull`, `push`, `remove`, `setup`, `status`, `sync`, and `update`.
 
@@ -214,14 +216,54 @@ Use a custom worktree base directory:
 arashi init --worktrees-dir ./workspace-worktrees
 ```
 
+Choose an explicit clone-local ignore preference only when the repository-local default is not appropriate:
+
+```bash
+# write missing managed-directory rules to the workspace-root .gitignore
+arashi init --ignore-scope tracked
+
+# do not write ignore files; report unignored managed paths instead
+arashi init --ignore-scope none
+
+# restore the repository-local default in an existing configured workspace
+arashi init --ignore-scope local
+```
+
 Expected outcomes:
 
 - `.arashi/config.json` includes `reposDir` and `worktreesDir`.
 - default `worktreesDir` is `.arashi/worktrees` when the option is omitted.
 - bootstrap mode accepts only `.` or a direct child directory name.
-- `.gitignore` always includes the configured repositories directory.
-- `.gitignore` auto-includes the normalized managed worktree directory entry when using the default location or a safe repository-relative subdirectory.
-- `.gitignore` skips auto-adding worktree entries for `.` and parent-traversal (`../`) `worktreesDir` values.
+- safe configured repository and worktree directories are checked against Git's effective tracked, repository-local, and global ignore sources before any write.
+- with no explicit or stored preference, missing rules are added to the repository-local exclude file resolved by Git; tracked `.gitignore` is unchanged.
+- `tracked` and `none` are stored in clone-local Git state, not shared `.arashi/config.json`; selecting `local` clears the non-default preference.
+- `arashi init --ignore-scope local` can reset only the preference and reconcile an existing valid workspace without `--force` or reinitializing configuration, hooks, or repositories.
+- existing effective rules are honored without duplication even when their source differs from the selected scope.
+- repository root, absolute paths, and parent traversal are reported as unsafe and are never added automatically.
+- Arashi never creates or modifies global Git configuration or a global excludes file.
+
+## Managed Ignore Reconciliation
+
+Configured initialization and configuration-backed lifecycle commands reconcile the safe normalized `reposDir` and `worktreesDir` rules before they materialize or continue work that depends on those paths. This applies to `init`, `pull`, `clone`, `add`, and `create`. A fresh clone with no stored preference defaults to the repository-local Git exclude file and does not unexpectedly dirty tracked `.gitignore`.
+
+Command boundaries:
+
+- `init` reconciles before creating managed directories and is the command that selects `local`, `tracked`, or `none` with `--ignore-scope`.
+- `pull` uses the current configuration, and when the selected parent pull changes configuration, reloads it and reconciles the resulting paths before continuing with the re-evaluated child selection. It does not pull an excluded parent solely for reconciliation or implicitly clone a newly configured missing child.
+- `clone` reconciles before creating a configured repository path.
+- `add` reconciles before changing configuration and cloning into `reposDir`.
+- `create` reconciles before creating parent or child worktrees.
+
+Expected outcomes:
+
+- Git's existing effective tracked, repository-local, or global rule wins; Arashi does not add a duplicate rule or rewrite user-authored content.
+- `local` writes only Arashi-owned rules to the common repository's local exclude file; `tracked` writes only Arashi-owned rules to workspace-root `.gitignore`.
+- `none` leaves ignore files untouched and warns about safe paths that remain unignored.
+- repeated lifecycle commands are idempotent, and command rollback reports whether reconciliation was attempted, retained, restored, or could not be restored based on final filesystem state.
+- human output explains warnings; JSON-capable modes keep stdout to one JSON document and place details under the command's managed-ignore result.
+- after configured initialization, lifecycle commands use `.arashi/config.json`; `init` itself reconciles before writing that file. This contract does not implement the separate zero-config standalone behavior tracked by issue #212.
+
+Run `arashi doctor --json` to inspect missing rules, stale Arashi-owned entries, invalid stored scope, or unsafe configured paths without mutation. Follow its suggested repair; use `arashi init --ignore-scope local` to restore the default when that is the intended preference. Do not repair Arashi by setting `core.excludesFile` or editing any global Git configuration.
 
 ## Repository Cloning and Recovery
 
@@ -240,6 +282,7 @@ arashi clone --all
 Expected outcomes:
 
 - command exits `0` when clone operations succeed
+- managed ignore state is reconciled before a missing repository path is materialized
 - already-present repositories are skipped
 - `arashi status` no longer reports missing repository spawn errors
 

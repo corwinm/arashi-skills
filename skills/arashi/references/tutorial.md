@@ -75,7 +75,8 @@ Success criteria:
 - `.arashi/config.json` exists after `arashi init`
 - `.arashi/config.json` includes `worktreesDir` (default `.arashi/worktrees`)
 - the repository target prompt accepts `.` for the current directory and a simple child name for child-directory bootstrap
-- `.gitignore` includes the normalized managed worktree directory entry when using the default location or a safe repository-relative subdirectory
+- safe configured repository and worktree directories are effectively ignored; missing rules default to the repository-local exclude file rather than tracked `.gitignore`
+- existing effective tracked, repository-local, or global rules are honored without duplication, and Arashi never writes global Git configuration
 - `arashi status` prints repository/worktree status without errors
 
 ## Step 5: Optional Session Shortcut Flow
