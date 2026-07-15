@@ -36,7 +36,7 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 3. Update `skills/arashi/SKILL.md` only when skill routing, operating policy, or reference links change.
 4. Include expected outcomes for every workflow or troubleshooting instruction.
 5. Keep skill references self-contained under `skills/arashi/`.
-6. Keep `contracts/command-coverage.json` aligned with every top-level CLI command. This repository-level validation metadata is deliberately outside `skills/` so it is not shipped as part of the installed skill. Record normal skill coverage with a skill-relative reference, every intentional exclusion with a stable reason, and each command's standalone support classification; `install` remains excluded because it is bootstrap-only.
+6. Keep `contracts/command-coverage.json` aligned with every top-level CLI command. This repository-level validation metadata is deliberately outside `skills/` so it is not shipped as part of the installed skill. Record normal skill coverage with a skill-relative reference, every intentional exclusion with a stable reason, and each command's standalone support classification. Keep the complete `init --zero-config` dry-run, JSON, compatible-option, and incompatible-option policy synchronized with the CLI contract; `install` remains excluded because it is bootstrap-only.
 
 ## Canonical Commands
 

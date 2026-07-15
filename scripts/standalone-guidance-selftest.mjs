@@ -194,7 +194,21 @@ function validateCoverageContract() {
     }
   }
 
-  assert.deepEqual(commands.get("init")?.requiredOptions, ["--zero-config"]);
+  const init = commands.get("init");
+  assert.deepEqual(init?.requiredOptions, ["--zero-config"]);
+  assert.deepEqual(init?.standalone?.policy, {
+    option: "--zero-config",
+    dryRun: true,
+    json: true,
+    compatibleOptions: ["--dry-run", "--json", "--verbose"],
+    incompatibleOptions: [
+      "--force",
+      "--ignore-scope",
+      "--no-discover",
+      "--repos-dir",
+      "--worktrees-dir"
+    ]
+  });
 }
 
 function main() {

@@ -14,7 +14,23 @@
       "reason": "Bootstrap-only command used by the installer before normal CLI operation; installation guidance is maintained as a platform-aware website flow rather than a runtime skill workflow.",
       "standalone": { "support": "not-applicable", "reason": "CLI installation does not resolve an Arashi workspace." }
     },
-    { "name": "init", "status": "covered", "reference": "references/commands.md", "requiredOptions": ["--zero-config"], "standalone": { "support": "conditional", "reason": "The --zero-config mode prepares standalone state; ordinary init creates configured mode." } },
+    {
+      "name": "init",
+      "status": "covered",
+      "reference": "references/commands.md",
+      "requiredOptions": ["--zero-config"],
+      "standalone": {
+        "support": "conditional",
+        "reason": "The --zero-config mode prepares standalone state; ordinary init creates configured mode.",
+        "policy": {
+          "option": "--zero-config",
+          "dryRun": true,
+          "json": true,
+          "compatibleOptions": ["--dry-run", "--json", "--verbose"],
+          "incompatibleOptions": ["--force", "--ignore-scope", "--no-discover", "--repos-dir", "--worktrees-dir"]
+        }
+      }
+    },
     { "name": "list", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "supported" } },
     { "name": "move", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "supported" } },
     { "name": "prune", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "supported" } },
