@@ -4,6 +4,7 @@ Use this catalog to choose the right workflow by goal and confidence level.
 
 | Workflow | Difficulty | User Goal |
 |----------|------------|-----------|
+| Standalone | Beginner | Manage worktrees for one existing repository without persisted Arashi configuration |
 | Beginner | Beginner | Initialize a workspace and inspect current status |
 | Intermediate | Intermediate | Clone missing repositories and create a feature branch across worktrees |
 | Advanced | Advanced | Recover from branch drift and synchronize repositories safely |
@@ -13,11 +14,13 @@ Use this catalog to choose the right workflow by goal and confidence level.
 - Beginner: `arashi init` -> `arashi status`
 - Intermediate: `arashi clone --all` -> `arashi create` -> `arashi switch`
 - Advanced: `arashi pull` -> `arashi sync` -> `arashi status` -> `arashi push --set-upstream`
+- Ad hoc in an unconfigured project: `arashi init --zero-config` -> `arashi create <branch>` -> `arashi list` -> `arashi status`
 - Agent inspection/validation/handoff: `arashi doctor --json` -> `arashi status` -> `arashi exec -- git status --short` -> `arashi exec --group <group> -- <validation-command>` or `arashi exec --only <repo> -- <validation-command>` -> `arashi handoff --link <issue-or-pr> --validation "<command> — <result>"`
 
 ## Selection Guidance
 
-- Start with **Beginner** if this is your first Arashi skill session.
+- Start with **Standalone** for one normal non-bare repository when child-repository coordination or persisted customization is not needed.
+- Start with **Beginner** configured mode when the workflow needs child repositories, groups, hooks, defaults, custom managed paths, or coordinated commands.
 - Choose **Intermediate** if you already have repositories and need cross-repo branch creation.
 - Choose **Advanced** if you need sync and recovery controls.
 - Use `arashi exec` for repeated non-interactive inspection or validation across managed repositories, especially agent handoff checks.
@@ -42,7 +45,42 @@ When a workflow needs command-specific options, inspect `arashi <command> --help
 
 When operating as an agent in a meta-repo, start with `arashi doctor --json` for structured workspace health diagnostics, then use `arashi status` for human-readable status as needed. Identify the owning child repository, keep implementation in `repos/<project>/`, keep shared planning in the meta-repo, and validate each affected repo before handoff. Use `arashi exec -- git status --short` for broad inspection, `arashi exec --dirty -- git diff --stat` for changed repositories, `arashi exec --group <group> -- <validation-command>` for known semantic sets, and `arashi exec --only <repo> -- <validation-command>` for targeted one-off validation. Before pausing or transferring context, run `arashi handoff` with supplied `--link`, `--validation`, `--todo`, `--risk`, and `--next-command` entries; use `--json` when another agent or script will parse the report.
 
-Expect configured initialization and configuration-backed lifecycle commands (`init`, `pull`, `clone`, `add`, and `create`) to reconcile safe configured repository and worktree directory rules before materialization. Preserve effective rules reported by Git, default missing rules to repository-local excludes, and never change global Git configuration. Use `arashi init --ignore-scope tracked` only for an intentional shared `.gitignore` rule, `--ignore-scope none` only for intentional non-mutation, and `--ignore-scope local` to restore the clone-local default. `init` reconciles before writing `.arashi/config.json`; subsequent lifecycle commands consume that file. Do not treat this as the zero-config behavior tracked by issue #212.
+Expect configured initialization and configuration-backed lifecycle commands (`init`, `pull`, `clone`, `add`, and `create`) to reconcile safe configured repository and worktree directory rules before materialization. Preserve effective rules reported by Git, default missing rules to repository-local excludes, and never change global Git configuration. Use `arashi init --ignore-scope tracked` only for an intentional shared `.gitignore` rule, `--ignore-scope none` only for intentional non-mutation, and `--ignore-scope local` to restore the clone-local default. `init` reconciles before writing `.arashi/config.json`; subsequent lifecycle commands consume that file. Standalone bootstrap instead owns only the literal `.worktrees/` local-exclude rule and never writes configuration.
+
+## Standalone Repository Workflow
+
+Prefer configured mode whenever a project can adopt Arashi—even for one repository—because it enables repository/workspace hooks, persisted defaults, and custom paths. Use zero-config standalone mode for ad hoc work in an existing non-bare Git project that has not adopted Arashi configuration. From either the main worktree or a linked worktree, Arashi resolves the main worktree as the workspace and repository root. The root-level `.worktrees/` directory is the discovery trigger; passive discovery does not create it or repair ignore state.
+
+Preferred explicit bootstrap:
+
+```bash
+arashi init --zero-config
+```
+
+This creates the main-root `.worktrees/` directory and, only when needed, appends the literal `.worktrees/` rule to the common repository's `info/exclude`. It does not create `.arashi/`, edit tracked `.gitignore`, or create or modify global Git configuration.
+
+Run the supported lifecycle:
+
+```bash
+branch=feature/skill-integration
+destination=".worktrees/$branch"
+git check-ignore --no-index -q -- "$destination" || {
+  printf 'error: %s is not effectively ignored\n' "$destination" >&2
+  exit 1
+}
+arashi create feature/skill-integration --no-launch --no-switch
+arashi list
+arashi status
+arashi switch feature/skill-integration
+arashi remove feature/skill-integration --dry-run
+arashi remove feature/skill-integration
+```
+
+Standalone worktrees use `.worktrees/<branch>` exactly, so `feature/skill-integration` maps to `.worktrees/feature/skill-integration` without a repository-name prefix. Before any create mutation, including dry-run planning, Arashi requires the exact planned destination to be effectively ignored.
+
+Standalone mode also supports `arashi prune`, `arashi doctor`, `arashi move`, and `arashi handoff`. Main-worktree and linked-worktree invocations operate on the same sole repository. Repository coordination remains configured-only: use ordinary `arashi init` before `add`, `clone`, `sync`, `pull`, `push`, `exec`, or `setup`. Repository/group selection such as `create --only`, `create --group`, `status --group`, interactive multi-repository selection, and `switch --repos` or `switch --all` is meaningless in standalone mode and fails rather than silently broadening or narrowing scope.
+
+Upgrade at any time with ordinary `arashi init` when child coordination, groups, local/workspace hooks, persisted defaults, or custom managed paths are needed. Existing `.worktrees/` and local exclude state are ordinary Git state; review the configured initialization plan before adopting a different worktree layout.
 
 ## Beginner Workflow
 

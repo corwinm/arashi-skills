@@ -31,7 +31,16 @@ cp .arashi/hooks/pre-remove.sh.example ~/.arashi/hooks/<repo>/pre-remove.sh
 Before enabling hooks, review script contents and ensure commands are safe for their scope.
 Only use hook scripts from trusted repositories and verify file provenance before making scripts executable.
 
-## Hook Order
+## Standalone Mode
+
+Prefer configured mode when a project can adopt Arashi and needs repository-local or workspace-root hooks. Zero-config standalone mode is for ad hoc use and does not create or activate those `.arashi/hooks` scopes; existing user-global hooks remain applicable:
+
+1. `~/.arashi/hooks/<main-root-basename>/<lifecycle>.sh`
+2. `~/.arashi/hooks/<lifecycle>.sh`
+
+Arashi uses the main-root basename as the stable targeted identity and runs applicable user-global hooks with the main repository as the working directory, whether invoked from the main worktree or a linked worktree. Existing pre-operation gating, post-operation finalization, failure reporting, and rollback behavior still apply. Do not create local configured hooks as part of zero-config bootstrap; use ordinary `arashi init` before adding those scopes.
+
+## Configured Mode Hook Order
 
 For each targeted repository, remove hooks run in order:
 

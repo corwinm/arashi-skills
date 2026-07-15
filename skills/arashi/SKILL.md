@@ -1,7 +1,7 @@
 ---
 name: arashi
 display_name: Arashi Worktree Orchestration
-description: Guided workflows for managing multi-repository feature branches with Arashi.
+description: Guided configured worktree coordination with Arashi, plus ad hoc use in unconfigured projects.
 version: 0.2.1
 repository: https://github.com/corwinm/arashi-skills
 owner: corwinm
@@ -15,9 +15,10 @@ entry_commands:
   verify_arashi: arashi --version
   discover_commands: arashi --help
   workflows:
-    beginner: arashi init && arashi status
+    configured: arashi init && arashi status
     intermediate: arashi clone --all && arashi create <branch> && arashi switch <branch>
     advanced: arashi pull && arashi sync
+    standalone: arashi init --zero-config && arashi status
   session_shortcuts:
     list: arashi list
     switch: arashi switch
@@ -27,7 +28,7 @@ status: draft
 
 # Arashi Skill
 
-Guidance for helping users manage multi-repository feature branches and worktrees with the `arashi` CLI.
+Guidance for coordinating feature branches and worktrees across configured meta-repositories with the `arashi` CLI, while allowing ad hoc use in projects that have not adopted Arashi.
 
 ## Common Requests
 
@@ -55,9 +56,11 @@ Assume Arashi is already installed unless the user is installing it or a command
 - For broad Markdown context, use the full export: https://arashi.haphazard.dev/llms-full.txt.
 - Use `arashi --help` and `arashi <command> --help` when current command parameters are needed.
 - Prefer `arashi doctor --json` for structured workspace health diagnostics before lower-level `status`, `prune`, or `clone` troubleshooting.
+- Prefer configured mode whenever a project can adopt Arashi, including single-repository projects that need repository/workspace hooks, persisted defaults, or custom paths.
+- Choose ordinary `arashi init` for child repositories, groups, local/workspace hooks, persisted defaults, custom managed paths, or coordinated commands; follow the configured guidance in [Commands](references/commands.md).
+- Use zero-config standalone mode for ad hoc work in a non-bare Git project that has not adopted Arashi configuration; follow the [Standalone Repository Workflow](references/workflows.md). Passive discovery does not repair ignore coverage, and bootstrap must not automatically edit tracked `.gitignore` or global Git configuration.
 - In configured workspaces, expect `init`, `pull`, `clone`, `add`, and `create` to reconcile safe repository and worktree directory ignore rules through Git. The default scope is repository-local; preserve any existing effective tracked, local, or global rule.
 - Use `arashi init --ignore-scope tracked` only for an intentional team-visible `.gitignore` rule, or `--ignore-scope none` for explicit non-mutation. Never create or modify global Git ignore configuration for Arashi.
-- Do not infer configured-workspace ignore reconciliation for zero-config operation; configless workspace behavior remains separate under issue #212.
 - Prefer `--json` for parsed command output, and handle `JSON_UNSUPPORTED_FOR_MODE` as a structured refusal for launch, shell-code, or interactive modes.
 - Use `arashi exec` for repeated non-interactive multi-repo inspection or validation; prefer `--group <group>` for known semantic sets and use explicit `--only` filters for one-off repository lists.
 - For mutating, expensive, network-heavy, or long-running multi-repo commands, apply an explicit `--group` or `--only` filter unless the user asked for every managed repository.
@@ -88,3 +91,4 @@ Assume Arashi is already installed unless the user is installing it or a command
 - tmux and sesh guide: https://arashi.haphazard.dev/workflows/tmux-and-sesh/
 - Agents guide: https://arashi.haphazard.dev/workflows/agents-and-specs/
 - Agents guide Markdown: https://arashi.haphazard.dev/workflows/agents-and-specs.md
+- Standalone workflow: https://arashi.haphazard.dev/workflows/standalone/

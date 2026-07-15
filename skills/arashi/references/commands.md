@@ -177,7 +177,28 @@ Expected outcomes:
 
 ## Workspace Initialization
 
-Run `arashi init` from an existing repository root, or from a non-repository parent directory when you want Arashi to create the repository during setup.
+Prefer configured mode whenever a project can adopt Arashi, including a single repository that needs repository/workspace hooks, persisted defaults, or custom paths. Choose initialization by workspace mode:
+
+- Use ordinary `arashi init` for configured child repositories, groups, hooks, defaults, custom managed paths, or coordinated commands.
+- Use `arashi init --zero-config` for ad hoc work in an existing non-bare Git project that has not adopted Arashi, using the fixed root-level `.worktrees/<branch>` layout.
+
+Preview or automate standalone bootstrap without changing its local-only policy:
+
+```bash
+arashi init --zero-config --dry-run
+arashi init --zero-config --json
+arashi init --zero-config --dry-run --json
+```
+
+Zero-config init accepts its mode flag plus `--dry-run`, `--verbose`, and `--json`; do not combine it with configured-init options such as `--repos-dir`, `--worktrees-dir`, `--ignore-scope`, `--force`, or `--no-discover`. It creates no `.arashi/config.json`, does not edit tracked `.gitignore`, and does not create or modify global Git configuration. If no effective rule already covers the deterministic probe, it adds only the literal `.worktrees/` rule to the repository-local exclude file resolved by Git. Dry-run plans the same directory and rule actions without writes; JSON mode emits one structured envelope.
+
+Passive standalone discovery requires an existing main-root `.worktrees/` directory and never repairs missing ignore coverage. `create`, including `create --dry-run`, checks the exact planned destination before mutation. A branch named `feature/auth` therefore requires `.worktrees/feature/auth` to be effectively ignored and is created at that exact path. To independently check the same gate from the main root, run `branch=feature/auth`, `destination=".worktrees/$branch"`, then `git check-ignore --no-index -q -- "$destination"` and require exit status `0` before creating.
+
+Supported standalone lifecycle commands are `create`, `list`, `status`, `switch`, `remove`, `prune`, `doctor`, `move`, and `handoff`. Invoking them from the main worktree or a linked worktree resolves the same sole main repository. Repository or group filters on these commands, including `create --only`, `create --group`, `status --group`, interactive multi-repository selection, and `switch --repos` or `switch --all`, have no standalone meaning and fail clearly.
+
+The child-coordination commands `add`, `clone`, `sync`, `pull`, `push`, `exec`, and `setup` are configured-only. Run ordinary `arashi init` to upgrade before using them; do not interpret an empty repository map as a successful no-op.
+
+For configured mode, run `arashi init` from an existing repository root, or from a non-repository parent directory when you want Arashi to create the repository during setup.
 
 Initialize an existing repository with defaults:
 
@@ -261,7 +282,7 @@ Expected outcomes:
 - `none` leaves ignore files untouched and warns about safe paths that remain unignored.
 - repeated lifecycle commands are idempotent, and command rollback reports whether reconciliation was attempted, retained, restored, or could not be restored based on final filesystem state.
 - human output explains warnings; JSON-capable modes keep stdout to one JSON document and place details under the command's managed-ignore result.
-- after configured initialization, lifecycle commands use `.arashi/config.json`; `init` itself reconciles before writing that file. This contract does not implement the separate zero-config standalone behavior tracked by issue #212.
+- after configured initialization, lifecycle commands use `.arashi/config.json`; `init` itself reconciles before writing that file. Zero-config standalone bootstrap is a separate local-only path described above.
 
 Run `arashi doctor --json` to inspect missing rules, stale Arashi-owned entries, invalid stored scope, or unsafe configured paths without mutation. Follow its suggested repair; use `arashi init --ignore-scope local` to restore the default when that is the intended preference. Do not repair Arashi by setting `core.excludesFile` or editing any global Git configuration.
 

@@ -2,31 +2,48 @@
   "schemaVersion": 1,
   "description": "Machine-readable coverage policy for top-level Arashi CLI commands. Curated usage guidance remains in references/.",
   "commands": [
-    { "name": "add", "status": "covered", "reference": "references/commands.md" },
-    { "name": "clone", "status": "covered", "reference": "references/commands.md" },
-    { "name": "create", "status": "covered", "reference": "references/commands.md" },
-    { "name": "doctor", "status": "covered", "reference": "references/commands.md" },
-    { "name": "exec", "status": "covered", "reference": "references/commands.md" },
-    { "name": "handoff", "status": "covered", "reference": "references/commands.md" },
+    { "name": "add", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "configured-only", "reason": "Adding child repositories requires persisted workspace configuration." } },
+    { "name": "clone", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "configured-only", "reason": "Cloning child repositories requires a persisted repository map." } },
+    { "name": "create", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "supported" } },
+    { "name": "doctor", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "supported" } },
+    { "name": "exec", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "configured-only", "reason": "Cross-repository execution requires persisted repository selection." } },
+    { "name": "handoff", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "supported" } },
     {
       "name": "install",
       "status": "excluded",
-      "reason": "Bootstrap-only command used by the installer before normal CLI operation; installation guidance is maintained as a platform-aware website flow rather than a runtime skill workflow."
+      "reason": "Bootstrap-only command used by the installer before normal CLI operation; installation guidance is maintained as a platform-aware website flow rather than a runtime skill workflow.",
+      "standalone": { "support": "not-applicable", "reason": "CLI installation does not resolve an Arashi workspace." }
     },
-    { "name": "init", "status": "covered", "reference": "references/commands.md" },
-    { "name": "list", "status": "covered", "reference": "references/commands.md" },
-    { "name": "move", "status": "covered", "reference": "references/commands.md" },
-    { "name": "prune", "status": "covered", "reference": "references/commands.md" },
-    { "name": "pull", "status": "covered", "reference": "references/commands.md" },
-    { "name": "push", "status": "covered", "reference": "references/commands.md" },
-    { "name": "remove", "status": "covered", "reference": "references/commands.md" },
-    { "name": "setup", "status": "covered", "reference": "references/commands.md" },
-    { "name": "shell", "status": "covered", "reference": "references/commands.md" },
-    { "name": "shell init", "status": "covered", "reference": "references/commands.md" },
-    { "name": "shell install", "status": "covered", "reference": "references/commands.md" },
-    { "name": "status", "status": "covered", "reference": "references/commands.md" },
-    { "name": "switch", "status": "covered", "reference": "references/commands.md" },
-    { "name": "sync", "status": "covered", "reference": "references/commands.md" },
-    { "name": "update", "status": "covered", "reference": "references/commands.md" }
+    {
+      "name": "init",
+      "status": "covered",
+      "reference": "references/commands.md",
+      "requiredOptions": ["--zero-config"],
+      "standalone": {
+        "support": "conditional",
+        "reason": "The --zero-config mode prepares standalone state; ordinary init creates configured mode.",
+        "policy": {
+          "option": "--zero-config",
+          "dryRun": true,
+          "json": true,
+          "compatibleOptions": ["--dry-run", "--json", "--verbose"],
+          "incompatibleOptions": ["--force", "--ignore-scope", "--no-discover", "--repos-dir", "--worktrees-dir"]
+        }
+      }
+    },
+    { "name": "list", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "supported" } },
+    { "name": "move", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "supported" } },
+    { "name": "prune", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "supported" } },
+    { "name": "pull", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "configured-only", "reason": "Coordinated repository pulling requires persisted repository selection." } },
+    { "name": "push", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "configured-only", "reason": "Coordinated repository publishing requires persisted repository selection." } },
+    { "name": "remove", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "supported" } },
+    { "name": "setup", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "configured-only", "reason": "Repository setup scripts require persisted child-repository configuration." } },
+    { "name": "shell", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "not-applicable", "reason": "Shell integration management does not resolve an Arashi workspace." } },
+    { "name": "shell init", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "not-applicable", "reason": "Shell integration output does not resolve an Arashi workspace." } },
+    { "name": "shell install", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "not-applicable", "reason": "Shell integration installation does not resolve an Arashi workspace." } },
+    { "name": "status", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "supported" } },
+    { "name": "switch", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "supported" } },
+    { "name": "sync", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "configured-only", "reason": "Cross-repository synchronization requires persisted repository configuration." } },
+    { "name": "update", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "not-applicable", "reason": "CLI updates do not resolve an Arashi workspace." } }
   ]
 }

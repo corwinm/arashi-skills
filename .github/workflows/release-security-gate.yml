@@ -23,6 +23,13 @@ jobs:
       - name: Run security gate
         run: node scripts/security-gate.mjs --root . --exceptions security/audit-exceptions.json
 
+      - name: Run security gate self-test
+        run: node scripts/security-gate-selftest.mjs
+
+      - name: Validate standalone source guidance and command coverage
+        run: |
+          node scripts/standalone-guidance-selftest.mjs
+
   package-skill:
     runs-on: ubuntu-latest
     needs:
@@ -31,8 +38,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
       - name: Create skill artifact
         run: tar -czf arashi-skill-package.tar.gz skills/ README.md LICENSE security/
+
+      - name: Validate packaged standalone guidance
+        run: |
+          mkdir package-check
+          tar -xzf arashi-skill-package.tar.gz -C package-check
+          node scripts/standalone-guidance-selftest.mjs --skill-root package-check/skills/arashi
 
       - name: Upload skill artifact
         uses: actions/upload-artifact@v7
