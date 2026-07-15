@@ -30,4 +30,3 @@ jobs:
       - name: Validate standalone guidance source and package boundary
         run: |
           node scripts/standalone-guidance-selftest.mjs
-          node scripts/manual-bootstrap-selftest.mjs

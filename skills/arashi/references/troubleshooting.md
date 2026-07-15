@@ -12,7 +12,7 @@ Use this matrix to map symptoms to root cause and a deterministic fix.
 | `arashi --version` exits immediately or returns `137` | Installed binary is invalid for the current platform or a published release artifact is bad | For npm installs, run `arashi install` once to refresh the platform binary; otherwise reinstall using a pinned version from the website guide, verify `arashi --version`, and report the bad release artifact. |
 | Repository security checks fail on exception metadata | Exception entry is stale or malformed | Remediate findings or renew exceptions with owner, rationale, and valid expiry metadata. |
 | `arashi init` fails | Directory not writable, unsupported bootstrap target, or wrong starting location | Ensure the directory is writable, run `arashi init` from the intended repository root or parent directory, and use `.` or a direct child directory name when prompted. |
-| Standalone `arashi create` reports that the exact `.worktrees/<branch>` destination is not ignored | The root convention exists, but Git's effective tracked, repository-local, or existing global rules do not cover this branch destination | Run `arashi init --zero-config`, or manually append the literal `.worktrees/` rule to the repository-local exclude returned by `git rev-parse --git-path info/exclude`; then verify the exact destination with `git check-ignore --no-index`. Do not automatically edit tracked `.gitignore` or global Git configuration. |
+| Standalone `arashi create` reports that the exact `.worktrees/<branch>` destination is not ignored | The root convention exists, but Git's effective tracked, repository-local, or existing global rules do not cover this branch destination | Run `arashi init --zero-config`, then verify the exact destination with `git check-ignore --no-index`. Do not automatically edit tracked `.gitignore`, a global excludes file, or global Git configuration. |
 | A repository has `.worktrees/`, but ignore coverage remains missing | Passive discovery does not repair standalone bootstrap state | Run `arashi init --zero-config` to repair the repository-local exclude, then rerun `arashi doctor --json`. |
 | A standalone command rejects child repositories, groups, or coordination | `add`, `clone`, `sync`, `pull`, `push`, `exec`, and `setup`, plus repository/group selectors, require persisted configured state | Upgrade with ordinary `arashi init`; do not treat standalone mode as an empty configured workspace. |
 | Managed repository or worktree paths appear as untracked, or managed ignore state may be stale | A safe configured path lacks an effective rule, an Arashi-owned entry is stale, or `none` is selected | Run `arashi doctor --json` and follow its non-mutating finding. If repository-local management is intended, run `arashi init --ignore-scope local`; rerun doctor to verify. |
@@ -35,7 +35,7 @@ destination=".worktrees/$branch"
 git check-ignore --no-index -v -- "$destination"
 ```
 
-If it exits non-zero, run `arashi init --zero-config` or add the literal `.worktrees/` rule to the repository-local exclude returned by `git rev-parse --git-path info/exclude`. Do not automatically edit tracked `.gitignore`, a global excludes file, or global Git configuration.
+If it exits non-zero, run `arashi init --zero-config`. Do not automatically edit tracked `.gitignore`, a global excludes file, or global Git configuration.
 
 ## Recovery Playbook
 
