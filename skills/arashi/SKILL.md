@@ -1,7 +1,7 @@
 ---
 name: arashi
 display_name: Arashi Worktree Orchestration
-description: Guided standalone and configured workflows for managing Git worktrees with Arashi.
+description: Guided meta-repository worktree coordination with Arashi, plus optional standalone support.
 version: 0.2.1
 repository: https://github.com/corwinm/arashi-skills
 owner: corwinm
@@ -15,10 +15,10 @@ entry_commands:
   verify_arashi: arashi --version
   discover_commands: arashi --help
   workflows:
-    standalone: arashi init --zero-config && arashi status
     configured: arashi init && arashi status
     intermediate: arashi clone --all && arashi create <branch> && arashi switch <branch>
     advanced: arashi pull && arashi sync
+    standalone: arashi init --zero-config && arashi status
   session_shortcuts:
     list: arashi list
     switch: arashi switch
@@ -28,7 +28,7 @@ status: draft
 
 # Arashi Skill
 
-Guidance for helping users manage standalone and multi-repository feature branches and worktrees with the `arashi` CLI.
+Guidance for coordinating feature branches and worktrees across configured meta-repositories with the `arashi` CLI, with an optional standalone path for one repository.
 
 ## Common Requests
 
@@ -56,8 +56,9 @@ Assume Arashi is already installed unless the user is installing it or a command
 - For broad Markdown context, use the full export: https://arashi.haphazard.dev/llms-full.txt.
 - Use `arashi --help` and `arashi <command> --help` when current command parameters are needed.
 - Prefer `arashi doctor --json` for structured workspace health diagnostics before lower-level `status`, `prune`, or `clone` troubleshooting.
-- Choose zero-config standalone mode for one non-bare repository with no `.arashi/config.json`; follow the [Standalone Repository Workflow](references/workflows.md). Passive discovery does not repair ignore coverage, and bootstrap must not automatically edit tracked `.gitignore` or global Git configuration.
+- Treat configured meta-repository coordination as Arashi's primary workflow.
 - Choose configured mode and ordinary `arashi init` for child repositories, groups, local/workspace hooks, persisted defaults, custom managed paths, or coordinated commands; follow the configured guidance in [Commands](references/commands.md).
+- Use zero-config standalone mode only as a convenience for one non-bare repository with no `.arashi/config.json`; follow the [Standalone Repository Workflow](references/workflows.md). Passive discovery does not repair ignore coverage, and bootstrap must not automatically edit tracked `.gitignore` or global Git configuration.
 - In configured workspaces, expect `init`, `pull`, `clone`, `add`, and `create` to reconcile safe repository and worktree directory ignore rules through Git. The default scope is repository-local; preserve any existing effective tracked, local, or global rule.
 - Use `arashi init --ignore-scope tracked` only for an intentional team-visible `.gitignore` rule, or `--ignore-scope none` for explicit non-mutation. Never create or modify global Git ignore configuration for Arashi.
 - Prefer `--json` for parsed command output, and handle `JSON_UNSUPPORTED_FOR_MODE` as a structured refusal for launch, shell-code, or interactive modes.
@@ -84,10 +85,10 @@ Assume Arashi is already installed unless the user is installing it or a command
 - LLM entrypoint: https://arashi.haphazard.dev/llms.txt
 - Full Markdown export: https://arashi.haphazard.dev/llms-full.txt
 - Workflow guides: https://arashi.haphazard.dev/workflows/
-- Standalone workflow: https://arashi.haphazard.dev/workflows/standalone/
 - Hooks guide: https://arashi.haphazard.dev/workflows/hooks/
 - Config guide: https://arashi.haphazard.dev/workflows/config/
 - VS Code guide: https://arashi.haphazard.dev/workflows/vscode/
 - tmux and sesh guide: https://arashi.haphazard.dev/workflows/tmux-and-sesh/
 - Agents guide: https://arashi.haphazard.dev/workflows/agents-and-specs/
 - Agents guide Markdown: https://arashi.haphazard.dev/workflows/agents-and-specs.md
+- Standalone workflow: https://arashi.haphazard.dev/workflows/standalone/
