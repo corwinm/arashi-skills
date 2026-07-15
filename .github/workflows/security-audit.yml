@@ -28,4 +28,6 @@ jobs:
         run: node scripts/security-gate-selftest.mjs
 
       - name: Validate standalone guidance source and package boundary
-        run: node scripts/standalone-guidance-selftest.mjs
+        run: |
+          node scripts/standalone-guidance-selftest.mjs
+          node scripts/manual-bootstrap-selftest.mjs

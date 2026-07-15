@@ -27,7 +27,9 @@ jobs:
         run: node scripts/security-gate-selftest.mjs
 
       - name: Validate standalone source guidance and command coverage
-        run: node scripts/standalone-guidance-selftest.mjs
+        run: |
+          node scripts/standalone-guidance-selftest.mjs
+          node scripts/manual-bootstrap-selftest.mjs
 
   package-skill:
     runs-on: ubuntu-latest
@@ -50,6 +52,7 @@ jobs:
           mkdir package-check
           tar -xzf arashi-skill-package.tar.gz -C package-check
           node scripts/standalone-guidance-selftest.mjs --skill-root package-check/skills/arashi
+          node scripts/manual-bootstrap-selftest.mjs --skill-root package-check/skills/arashi
 
       - name: Upload skill artifact
         uses: actions/upload-artifact@v7
