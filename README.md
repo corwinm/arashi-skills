@@ -36,7 +36,7 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 3. Update `skills/arashi/SKILL.md` only when skill routing, operating policy, or reference links change.
 4. Include expected outcomes for every workflow or troubleshooting instruction.
 5. Keep skill references self-contained under `skills/arashi/`.
-6. Keep `contracts/command-coverage.json` aligned with every top-level CLI command. This repository-level validation metadata is deliberately outside `skills/` so it is not shipped as part of the installed skill. Record normal skill coverage with a skill-relative reference, and every intentional exclusion with a stable reason; `install` remains excluded because it is bootstrap-only.
+6. Keep `contracts/command-coverage.json` aligned with every top-level CLI command. This repository-level validation metadata is deliberately outside `skills/` so it is not shipped as part of the installed skill. Record normal skill coverage with a skill-relative reference, every intentional exclusion with a stable reason, and each command's standalone support classification; `install` remains excluded because it is bootstrap-only.
 
 ## Canonical Commands
 
@@ -65,6 +65,9 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 ## Security Compliance
 
 - Canonical gate command: `node scripts/security-gate.mjs --root . --exceptions security/audit-exceptions.json`
+- Security gate self-test: `node scripts/security-gate-selftest.mjs`
+- Standalone source/package coverage: `node scripts/standalone-guidance-selftest.mjs`
+- Cross-repository command contracts: `(cd ../.. && pnpm contracts:check)`
 - Policy and thresholds: `security/policy.md`
 - Baseline findings and remediation tracking: `security/baseline-findings.md`
 - Exception metadata file: `security/audit-exceptions.json`
