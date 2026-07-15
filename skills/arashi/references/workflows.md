@@ -14,7 +14,7 @@ Use this catalog to choose the right workflow by goal and confidence level.
 - Beginner: `arashi init` -> `arashi status`
 - Intermediate: `arashi clone --all` -> `arashi create` -> `arashi switch`
 - Advanced: `arashi pull` -> `arashi sync` -> `arashi status` -> `arashi push --set-upstream`
-- Standalone convenience: `arashi init --zero-config` -> `arashi create <branch>` -> `arashi list` -> `arashi status`
+- Ad hoc in an unconfigured project: `arashi init --zero-config` -> `arashi create <branch>` -> `arashi list` -> `arashi status`
 - Agent inspection/validation/handoff: `arashi doctor --json` -> `arashi status` -> `arashi exec -- git status --short` -> `arashi exec --group <group> -- <validation-command>` or `arashi exec --only <repo> -- <validation-command>` -> `arashi handoff --link <issue-or-pr> --validation "<command> — <result>"`
 
 ## Selection Guidance
@@ -49,7 +49,7 @@ Expect configured initialization and configuration-backed lifecycle commands (`i
 
 ## Standalone Repository Workflow
 
-Arashi's primary workflow coordinates branches and worktrees across repositories in a configured meta-repo. Use zero-config standalone mode only as a narrower convenience for one existing non-bare Git repository with no `.arashi/config.json`. From either the main worktree or a linked worktree, Arashi resolves the main worktree as the workspace and repository root. The root-level `.worktrees/` directory is the discovery trigger; passive discovery does not create it or repair ignore state.
+Prefer configured mode whenever a project can adopt Arashi—even for one repository—because it enables repository/workspace hooks, persisted defaults, and custom paths. Use zero-config standalone mode for ad hoc work in an existing non-bare Git project that has not adopted Arashi configuration. From either the main worktree or a linked worktree, Arashi resolves the main worktree as the workspace and repository root. The root-level `.worktrees/` directory is the discovery trigger; passive discovery does not create it or repair ignore state.
 
 Preferred explicit bootstrap:
 

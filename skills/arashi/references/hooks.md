@@ -33,7 +33,7 @@ Only use hook scripts from trusted repositories and verify file provenance befor
 
 ## Standalone Mode
 
-Zero-config standalone mode does not create or activate repository-local or workspace-root `.arashi/hooks` scopes; those hooks are not active without configured mode. Existing user-global hooks remain applicable:
+Prefer configured mode when a project can adopt Arashi and needs repository-local or workspace-root hooks. Zero-config standalone mode is for ad hoc use and does not create or activate those `.arashi/hooks` scopes; existing user-global hooks remain applicable:
 
 1. `~/.arashi/hooks/<main-root-basename>/<lifecycle>.sh`
 2. `~/.arashi/hooks/<lifecycle>.sh`

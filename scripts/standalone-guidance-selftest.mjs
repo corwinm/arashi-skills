@@ -21,7 +21,9 @@ const requirements = new Map([
     [
       "zero-config standalone",
       "arashi init --zero-config",
-      "one non-bare repository",
+      "non-bare Git project",
+      "ad hoc work",
+      "Prefer configured mode",
       "configured mode",
       "child repositories",
       "tracked `.gitignore`",
@@ -99,12 +101,14 @@ const requirements = new Map([
     "references/hooks.md",
     [
       "standalone mode",
+      "Prefer configured mode",
+      "ad hoc use",
       "user-global",
       "main-root basename",
       "main repository",
       "repository-local",
       "workspace-root",
-      "not active"
+      "does not create or activate"
     ]
   ]
 ]);
@@ -121,12 +125,12 @@ function validateSkill(root, label) {
   }
 
   const workflow = readFileSync(join(root, "references", "workflows.md"), "utf8");
-  const standalonePosition = workflow.indexOf("## Standalone Repository Workflow");
-  const configuredPosition = workflow.indexOf("## Beginner Workflow");
-  assert.ok(standalonePosition >= 0, `${label} is missing the standalone workflow heading`);
+  const configuredPosition = workflow.indexOf("- Beginner: `arashi init`");
+  const standalonePosition = workflow.indexOf("- Ad hoc in an unconfigured project:");
+  assert.ok(standalonePosition >= 0, `${label} is missing the ad hoc standalone workflow route`);
   assert.ok(
-    configuredPosition >= 0 && standalonePosition < configuredPosition,
-    `${label} must prioritize standalone guidance before configured beginner guidance`
+    configuredPosition >= 0 && configuredPosition < standalonePosition,
+    `${label} must prioritize configured guidance before ad hoc standalone guidance`
   );
 
   const allGuidance = [...requirements.keys()]

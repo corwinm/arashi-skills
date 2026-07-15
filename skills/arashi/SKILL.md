@@ -1,7 +1,7 @@
 ---
 name: arashi
 display_name: Arashi Worktree Orchestration
-description: Guided meta-repository worktree coordination with Arashi, plus optional standalone support.
+description: Guided configured worktree coordination with Arashi, plus ad hoc use in unconfigured projects.
 version: 0.2.1
 repository: https://github.com/corwinm/arashi-skills
 owner: corwinm
@@ -28,7 +28,7 @@ status: draft
 
 # Arashi Skill
 
-Guidance for coordinating feature branches and worktrees across configured meta-repositories with the `arashi` CLI, with an optional standalone path for one repository.
+Guidance for coordinating feature branches and worktrees across configured meta-repositories with the `arashi` CLI, while allowing ad hoc use in projects that have not adopted Arashi.
 
 ## Common Requests
 
@@ -56,9 +56,9 @@ Assume Arashi is already installed unless the user is installing it or a command
 - For broad Markdown context, use the full export: https://arashi.haphazard.dev/llms-full.txt.
 - Use `arashi --help` and `arashi <command> --help` when current command parameters are needed.
 - Prefer `arashi doctor --json` for structured workspace health diagnostics before lower-level `status`, `prune`, or `clone` troubleshooting.
-- Treat configured meta-repository coordination as Arashi's primary workflow.
-- Choose configured mode and ordinary `arashi init` for child repositories, groups, local/workspace hooks, persisted defaults, custom managed paths, or coordinated commands; follow the configured guidance in [Commands](references/commands.md).
-- Use zero-config standalone mode only as a convenience for one non-bare repository with no `.arashi/config.json`; follow the [Standalone Repository Workflow](references/workflows.md). Passive discovery does not repair ignore coverage, and bootstrap must not automatically edit tracked `.gitignore` or global Git configuration.
+- Prefer configured mode whenever a project can adopt Arashi, including single-repository projects that need repository/workspace hooks, persisted defaults, or custom paths.
+- Choose ordinary `arashi init` for child repositories, groups, local/workspace hooks, persisted defaults, custom managed paths, or coordinated commands; follow the configured guidance in [Commands](references/commands.md).
+- Use zero-config standalone mode for ad hoc work in a non-bare Git project that has not adopted Arashi configuration; follow the [Standalone Repository Workflow](references/workflows.md). Passive discovery does not repair ignore coverage, and bootstrap must not automatically edit tracked `.gitignore` or global Git configuration.
 - In configured workspaces, expect `init`, `pull`, `clone`, `add`, and `create` to reconcile safe repository and worktree directory ignore rules through Git. The default scope is repository-local; preserve any existing effective tracked, local, or global rule.
 - Use `arashi init --ignore-scope tracked` only for an intentional team-visible `.gitignore` rule, or `--ignore-scope none` for explicit non-mutation. Never create or modify global Git ignore configuration for Arashi.
 - Prefer `--json` for parsed command output, and handle `JSON_UNSUPPORTED_FOR_MODE` as a structured refusal for launch, shell-code, or interactive modes.

@@ -177,10 +177,10 @@ Expected outcomes:
 
 ## Workspace Initialization
 
-Configured meta-repository coordination is Arashi's primary workflow. Choose initialization by workspace mode:
+Prefer configured mode whenever a project can adopt Arashi, including a single repository that needs repository/workspace hooks, persisted defaults, or custom paths. Choose initialization by workspace mode:
 
 - Use ordinary `arashi init` for configured child repositories, groups, hooks, defaults, custom managed paths, or coordinated commands.
-- Use `arashi init --zero-config` as an optional convenience for one existing non-bare repository using the fixed root-level `.worktrees/<branch>` layout.
+- Use `arashi init --zero-config` for ad hoc work in an existing non-bare Git project that has not adopted Arashi, using the fixed root-level `.worktrees/<branch>` layout.
 
 Preview or automate standalone bootstrap without changing its local-only policy:
 
