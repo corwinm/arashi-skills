@@ -29,6 +29,7 @@ Use this catalog to choose the right workflow by goal and confidence level.
 - When both `--group` and `--only` are supplied, Arashi intersects them, so the group narrows the explicit repository list.
 - If you automate teardown on branch removal, use [Hooks](hooks.md).
 - If you use tmux/sesh, apply shortcuts from [Session Shortcuts](session-shortcuts.md).
+- For Herdr workspace launch, reuse, ownership boundaries, and cleanup guidance, see `https://arashi.haphazard.dev/workflows/herdr/` and [Session Shortcuts](session-shortcuts.md).
 - For the latest hooks docs, see `https://arashi.haphazard.dev/workflows/hooks/`.
 - For command defaults and shell-aware switching behavior, see `https://arashi.haphazard.dev/workflows/config/`.
 - For VS Code and VS Code-based editor workflows, see `https://arashi.haphazard.dev/workflows/vscode/`.
@@ -119,6 +120,20 @@ Expected outcomes:
 - New worktrees exist for `feature/skill-integration`.
 - `arashi switch` opens the selected worktree in a new terminal context.
 - Use `arashi switch --help` to confirm current editor launch flags before choosing an IDE-specific switch option.
+
+## Optional Herdr Workspace Launch
+
+Use this flow when Herdr is installed with the verified v0.7.4 command contract and its default session/server is reachable:
+
+```bash
+arashi switch --herdr feature/skill-integration
+# or create first and launch the primary worktree afterward
+arashi create feature/skill-integration --herdr
+```
+
+Configured `launchMode: "herdr"` selects the same launcher outside a Herdr pane. With no explicit or configured launcher, trimmed `HERDR_ENV=1` enables automatic detection after automatic tmux and before cmux, IDE, or terminal fallbacks. Arashi resolves the repository's non-bare main checkout as the Herdr source, opens only the existing selected worktree, labels it `<repo-name>: <branch-name>`, and treats an already-open workspace as successful reuse.
+
+Arashi alone owns Git worktree creation and removal. A Herdr launch failure after `create` leaves every successfully created worktree intact, and `arashi remove` does not close Herdr workspaces. If cleanup is desired, resolve the workspace ID while the checkout still exists and opt into a pre-remove hook that runs `herdr workspace close <workspace-id>`; never use `herdr worktree remove` as Arashi cleanup.
 
 ## Advanced Workflow
 

@@ -1,4 +1,4 @@
-# Session Shortcuts (fzf, tmux, sesh)
+# Session Shortcuts (fzf, tmux, sesh, Herdr)
 
 Use these optional shortcuts to move quickly between Arashi worktrees.
 
@@ -7,6 +7,7 @@ Use these optional shortcuts to move quickly between Arashi worktrees.
 - `arashi` installed and on `PATH`
 - `fzf` installed for interactive selection
 - `sesh` installed for tmux session management (optional)
+- Herdr installed with the verified v0.7.4 command contract and its default session/server reachable (optional)
 
 ## Safe Worktree Selection
 
@@ -38,6 +39,7 @@ arashi switch --cd feature-auth
 arashi switch --repos docs
 arashi switch --all
 arashi switch --cursor feature-auth
+arashi switch --herdr feature-auth
 arashi switch --no-default-launch
 ```
 
@@ -46,6 +48,15 @@ arashi switch --no-default-launch
 ```bash
 arashi switch --sesh
 ```
+
+## Open or Reuse a Herdr Workspace
+
+```bash
+arashi switch --herdr feature-auth
+arashi create feature-auth --herdr
+```
+
+`--herdr` explicitly selects Herdr even outside a Herdr-managed pane. Without an explicit or configured launcher, Arashi automatically selects Herdr only when trimmed `HERDR_ENV` is exactly `1`; automatic tmux still takes precedence. Herdr opens the existing Arashi-created worktree with the label `<repo-name>: <branch-name>` and focuses the same workspace when it is already open.
 
 ## Optional Keybinds
 
@@ -59,5 +70,7 @@ Avoid command-substitution keybinds that execute unsanitized output directly.
 - `arashi switch --cd` changes the current shell directory when shell integration is active.
 - `arashi switch --vscode|--cursor|--kiro` forces that IDE for one switch invocation.
 - `arashi switch --sesh` creates or switches via sesh in tmux.
+- `arashi switch --herdr` opens or focuses the selected existing worktree in Herdr.
+- `arashi create <branch> --herdr` creates worktrees first, then opens the primary worktree in Herdr.
 - if shell integration is inactive, `arashi switch --cd` warns and falls back to launch behavior.
 - `arashi switch --no-default-launch` bypasses configured switch launch defaults for one run.
