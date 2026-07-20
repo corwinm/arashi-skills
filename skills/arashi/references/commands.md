@@ -419,7 +419,7 @@ Use command defaults in `.arashi/config.json` to control post-create switch/laun
       "launchMode": "herdr"
     },
     "switch": {
-      "mode": "auto",
+      "mode": "launch",
       "launchMode": "herdr"
     }
   }
