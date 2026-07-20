@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "canonicalField": "defaults.switch.mode",
+  "modes": [
+    "auto",
+    "cd",
+    "launch",
+    "sesh",
+    "herdr"
+  ],
+  "absentMode": "launch",
+  "autoOrder": [
+    "tmux",
+    "herdr",
+    "cmux",
+    "ide",
+    "cd",
+    "platform"
+  ],
+  "legacyFields": [
+    "defaults.switch.launchMode",
+    "defaults.switch.launch_mode"
+  ],
+  "createDefaultsUnchanged": true
+}
