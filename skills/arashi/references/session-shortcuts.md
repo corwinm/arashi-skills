@@ -40,6 +40,7 @@ arashi switch --repos docs
 arashi switch --all
 arashi switch --cursor feature-auth
 arashi switch --herdr feature-auth
+arashi switch --no-cd
 arashi switch --no-default-launch
 ```
 
@@ -56,7 +57,7 @@ arashi switch --herdr feature-auth
 arashi create feature-auth --herdr
 ```
 
-`--herdr` explicitly selects Herdr even outside a Herdr-managed pane. Without an explicit or configured launcher, Arashi automatically selects Herdr only when trimmed `HERDR_ENV` is exactly `1`; automatic tmux still takes precedence. Herdr opens the existing Arashi-created worktree with the label `<repo-name>: <branch-name>` and focuses the same workspace when it is already open.
+`--herdr` explicitly selects Herdr even outside a Herdr-managed pane. Automatic contextual resolution follows tmux → Herdr → cmux → integrated IDE → parent-shell `cd` → terminal/platform fallback. Herdr is selected automatically only when trimmed `HERDR_ENV` is exactly `1` and tmux is not active. Herdr opens the existing Arashi-created worktree with the label `<repo-name>: <branch-name>` and focuses the same workspace when it is already open.
 
 ## Optional Keybinds
 
@@ -72,5 +73,6 @@ Avoid command-substitution keybinds that execute unsanitized output directly.
 - `arashi switch --sesh` creates or switches via sesh in tmux.
 - `arashi switch --herdr` opens or focuses the selected existing worktree in Herdr.
 - `arashi create <branch> --herdr` creates worktrees first, then opens the primary worktree in Herdr.
-- if shell integration is inactive, `arashi switch --cd` warns and falls back to launch behavior.
-- `arashi switch --no-default-launch` bypasses configured switch launch defaults for one run.
+- if shell integration is inactive, explicit `arashi switch --cd` warns without launching another context; configured `mode: "cd"` warns and falls back to automatic launch.
+- `arashi switch --no-cd` forces launch for one run and retains a configured explicit `sesh` or `herdr` mode.
+- `arashi switch --no-default-launch` bypasses a configured explicit `sesh` or `herdr` mode for one run, but does not erase configured `auto`, `cd`, or `launch` behavior.

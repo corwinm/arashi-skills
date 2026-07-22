@@ -30,3 +30,6 @@ jobs:
       - name: Validate standalone guidance source and package boundary
         run: |
           node scripts/standalone-guidance-selftest.mjs
+
+      - name: Validate unified switch-mode guidance
+        run: node scripts/switch-mode-guidance-selftest.mjs

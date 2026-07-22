@@ -131,7 +131,7 @@ arashi switch --herdr feature/skill-integration
 arashi create feature/skill-integration --herdr
 ```
 
-Configured `launchMode: "herdr"` selects the same launcher outside a Herdr pane. With no explicit or configured launcher, trimmed `HERDR_ENV=1` enables automatic detection after automatic tmux and before cmux, IDE, or terminal fallbacks. Arashi resolves the repository's non-bare main checkout as the Herdr source, opens only the existing selected worktree, labels it `<repo-name>: <branch-name>`, and treats an already-open workspace as successful reuse.
+Configured `defaults.switch.mode: "herdr"` selects the same launcher outside a Herdr pane. Automatic launcher selection checks tmux → Herdr → cmux → integrated IDE before terminal/platform fallback. Contextual `defaults.switch.mode: "auto"` uses parent-shell `cd` only after those managed contexts and before fallback; `mode: "launch"` skips the `cd` preference. Arashi resolves the repository's non-bare main checkout as the Herdr source, opens only the existing selected worktree, labels it `<repo-name>: <branch-name>`, and treats an already-open workspace as successful reuse.
 
 Arashi alone owns Git worktree creation and removal. A Herdr launch failure after `create` leaves every successfully created worktree intact, and `arashi remove` does not close Herdr workspaces. If cleanup is desired, resolve the workspace ID while the checkout still exists and opt into a pre-remove hook that runs `herdr workspace close <workspace-id>`; never use `herdr worktree remove` as Arashi cleanup.
 
