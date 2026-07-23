@@ -89,12 +89,12 @@ function validateSkill(root, label) {
   );
   assert.match(
     commands,
-    /create[^\n]*`launchMode`[^\n]*`auto`, `sesh`, and `herdr`/i,
+    /defaults\.create\.launch[^\n]*`none`, `auto`, `sesh`, and `herdr`/,
     `${label} must keep the configured create launch vocabulary unchanged`
   );
   assert.doesNotMatch(
     commands,
-    /"mode"\s*:\s*"tmux"|"launchMode"\s*:\s*"tmux"/i,
+    /"mode"\s*:\s*"tmux"|"launch"\s*:\s*"tmux"|"launchMode"\s*:\s*"tmux"/i,
     `${label} must not advertise tmux as a persisted mode`
   );
 }

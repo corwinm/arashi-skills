@@ -104,8 +104,14 @@ Workspaces can declare semantic repository sets with `repos.<name>.groups` array
   "repos": {
     "arashi": { "path": "repos/arashi", "groups": ["core"] },
     "arashi-docs": { "path": "repos/arashi-docs", "groups": ["docs"] },
-    "arashi-vscode": { "path": "repos/arashi-vscode", "groups": ["extensions"] },
-    "arashi-skills": { "path": "repos/arashi-skills", "groups": ["agents", "docs"] },
+    "arashi-vscode": {
+      "path": "repos/arashi-vscode",
+      "groups": ["extensions"]
+    },
+    "arashi-skills": {
+      "path": "repos/arashi-skills",
+      "groups": ["agents", "docs"]
+    },
     "deploy": { "path": "repos/deploy", "groups": ["infra"] }
   }
 }
@@ -423,8 +429,15 @@ Use command defaults in `.arashi/config.json` to control post-create behavior an
   "defaults": {
     "create": {
       "switch": true,
-      "launch": true,
-      "launchMode": "herdr"
+      "launch": "herdr"
+    },
+    "editors": {
+      "vscode": {
+        "create": {
+          "switch": false,
+          "launch": "auto"
+        }
+      }
     },
     "switch": {
       "mode": "auto"
@@ -433,6 +446,10 @@ Use command defaults in `.arashi/config.json` to control post-create behavior an
 }
 ```
 
+For `defaults.create.launch`, choose `none`, `auto`, `sesh`, or `herdr`. Omitting it has the built-in `none` behavior. The independent `switch` boolean still opts into or out of post-create selection, but launch implies switch: resolving `auto`, `sesh`, or `herdr` always selects the newly created primary worktree even when `switch` is false or `--no-switch` is present. Conversely, `launch: "none"` does not suppress an independently enabled switch.
+
+Scope create defaults to the invocation host. Terminal invocations use only `defaults.create`. Editor-hosted invocations use only `defaults.editors.<host>.create` for the matching `vscode`, `cursor`, or `kiro` host and do not fall back to generic defaults or another editor host when that scope is absent. Implicit standalone create has no configured defaults and continues to use explicit flags only.
+
 For `defaults.switch.mode`, choose exactly one of `auto`, `cd`, `launch`, `sesh`, and `herdr`:
 
 - `auto` prefers strictly detected managed contexts in the order tmux → Herdr → cmux → integrated IDE, then uses parent-shell `cd` when shell integration is active, and otherwise continues to terminal application/platform fallback.
@@ -440,18 +457,23 @@ For `defaults.switch.mode`, choose exactly one of `auto`, `cd`, `launch`, `sesh`
 - `launch` always enters automatic launcher selection and does not prefer `cd`.
 - `sesh` and `herdr` choose that explicit launcher regardless of detected context or shell integration.
 
-`defaults.create` remains unchanged: its independent `switch`, `launch`, and `launchMode` fields still control post-create behavior. Editor-scoped create defaults also retain their independent launch fields.
-
-Use one-off CLI overrides when you want a single `arashi create` run to differ from configured defaults, such as launching immediately or skipping the post-create switch. Common examples include:
+Use one-off CLI overrides when one `arashi create` run should differ from its matching configured scope:
 
 ```bash
 arashi create feature-auth --launch
 arashi create feature-auth --tmux
+arashi create feature-auth --sesh
 arashi create feature-auth --herdr
 arashi create feature-auth --no-launch
 arashi create feature-auth --no-switch
 arashi create feature-auth --move-changes
 ```
+
+Create launch precedence is `--sesh` or `--herdr` > `--launch` > `--no-launch` > matching configured `launch` > built-in `none`. An explicit launcher implies launch even with `--no-launch`; simultaneous `--sesh` and `--herdr` is rejected before repository discovery or mutation. `--no-launch` suppresses a configured launcher when no explicit launcher is present. Switch precedence is resolved independently before launch-implies-switch is applied.
+
+Configured launch is unsupported with `create --json`: resolved `auto`, `sesh`, or `herdr` returns one structured unsupported-mode error before repository discovery or worktree mutation, just like explicit launch flags. Resolved `none` may continue through normal non-interactive JSON create, with stdout remaining exactly one JSON document.
+
+Automatic launch preserves the existing tmux → Herdr → cmux → integrated IDE → terminal/platform selection and strict environment checks. Explicit `sesh` or `herdr` bypasses automatic context detection. Launch runs only after successful creation; launcher validation or process failure preserves every successfully created worktree, reports creation separately from launch failure, and does not fall back to another launcher. Paths and labels remain distinct process arguments rather than shell-interpolated command text.
 
 If work starts before the right coordinated worktree exists, move compatible uncommitted edits into the target workspace:
 
@@ -469,6 +491,7 @@ Expected outcomes:
 - `arashi create <branch> --json` includes dirty-workspace guidance as structured data, not human text.
 - `arashi create <branch> --move-changes` moves compatible staged, unstaged, and untracked changes after successful worktree creation.
 - `arashi move` refuses dirty target repositories and reports recovery commands if a stash-backed transfer needs manual recovery.
+
 Use `arashi shell install` to enable parent-shell switching for bash, zsh, or fish, or `arashi shell init <shell>` for manual setup.
 
 Precedence for create/switch launch behavior is: explicit flag > opt-out flag > config default > built-in default. `--tmux` is a per-invocation-only override: configured `auto` remains the persistent contextual path to plain tmux. In zero-config standalone and configured repositories alike, explicit tmux requires a non-empty trimmed `TMUX` and does not fall back after prerequisite or process failure.
@@ -477,12 +500,23 @@ For switch, `--tmux` conflicts with `--cd` and any explicit launcher in `--sesh`
 
 Both `switch --json --tmux` and `create --json --tmux` return one structured `JSON_UNSUPPORTED_FOR_MODE` document before context validation, conflicts, launch, hooks, or repository mutation. Switch retains its `launch` mode label; create retains its `interactive-or-launch` mode label. A missing tmux context therefore creates nothing. A `tmux new-window` process failure after successful create preserves successfully created worktrees and does not try another launcher.
 
-The configured vocabularies do not gain `tmux`: `defaults.switch.mode` still accepts only `auto`, `cd`, `launch`, `sesh`, and `herdr`, while create `launchMode` still accepts only `auto`, `sesh`, and `herdr`. Configured `auto` can continue choosing plain tmux contextually.
+The configured vocabularies do not gain `tmux`: `defaults.switch.mode` still accepts only `auto`, `cd`, `launch`, `sesh`, and `herdr`, while `defaults.create.launch` still accepts only `none`, `auto`, `sesh`, and `herdr`. Configured `auto` can continue choosing plain tmux contextually.
 
-For switch, `--no-cd` forces launch while preserving a configured explicit launcher. `--no-default-launch` bypasses only configured `sesh` or `herdr`; it leaves configured `auto`, `cd`, and `launch` behavior intact.
-Explicit `create --herdr` implies launch and takes precedence over `--no-launch`; `--no-launch` still suppresses configured Herdr when `--herdr` is absent. Do not combine create `--herdr` with `--sesh`, switch `--herdr` with `--sesh` or an IDE launcher, or either Herdr flag with `--json`.
-For automatic switch launch, Arashi checks tmux → Herdr → cmux → integrated IDE before terminal application/platform fallback. Contextual `auto` inserts parent-shell `cd` after those managed contexts and before the terminal/platform fallback; plain `launch` does not prefer `cd`.
-For cmux, both `switch` launch behavior and `create --launch` use the same automatic workspace launcher. If worktree creation succeeds but cmux launch fails, preserve the created worktrees, report the launch error, and do not claim the context opened successfully.
+For switch, `--no-cd` forces launch while preserving a configured explicit launcher. `--no-default-launch` bypasses only configured `sesh` or `herdr`; it leaves configured `auto`, `cd`, and `launch` behavior intact. Do not combine switch `--herdr` with `--sesh` or an IDE launcher, or either Herdr flag with `--json`.
+
+### Legacy create-default migration
+
+Canonical create examples use one string `launch` value. During the bounded compatibility window, Arashi still reads legacy boolean `launch` plus `launchMode` and `launch_mode` at generic and editor-hosted create scopes. Accepted legacy input is normalized only in memory, emits one scope-qualified warning with the exact canonical replacement, never rewrites the configuration file, and keeps diagnostics out of JSON stdout.
+
+| Legacy `launch` | Legacy launcher            | Canonical replacement           |
+| --------------- | -------------------------- | ------------------------------- |
+| absent          | absent                     | omit `launch` (built-in `none`) |
+| absent          | `auto`, `sesh`, or `herdr` | matching mode                   |
+| `true`          | absent or `auto`           | `auto`                          |
+| `true`          | `sesh` or `herdr`          | matching explicit mode          |
+| `false`         | absent                     | `none`                          |
+
+`launch: false` plus any legacy launcher is rejected because one field cannot preserve both authored intents; choose canonical `launch: "none"` to remain disabled or the matching enabled mode. Equal camel/snake aliases collapse and produce one warning. Conflicting aliases, `none` plus a launcher, `auto` plus a legacy explicit launcher, and opposite explicit launchers are rejected with scope-qualified, actionable alternatives before mutation. Unsupported create `launch` values and non-boolean create `switch` values are also rejected before repository discovery or mutation. A canonical explicit mode may coexist with legacy `auto` or the matching explicit mode during migration, but the redundant legacy field still warns and should be removed.
 
 ### Legacy switch-default migration
 
@@ -511,7 +545,7 @@ Arashi rejects `cd` plus `sesh` or `herdr`, and rejects opposite explicit launch
 ### Herdr launch contract and safety
 
 - `switch --herdr` opens or focuses the selected existing worktree. `create --herdr` creates worktrees first and then opens the primary worktree; launch failure preserves every successful Git creation.
-- Configure switch with `defaults.switch.mode: "herdr"`. Generic create and editor-scoped create defaults continue to use their independent `launchMode: "herdr"` field. `--no-default-launch` bypasses configured switch Herdr for one invocation; `--no-launch` suppresses configured create launch.
+- Configure switch with `defaults.switch.mode: "herdr"`; configure generic or matching editor-scoped create with `launch: "herdr"`. `--no-default-launch` bypasses configured switch Herdr for one invocation; `--no-launch` suppresses configured create launch.
 - Arashi resolves the repository's absolute non-bare main checkout for Herdr `--cwd`. Do not substitute a linked worktree or a bare repository; a missing source fails actionably without another launcher.
 - The approved argv contract is `herdr worktree open --cwd <source-checkout> --path <existing-worktree> --label '<repo-name>: <branch-name>' --focus --json`. Paths and labels are separate process arguments, not shell-interpolated text.
 - A first open and an already-open response are both successful when Herdr returns a validated `worktree_opened` result with a workspace ID. Repeated launch focuses the existing workspace and reapplies the deterministic label.

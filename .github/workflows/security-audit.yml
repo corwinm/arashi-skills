@@ -36,3 +36,6 @@ jobs:
 
       - name: Validate explicit tmux launch guidance
         run: node scripts/tmux-launch-guidance-selftest.mjs
+
+      - name: Validate unified create-launch guidance
+        run: node scripts/create-launch-guidance-selftest.mjs
