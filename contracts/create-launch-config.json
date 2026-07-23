@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "canonicalField": "defaults.create.launch",
+  "modes": ["none", "auto", "sesh", "herdr"],
+  "absentMode": "none",
+  "switchIndependent": true,
+  "launchImpliesSwitch": true,
+  "editorHosts": ["vscode", "cursor", "kiro"],
+  "legacyFields": ["launch:boolean", "launchMode", "launch_mode"],
+  "legacyPolicy": {
+    "booleanTrue": "launcher-or-auto",
+    "booleanFalseWithoutLauncher": "none",
+    "booleanFalseWithLauncher": "reject",
+    "launcherWithoutBoolean": "launcher",
+    "equalAliases": "collapse",
+    "conflictingAliases": "reject",
+    "canonicalCompatibleLegacy": "preserve",
+    "canonicalConflictingLegacy": "reject"
+  },
+  "explicitPrecedence": [
+    "sesh-or-herdr",
+    "launch",
+    "no-launch",
+    "config",
+    "absent-none"
+  ],
+  "configuredJsonLaunch": "reject-before-mutation"
+}
