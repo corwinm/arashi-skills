@@ -33,3 +33,6 @@ jobs:
 
       - name: Validate unified switch-mode guidance
         run: node scripts/switch-mode-guidance-selftest.mjs
+
+      - name: Validate explicit tmux launch guidance
+        run: node scripts/tmux-launch-guidance-selftest.mjs

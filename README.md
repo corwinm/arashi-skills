@@ -68,6 +68,7 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 - Security gate self-test: `node scripts/security-gate-selftest.mjs`
 - Standalone source/package coverage: `node scripts/standalone-guidance-selftest.mjs`
 - Switch-mode source/package coverage: `node scripts/switch-mode-guidance-selftest.mjs`
+- Explicit tmux source/package coverage: `node scripts/tmux-launch-guidance-selftest.mjs`
 - Cross-repository command contracts: `(cd ../.. && pnpm contracts:check)`
 - Policy and thresholds: `security/policy.md`
 - Baseline findings and remediation tracking: `security/baseline-findings.md`
