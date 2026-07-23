@@ -503,7 +503,7 @@ Canonical create examples use one string `launch` value. During the bounded comp
 | `true`          | `sesh` or `herdr`          | matching explicit mode          |
 | `false`         | absent                     | `none`                          |
 
-`launch: false` plus any legacy launcher is rejected because one field cannot preserve both authored intents; choose canonical `launch: "none"` to remain disabled or the matching enabled mode. Equal camel/snake aliases collapse and produce one warning. Conflicting aliases, `none` plus a launcher, `auto` plus a legacy explicit launcher, and opposite explicit launchers are rejected with scope-qualified, actionable alternatives before mutation. A canonical explicit mode may coexist with legacy `auto` or the matching explicit mode during migration, but the redundant legacy field still warns and should be removed.
+`launch: false` plus any legacy launcher is rejected because one field cannot preserve both authored intents; choose canonical `launch: "none"` to remain disabled or the matching enabled mode. Equal camel/snake aliases collapse and produce one warning. Conflicting aliases, `none` plus a launcher, `auto` plus a legacy explicit launcher, and opposite explicit launchers are rejected with scope-qualified, actionable alternatives before mutation. Unsupported create `launch` values and non-boolean create `switch` values are also rejected before repository discovery or mutation. A canonical explicit mode may coexist with legacy `auto` or the matching explicit mode during migration, but the redundant legacy field still warns and should be removed.
 
 ### Legacy switch-default migration
 

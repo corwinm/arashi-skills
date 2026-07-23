@@ -39,6 +39,8 @@ const expectedGuidance = [
   "`launch: false` plus any legacy launcher is rejected",
   'canonical `launch: "none"`',
   "matching enabled mode",
+  "Unsupported create `launch` values",
+  "non-boolean create `switch` values",
 ];
 
 const expectedContract = {
