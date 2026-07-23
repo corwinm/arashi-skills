@@ -386,6 +386,9 @@ arashi switch --no-cd
 # sesh mode inside tmux
 arashi switch --sesh
 
+# force plain tmux for this invocation
+arashi switch --tmux feature-auth
+
 # explicitly open or focus the worktree in Herdr
 arashi switch --herdr feature-auth
 
@@ -403,6 +406,7 @@ Expected outcomes:
 - cmux launch requires cmux v0.64.18 or newer, the `cmux workspace create` command, and local socket access
 - cmux command, socket, malformed JSON, or missing workspace identifier failures return `LAUNCH_FAILED` without opening standalone Ghostty
 - explicit IDE or sesh launch choices keep precedence, and an active tmux session nested inside cmux keeps tmux behavior
+- explicit `--tmux` requires a non-empty trimmed `TMUX`, overrides configured and detected launch behavior, and never falls back to another launcher
 - explicit `--herdr` selects Herdr outside a managed pane; conflicting explicit launcher flags and `--cd --herdr` are rejected
 - with no explicit or configured launcher, trimmed `HERDR_ENV` must equal exactly `1` to select Herdr automatically; automatic tmux remains earlier, while Herdr is earlier than cmux, IDE, and terminal fallbacks
 - `arashi switch --cd` changes the current shell directory when invoked through the installed shell wrapper; without shell integration it warns and does not launch an alternate context
@@ -457,6 +461,7 @@ Use one-off CLI overrides when one `arashi create` run should differ from its ma
 
 ```bash
 arashi create feature-auth --launch
+arashi create feature-auth --tmux
 arashi create feature-auth --sesh
 arashi create feature-auth --herdr
 arashi create feature-auth --no-launch
@@ -488,6 +493,14 @@ Expected outcomes:
 - `arashi move` refuses dirty target repositories and reports recovery commands if a stash-backed transfer needs manual recovery.
 
 Use `arashi shell install` to enable parent-shell switching for bash, zsh, or fish, or `arashi shell init <shell>` for manual setup.
+
+Precedence for create/switch launch behavior is: explicit flag > opt-out flag > config default > built-in default. `--tmux` is a per-invocation-only override: configured `auto` remains the persistent contextual path to plain tmux. In zero-config standalone and configured repositories alike, explicit tmux requires a non-empty trimmed `TMUX` and does not fall back after prerequisite or process failure.
+
+For switch, `--tmux` conflicts with `--cd` and any explicit launcher in `--sesh`, `--herdr`, `--vscode`, `--cursor`, or `--kiro`. `--tmux --no-cd` is compatible launch intent, and `--tmux --no-default-launch` keeps explicit tmux authoritative while bypassing configured launchers. For create, `--tmux` implies launch and target selection: `--tmux --no-launch` and `--tmux --no-switch` still create and launch the primary worktree, while create `--tmux` conflicts with `--sesh` or `--herdr`.
+
+Both `switch --json --tmux` and `create --json --tmux` return one structured `JSON_UNSUPPORTED_FOR_MODE` document before context validation, conflicts, launch, hooks, or repository mutation. Switch retains its `launch` mode label; create retains its `interactive-or-launch` mode label. A missing tmux context therefore creates nothing. A `tmux new-window` process failure after successful create preserves successfully created worktrees and does not try another launcher.
+
+The configured vocabularies do not gain `tmux`: `defaults.switch.mode` still accepts only `auto`, `cd`, `launch`, `sesh`, and `herdr`, while `defaults.create.launch` still accepts only `none`, `auto`, `sesh`, and `herdr`. Configured `auto` can continue choosing plain tmux contextually.
 
 For switch, `--no-cd` forces launch while preserving a configured explicit launcher. `--no-default-launch` bypasses only configured `sesh` or `herdr`; it leaves configured `auto`, `cd`, and `launch` behavior intact. Do not combine switch `--herdr` with `--sesh` or an IDE launcher, or either Herdr flag with `--json`.
 

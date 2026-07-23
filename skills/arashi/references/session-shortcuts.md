@@ -6,6 +6,7 @@ Use these optional shortcuts to move quickly between Arashi worktrees.
 
 - `arashi` installed and on `PATH`
 - `fzf` installed for interactive selection
+- an active tmux client or session (`TMUX` is non-empty after trimming) for plain `--tmux` launch
 - `sesh` installed for tmux session management (optional)
 - Herdr installed with the verified v0.7.4 command contract and its default session/server reachable (optional)
 
@@ -39,6 +40,7 @@ arashi switch --cd feature-auth
 arashi switch --repos docs
 arashi switch --all
 arashi switch --cursor feature-auth
+arashi switch --tmux feature-auth
 arashi switch --herdr feature-auth
 arashi switch --no-cd
 arashi switch --no-default-launch
@@ -49,6 +51,15 @@ arashi switch --no-default-launch
 ```bash
 arashi switch --sesh
 ```
+
+## Open a Plain tmux Window
+
+```bash
+arashi switch --tmux feature-auth
+arashi create feature-auth --tmux
+```
+
+Use `--tmux` for deterministic plain tmux launch in an active tmux context; use `--sesh` when you want sesh session management. Explicit tmux does not fall back to sesh, Herdr, an IDE, or another terminal when its prerequisite or launch fails.
 
 ## Open or Reuse a Herdr Workspace
 
@@ -71,6 +82,8 @@ Avoid command-substitution keybinds that execute unsanitized output directly.
 - `arashi switch --cd` changes the current shell directory when shell integration is active.
 - `arashi switch --vscode|--cursor|--kiro` forces that IDE for one switch invocation.
 - `arashi switch --sesh` creates or switches via sesh in tmux.
+- `arashi switch --tmux <target>` opens the selected configured or standalone worktree in a new plain tmux window.
+- `arashi create <branch> --tmux` creates worktrees and then opens the primary worktree in a new plain tmux window.
 - `arashi switch --herdr` opens or focuses the selected existing worktree in Herdr.
 - `arashi create <branch> --herdr` creates worktrees first, then opens the primary worktree in Herdr.
 - if shell integration is inactive, explicit `arashi switch --cd` warns without launching another context; configured `mode: "cd"` warns and falls back to automatic launch.
