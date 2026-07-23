@@ -23,6 +23,7 @@ const requirements = new Map([
       "arashi create feature-auth --tmux",
       "arashi switch --sesh",
       "active tmux",
+      "non-empty after trimming",
       "does not fall back"
     ]
   ],

@@ -6,7 +6,7 @@ Use these optional shortcuts to move quickly between Arashi worktrees.
 
 - `arashi` installed and on `PATH`
 - `fzf` installed for interactive selection
-- an active tmux client or session (`TMUX` is non-empty) for plain `--tmux` launch
+- an active tmux client or session (`TMUX` is non-empty after trimming) for plain `--tmux` launch
 - `sesh` installed for tmux session management (optional)
 - Herdr installed with the verified v0.7.4 command contract and its default session/server reachable (optional)
 
