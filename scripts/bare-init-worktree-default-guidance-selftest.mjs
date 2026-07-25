@@ -18,6 +18,14 @@ if (skillRootArgumentIndex >= 0 && !suppliedSkillRoot) {
 
 const requirements = new Map([
   [
+    "SKILL.md",
+    [
+      "In bare configured repositories",
+      "non-worktree managed-path reporting",
+      "does not inspect or write ignore files",
+    ],
+  ],
+  [
     "references/tutorial.md",
     [
       "non-bare repositories default to `.arashi/worktrees`",
