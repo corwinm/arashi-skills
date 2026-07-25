@@ -46,7 +46,7 @@ When a workflow needs command-specific options, inspect `arashi <command> --help
 
 When operating as an agent in a meta-repo, start with `arashi doctor --json` for structured workspace health diagnostics, then use `arashi status` for human-readable status as needed. Identify the owning child repository, keep implementation in `repos/<project>/`, keep shared planning in the meta-repo, and validate each affected repo before handoff. Use `arashi exec -- git status --short` for broad inspection, `arashi exec --dirty -- git diff --stat` for changed repositories, `arashi exec --group <group> -- <validation-command>` for known semantic sets, and `arashi exec --only <repo> -- <validation-command>` for targeted one-off validation. Before pausing or transferring context, run `arashi handoff` with supplied `--link`, `--validation`, `--todo`, `--risk`, and `--next-command` entries; use `--json` when another agent or script will parse the report.
 
-Expect configured initialization and configuration-backed lifecycle commands (`init`, `pull`, `clone`, `add`, and `create`) to reconcile safe configured repository and worktree directory rules before materialization. Preserve effective rules reported by Git, default missing rules to repository-local excludes, and never change global Git configuration. Use `arashi init --ignore-scope tracked` only for an intentional shared `.gitignore` rule, `--ignore-scope none` only for intentional non-mutation, and `--ignore-scope local` to restore the clone-local default. `init` reconciles before writing `.arashi/config.json`; subsequent lifecycle commands consume that file. Standalone bootstrap instead owns only the literal `.worktrees/` local-exclude rule and never writes configuration.
+Expect configured initialization and configuration-backed lifecycle commands (`init`, `pull`, `clone`, `add`, and `create`) to reconcile safe configured repository and worktree directory rules before materialization. Preserve effective rules reported by Git, default missing rules to repository-local excludes, and never change global Git configuration. Use `arashi init --ignore-scope tracked` only for an intentional shared `.gitignore` rule, `--ignore-scope none` only for intentional non-mutation, and `--ignore-scope local` to restore the clone-local default. Non-bare configured init defaults to `.arashi/worktrees`; canonical bare configured init defaults to `..`. An explicit `--worktrees-dir` overrides either default. Later commands use the persisted config value rather than re-inferring repository type. Bare init reports the parent default as external and unsafe and bare-root subdirectories as non-applicable; under local, tracked, or none it reports the selected scope without `git check-ignore` or ignore-file writes. `init` reconciles or reports managed paths before writing `.arashi/config.json`; subsequent lifecycle commands consume that file. Standalone bootstrap instead owns only the literal `.worktrees/` local-exclude rule and never writes configuration.
 
 ## Standalone Repository Workflow
 
@@ -98,11 +98,13 @@ arashi status
 Expected outcomes:
 
 - `.arashi/config.json` exists after `arashi init`.
-- `.arashi/config.json` records `worktreesDir` (default `.arashi/worktrees`).
+- `.arashi/config.json` records the repository-aware or explicit normalized `worktreesDir`.
+- omitted `--worktrees-dir` uses `.arashi/worktrees` for a non-bare repository and `..` for a canonical bare repository; an explicit option wins, and the persisted value remains authoritative afterward.
 - bootstrap mode accepts `.` for the current directory and a direct child repository name for child-directory creation.
-- Git checks safe configured `reposDir` and `worktreesDir` paths against all effective ignore sources.
+- in non-bare repositories, Git checks safe configured `reposDir` and `worktreesDir` paths against all effective ignore sources.
 - missing safe rules default to the repository-local exclude file; tracked `.gitignore` changes only after explicit `--ignore-scope tracked` selection.
 - existing effective tracked, local, or global rules remain unchanged and are not duplicated.
+- bare init does not inspect or write worktree ignore files: it reports parent traversal as external/unsafe and bare-root administrative paths as non-applicable for local, tracked, and none scopes.
 - `arashi status` prints repository/worktree status without errors.
 
 ## Intermediate Workflow
