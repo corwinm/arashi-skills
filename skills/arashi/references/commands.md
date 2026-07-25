@@ -291,8 +291,9 @@ Command boundaries:
 Expected outcomes:
 
 - Git's existing effective tracked, repository-local, or global rule wins; Arashi does not add a duplicate rule or rewrite user-authored content.
-- `local` writes only Arashi-owned rules to the common repository's local exclude file; `tracked` writes only Arashi-owned rules to workspace-root `.gitignore`.
+- In non-bare repositories, `local` writes only Arashi-owned rules to the common repository's local exclude file; `tracked` writes only Arashi-owned rules to workspace-root `.gitignore`.
 - `none` leaves ignore files untouched and warns about safe paths that remain unignored.
+- Bare repositories are the exception: every scope uses the non-worktree reporting policy above and performs no ignore-file writes.
 - repeated lifecycle commands are idempotent, and command rollback reports whether reconciliation was attempted, retained, restored, or could not be restored based on final filesystem state.
 - human output explains warnings; JSON-capable modes keep stdout to one JSON document and place details under the command's managed-ignore result.
 - after configured initialization, lifecycle commands use `.arashi/config.json`; `init` itself reconciles before writing that file. Zero-config standalone bootstrap is a separate local-only path described above.

@@ -31,6 +31,14 @@ jobs:
         run: |
           node scripts/standalone-guidance-selftest.mjs
 
+      - name: Validate bare init worktree-default guidance source and package boundary
+        run: |
+          node scripts/bare-init-worktree-default-guidance-selftest.mjs
+          tar -czf arashi-skill-package.tar.gz skills/
+          mkdir package-check
+          tar -xzf arashi-skill-package.tar.gz -C package-check
+          node scripts/bare-init-worktree-default-guidance-selftest.mjs --skill-root package-check/skills/arashi
+
       - name: Validate unified switch-mode guidance
         run: node scripts/switch-mode-guidance-selftest.mjs
 

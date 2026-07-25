@@ -41,6 +41,8 @@ const requirements = new Map([
       "or write `.gitignore` or the common local exclude file",
       "`local`, `tracked`, and `none`",
       "clone-local scope preference",
+      "In non-bare repositories, `local` writes only",
+      "Bare repositories are the exception",
     ],
   ],
   [
@@ -79,6 +81,42 @@ function validateSkill(root, label) {
     /default `worktreesDir` is `\.arashi\/worktrees` when the option is omitted|`worktreesDir` \(default `\.arashi\/worktrees`\)|records `worktreesDir` \(default `\.arashi\/worktrees`\)/i,
     `${label} still states an unconditional .arashi/worktrees default`,
   );
+
+  assert.doesNotMatch(
+    allGuidance,
+    /^- `(?:local|tracked)` writes only/m,
+    `${label} still states an unconditional ignore-file write outcome`,
+  );
+}
+
+function validateWorkflowWiring() {
+  const workflowRequirements = new Map([
+    [
+      ".github/workflows/security-audit.yml",
+      [
+        /^\s*node scripts\/bare-init-worktree-default-guidance-selftest\.mjs\s*$/m,
+        /^\s*tar -czf arashi-skill-package\.tar\.gz skills\/\s*$/m,
+        /^\s*tar -xzf arashi-skill-package\.tar\.gz -C package-check\s*$/m,
+        /^\s*node scripts\/bare-init-worktree-default-guidance-selftest\.mjs --skill-root package-check\/skills\/arashi\s*$/m,
+      ],
+    ],
+    [
+      ".github/workflows/release-security-gate.yml",
+      [
+        /^\s*node scripts\/bare-init-worktree-default-guidance-selftest\.mjs\s*$/m,
+        /^\s*run: tar -czf arashi-skill-package\.tar\.gz skills\/ README\.md LICENSE security\/\s*$/m,
+        /^\s*tar -xzf arashi-skill-package\.tar\.gz -C package-check\s*$/m,
+        /^\s*node scripts\/bare-init-worktree-default-guidance-selftest\.mjs --skill-root package-check\/skills\/arashi\s*$/m,
+      ],
+    ],
+  ]);
+
+  for (const [relativePath, expectedPatterns] of workflowRequirements) {
+    const content = readFileSync(join(repositoryRoot, relativePath), "utf8");
+    for (const expected of expectedPatterns) {
+      assert.match(content, expected, `${relativePath} is missing ${expected}`);
+    }
+  }
 }
 
 function main() {
@@ -89,6 +127,7 @@ function main() {
   }
 
   validateSkill(sourceSkillRoot, "source");
+  validateWorkflowWiring();
 
   const packageRoot = mkdtempSync(join(tmpdir(), "arashi-bare-init-skill-package-"));
   try {
