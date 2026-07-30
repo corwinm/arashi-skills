@@ -75,6 +75,12 @@ const requirements = new Map([
       "duplicate exact marked Kitty windows",
       "does not close ambiguous Kitty windows",
       "preserve the created worktrees",
+      "cross-process identity lock",
+      "10-second wait",
+      "live owner",
+      "dead owner",
+      "30 seconds",
+      "ownership-safe release",
     ],
   ],
 ]);
