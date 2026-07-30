@@ -133,9 +133,17 @@ arashi switch --herdr feature/skill-integration
 arashi create feature/skill-integration --herdr
 ```
 
-Configured `defaults.switch.mode: "herdr"` selects the same launcher outside a Herdr pane. Automatic launcher selection checks tmux → Herdr → cmux → integrated IDE before terminal/platform fallback. Contextual `defaults.switch.mode: "auto"` uses parent-shell `cd` only after those managed contexts and before fallback; `mode: "launch"` skips the `cd` preference. Arashi resolves the repository's non-bare main checkout as the Herdr source, opens only the existing selected worktree, labels it `<repo-name>: <branch-name>`, and treats an already-open workspace as successful reuse.
+Configured `defaults.switch.mode: "herdr"` selects the same launcher outside a Herdr pane. Automatic launcher selection checks tmux → Herdr → cmux → integrated IDE → Kitty before terminal/platform fallback. Contextual `defaults.switch.mode: "auto"` uses parent-shell `cd` only after those managed contexts and before fallback; `mode: "launch"` skips the `cd` preference. Arashi resolves the repository's non-bare main checkout as the Herdr source, opens only the existing selected worktree, labels it `<repo-name>: <branch-name>`, and treats an already-open workspace as successful reuse.
 
 Arashi alone owns Git worktree creation and removal. A Herdr launch failure after `create` leaves every successfully created worktree intact, and `arashi remove` does not close Herdr workspaces. If cleanup is desired, resolve the workspace ID while the checkout still exists and opt into a pre-remove hook that runs `herdr workspace close <workspace-id>`; never use `herdr worktree remove` as Arashi cleanup.
+
+## Automatic Managed Kitty Sessions
+
+Inside a positively detected Kitty terminal, automatic `arashi switch` and post-create launch use the same managed Kitty flow after higher-precedence tmux, Herdr, cmux, and integrated IDE contexts. Kitty 0.43+ and permitted remote control are prerequisites. Arashi derives a collision-resistant stable identity from the canonical worktree path, keeps a separate readable `<repo-name>: <branch-name>` session label, and focuses the one live window with the exact Arashi-managed marker and canonical cwd. It creates a session-backed tab only when no exact match exists.
+
+Managed Kitty is auto-detected only: there is no explicit Kitty launcher or persisted Kitty launch mode. Once selected, an unsupported version, denied remote control, malformed state, duplicate exact matches, focus failure, or launch failure fails closed with `LAUNCH_FAILED`; do not retry a generic terminal or close a window to force success. A post-create launch failure preserves every successfully created worktree and reports creation separately from launch failure.
+
+Arashi's Kitty integration is live-only. It does not create or modify `.kitty-session` files, restore sessions after Kitty exits, or perform automatic window cleanup. `arashi remove` does not close Kitty windows or sessions; close them manually in Kitty when desired.
 
 ## Advanced Workflow
 
