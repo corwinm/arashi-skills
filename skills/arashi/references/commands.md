@@ -408,7 +408,7 @@ Expected outcomes:
 
 - command exits `0` and opens the selected target in a new context
 - configured `defaults.switch.mode` is the single switch default and accepts `auto`, `cd`, `launch`, `sesh`, and `herdr`; when omitted, Arashi keeps automatic launch behavior rather than preferring `cd`
-- contextual `auto` resolves in this order: tmux → Herdr → cmux → integrated IDE → parent-shell `cd` → terminal application/platform fallback
+- contextual `auto` resolves in this order: tmux → Herdr → cmux → integrated IDE → Kitty → parent-shell `cd` → terminal application/platform fallback
 - in a cmux-managed terminal, automatic launch creates and focuses a cmux workspace at the exact selected worktree
 - Arashi recognizes cmux from a non-empty `CMUX_WORKSPACE_ID` or `CMUX_SURFACE_ID`; `CMUX_SOCKET_PATH` alone does not activate cmux behavior
 - cmux launch requires cmux v0.64.18 or newer, the `cmux workspace create` command, and local socket access
@@ -417,6 +417,8 @@ Expected outcomes:
 - explicit `--tmux` requires a non-empty trimmed `TMUX`, overrides configured and detected launch behavior, and never falls back to another launcher
 - explicit `--herdr` selects Herdr outside a managed pane; conflicting explicit launcher flags and `--cd --herdr` are rejected
 - with no explicit or configured launcher, trimmed `HERDR_ENV` must equal exactly `1` to select Herdr automatically; automatic tmux remains earlier, while Herdr is earlier than cmux, IDE, and terminal fallbacks
+- positively detected Kitty is automatic only, requires Kitty 0.43+ with permitted remote control, and reports `mode: "kitty"`; there is no explicit Kitty launcher flag, and `kitty` is not a persisted create or switch mode
+- once managed Kitty is selected, version, permission, state, duplicate, focus, or launch failure reports actionable `LAUNCH_FAILED` detail and does not fall back to another launcher
 - `arashi switch --cd` changes the current shell directory when invoked through the installed shell wrapper; without shell integration it warns and does not launch an alternate context
 - `arashi switch --no-cd` forces launch behavior while retaining a configured explicit `sesh` or `herdr` mode
 - `arashi switch --no-default-launch` bypasses only configured `sesh` or `herdr` and uses automatic launch; it does not erase configured `auto`, `cd`, or `launch`
@@ -460,7 +462,7 @@ Scope create defaults to the invocation host. Terminal invocations use only `def
 
 For `defaults.switch.mode`, choose exactly one of `auto`, `cd`, `launch`, `sesh`, and `herdr`:
 
-- `auto` prefers strictly detected managed contexts in the order tmux → Herdr → cmux → integrated IDE, then uses parent-shell `cd` when shell integration is active, and otherwise continues to terminal application/platform fallback.
+- `auto` prefers strictly detected managed contexts in the order tmux → Herdr → cmux → integrated IDE → Kitty, then uses parent-shell `cd` when shell integration is active, and otherwise continues to terminal application/platform fallback.
 - `cd` requests parent-shell switching. A configured `cd` warns and falls back to automatic launch when shell integration is unavailable; an explicit `--cd` instead warns without launching another context.
 - `launch` always enters automatic launcher selection and does not prefer `cd`.
 - `sesh` and `herdr` choose that explicit launcher regardless of detected context or shell integration.
@@ -481,7 +483,7 @@ Create launch precedence is `--sesh` or `--herdr` > `--launch` > `--no-launch` >
 
 Configured launch is unsupported with `create --json`: resolved `auto`, `sesh`, or `herdr` returns one structured unsupported-mode error before repository discovery or worktree mutation, just like explicit launch flags. Resolved `none` may continue through normal non-interactive JSON create, with stdout remaining exactly one JSON document.
 
-Automatic launch preserves the existing tmux → Herdr → cmux → integrated IDE → terminal/platform selection and strict environment checks. Explicit `sesh` or `herdr` bypasses automatic context detection. Launch runs only after successful creation; launcher validation or process failure preserves every successfully created worktree, reports creation separately from launch failure, and does not fall back to another launcher. Paths and labels remain distinct process arguments rather than shell-interpolated command text.
+Automatic launch uses tmux → Herdr → cmux → integrated IDE → Kitty → terminal/platform selection and strict environment checks. Explicit `sesh` or `herdr` bypasses automatic context detection. Launch runs only after successful creation; launcher validation or process failure preserves every successfully created worktree, reports creation separately from launch failure, and does not fall back to another launcher. Paths and labels remain distinct process arguments rather than shell-interpolated command text.
 
 If work starts before the right coordinated worktree exists, move compatible uncommitted edits into the target workspace:
 

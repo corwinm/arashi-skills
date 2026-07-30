@@ -23,7 +23,7 @@ const requirements = new Map([
     [
       '"mode": "auto"',
       "`auto`, `cd`, `launch`, `sesh`, and `herdr`",
-      "tmux → Herdr → cmux → integrated IDE → parent-shell `cd` → terminal application/platform fallback",
+      "tmux → Herdr → cmux → integrated IDE → Kitty → parent-shell `cd` → terminal application/platform fallback",
       "arashi switch --no-cd",
       "arashi switch --no-default-launch",
       "`--no-default-launch` bypasses only configured `sesh` or `herdr`",
@@ -37,7 +37,7 @@ const requirements = new Map([
     "references/workflows.md",
     [
       '`defaults.switch.mode: "herdr"`',
-      "tmux → Herdr → cmux → integrated IDE",
+      "tmux → Herdr → cmux → integrated IDE → Kitty",
       "parent-shell `cd`",
       "terminal/platform fallback",
     ],
@@ -46,7 +46,7 @@ const requirements = new Map([
     "references/session-shortcuts.md",
     [
       "arashi switch --no-cd",
-      "tmux → Herdr → cmux → integrated IDE → parent-shell `cd` → terminal/platform fallback",
+      "tmux → Herdr → cmux → integrated IDE → Kitty → parent-shell `cd` → terminal/platform fallback",
       "configured explicit `sesh` or `herdr` mode",
     ],
   ],

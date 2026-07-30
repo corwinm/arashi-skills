@@ -68,7 +68,7 @@ arashi switch --herdr feature-auth
 arashi create feature-auth --herdr
 ```
 
-`--herdr` explicitly selects Herdr even outside a Herdr-managed pane. Automatic contextual resolution follows tmux → Herdr → cmux → integrated IDE → parent-shell `cd` → terminal/platform fallback. Herdr is selected automatically only when trimmed `HERDR_ENV` is exactly `1` and tmux is not active. Herdr opens the existing Arashi-created worktree with the label `<repo-name>: <branch-name>` and focuses the same workspace when it is already open.
+`--herdr` explicitly selects Herdr even outside a Herdr-managed pane. Automatic contextual resolution follows tmux → Herdr → cmux → integrated IDE → Kitty → parent-shell `cd` → terminal/platform fallback. Herdr is selected automatically only when trimmed `HERDR_ENV` is exactly `1` and tmux is not active. Herdr opens the existing Arashi-created worktree with the label `<repo-name>: <branch-name>` and focuses the same workspace when it is already open.
 
 ## Optional Keybinds
 

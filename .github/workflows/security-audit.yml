@@ -45,5 +45,10 @@ jobs:
       - name: Validate explicit tmux launch guidance
         run: node scripts/tmux-launch-guidance-selftest.mjs
 
+      - name: Validate managed Kitty session guidance
+        run: |
+          node scripts/kitty-session-guidance-selftest.mjs
+          node scripts/kitty-session-guidance-selftest.mjs --skill-root package-check/skills/arashi
+
       - name: Validate unified create-launch guidance
         run: node scripts/create-launch-guidance-selftest.mjs
