@@ -66,13 +66,17 @@ const requirements = new Map([
       "Ghostty inside Herdr uses a Herdr tab",
       "cmux uses a workspace (its vertical-tab equivalent)",
       "Bare macOS Ghostty 1.3+ uses a Ghostty tab",
+      "Bare Terminal.app returns `TAB_DISPOSITION_UNSUPPORTED` before target preflight, AppleScript, command execution, or fallback launch",
+      "press Command-T manually, then run `arashi switch --cd`",
+      "requires active Arashi shell integration",
+      "when automatic launcher resolution selects Terminal.app",
       "Bare Git Bash/MinTTY returns an actionable `TAB_DISPOSITION_UNSUPPORTED`",
       "does not fall back to a new window",
       "An automatically detected IDE whose CLI is unavailable continues canonical terminal/platform resolution",
       "do not classify the unavailable IDE as a selected unsupported IDE",
       "missing target or supported-version evidence returns `TAB_DISPOSITION_UNSUPPORTED` before any process, automation, or fallback attempt",
-      "Denied or failed macOS automation returns `LAUNCH_FAILED`",
-      "Denied or failed read-only macOS automation preflight returns `LAUNCH_FAILED` before create mutation or switch launch, with no fallback",
+      "Denied or failed automation for a supported macOS tab adapter returns `LAUNCH_FAILED`",
+      "Denied or failed read-only macOS automation preflight for a supported tab adapter returns `LAUNCH_FAILED` before create mutation or switch launch, with no fallback",
       "preserves the selected app, profile, shell, and cwd",
       "never silently falls back",
       "Configured and implicit-standalone `switch --tab` and `create --tab` use the same resolver and failure semantics",
@@ -127,7 +131,7 @@ const requirements = new Map([
       "created worktrees remain intact",
       "missing `WEZTERM_PANE`, `HERDR_WORKSPACE_ID`, exact macOS target, or supported Ghostty version",
       "`TAB_DISPOSITION_UNSUPPORTED` before any process or fallback attempt",
-      "Denied or failed read-only macOS automation preflight for Terminal.app, iTerm2, or Ghostty",
+      "Denied or failed read-only macOS automation preflight for iTerm2 or Ghostty",
       "`LAUNCH_FAILED` without fallback as authoritative before create mutation or switch launch",
       "Default Herdr launch still needs a non-bare source checkout",
       "`--tab --herdr` does not",
@@ -149,7 +153,7 @@ const launcherMatrixRows = [
   "| Linux Ghostty | `ghostty +new-window --working-directory <path>` | `TAB_DISPOSITION_UNSUPPORTED`; never map the request to `+new-window` |",
   "| macOS Ghostty older than 1.3 or missing supported-version evidence | Existing explicit independent-process window mapping | `TAB_DISPOSITION_UNSUPPORTED`; no supported tab API is available |",
   "| macOS Ghostty 1.3+ | AppleScript `new window with configuration`, preserving exact cwd and current shell as data | AppleScript `new tab in <captured-window> with configuration`; missing supported-version evidence or an exact target window returns `TAB_DISPOSITION_UNSUPPORTED` before automation |",
-  "| Terminal.app | One static AppleScript transaction creates a new window/tab object with exact cwd, current shell, and captured settings when available | One static AppleScript transaction creates a tab in the exact captured target window with the captured settings; a missing target returns `TAB_DISPOSITION_UNSUPPORTED` |",
+  "| Terminal.app | One static AppleScript transaction creates a new window/tab object with exact cwd, current shell, and captured settings when available | `TAB_DISPOSITION_UNSUPPORTED`; supported Terminal.app automation cannot safely create a true tab in an exact selected window |",
   "| iTerm2 | One static AppleScript transaction creates a new window with the captured current profile when available | One static AppleScript transaction creates a tab in the exact captured target window with the captured profile; a missing target returns `TAB_DISPOSITION_UNSUPPORTED` |",
   "| Generic Linux/macOS/Windows fallback | Existing platform-specific independent process/window sequence | `TAB_DISPOSITION_UNSUPPORTED`; no generic cross-terminal tab protocol exists |",
 ];
@@ -211,6 +215,11 @@ function validateSkill(root, label) {
     commands,
     /\| Tab disposition support \| Mapping \|/,
     `${label}/references/commands.md regressed to the abbreviated tab-only mapping`,
+  );
+  assert.doesNotMatch(
+    commands,
+    /cd "\$\(arashi switch --no-cd --no-default-launch\)"/,
+    `${label}/references/commands.md must not recommend launch-mode output as a path-only command substitution`,
   );
 
   const dispositionSection = commands.slice(
