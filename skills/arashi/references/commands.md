@@ -400,6 +400,11 @@ arashi switch --tmux feature-auth
 # explicitly open or focus the worktree in Herdr
 arashi switch --herdr feature-auth
 
+# request a tab/equivalent in the selected launcher for this invocation
+arashi switch --tab feature-auth
+arashi switch --tab --vscode feature-auth
+arashi switch --tab --herdr feature-auth
+
 # bypass a configured explicit sesh or Herdr switch mode for one run
 arashi switch --no-default-launch
 ```
@@ -429,6 +434,90 @@ Expected outcomes:
 - when shell integration is inactive, explicit `--cd` warns without launching another context; configured `mode: "cd"` warns and falls back to automatic launch
 - compatible editor hosts can pass the matching switch flag automatically when running Arashi through the extension
 - extension-driven switch selections use exact path mode so duplicate branch names do not create ambiguous CLI matches
+
+### Launch disposition (`--tab`)
+
+Default launch opens a new window or independent managed session. `--tab` is a one-shot CLI-only launch disposition on `switch` and `create`; it is never persisted in `.arashi/config.json`, and the existing create/switch configuration contracts remain unchanged. A tab request preserves the selected app, profile, shell, and cwd and never silently falls back to a window, another launcher, or a generic terminal.
+
+`switch --tab` expresses explicit launch intent. It overrides configured or contextual parent-shell `cd`, conflicts only with explicit `--cd`, and composes with launcher selectors such as `--vscode`, `--cursor`, `--kiro`, `--tmux`, `--sesh`, and `--herdr`; explicit launcher composition is not a parser conflict, and the selected adapter decides capability. `switch --tab --no-cd` is compatible launch intent. `switch --tab --no-default-launch` bypasses configured launcher/default selection while preserving automatic tab intent and contextual launcher selection. `switch --tab --json` returns `JSON_UNSUPPORTED_FOR_MODE` with `details.mode: "launch"` and exits `2`.
+
+For create, the complete precedence examples are:
+
+```bash
+# tab intent implies both launch and selection
+arashi create feature-auth --tab
+
+# positive tab intent wins over both negative flags
+arashi create feature-auth --tab --no-launch --no-switch
+
+# positive launch/switch flags are compatible and redundant with tab intent
+arashi create feature-auth --tab --launch
+arashi create feature-auth --tab --switch
+
+# preview the resolved tab launch without mutation
+arashi create feature-auth --tab --dry-run
+```
+
+`create --tab` implies launch and switch, wins over `--no-launch` and `--no-switch`, and may compose with explicit launcher selectors. `create --tab --launch` and `create --tab --switch` are compatible. `create --tab --json` returns `JSON_UNSUPPORTED_FOR_MODE` with `details.mode: "interactive-or-launch"` and exits `1`. Both JSON guards run before option-conflict or contextual validation, and stdout remains exactly one JSON document. After authoritative workspace/config resolution, a knowable unsupported tab request fails before managed-ignore reconciliation, hooks, branch creation, or worktree creation. Dry-run previews tab intent without mutation and does not require runtime-only session evidence. If a supported launch is attempted but fails at runtime, Arashi reports partial failure, preserves every successfully created worktree, and does not retry as a window or another launcher.
+
+The exact tab JSON refusal envelopes include these command fields and modes:
+
+```json
+{
+  "ok": false,
+  "command": "switch",
+  "schemaVersion": 1,
+  "error": {
+    "code": "JSON_UNSUPPORTED_FOR_MODE",
+    "message": "JSON output is not supported for this mode",
+    "details": { "mode": "launch" }
+  },
+  "warnings": []
+}
+```
+
+```json
+{
+  "ok": false,
+  "command": "create",
+  "schemaVersion": 1,
+  "error": {
+    "code": "JSON_UNSUPPORTED_FOR_MODE",
+    "message": "JSON output is not supported for this mode",
+    "details": { "mode": "interactive-or-launch" }
+  },
+  "warnings": []
+}
+```
+
+For each refusal, Arashi emits exactly one JSON document on stdout and keeps stderr silent. Enforce the guard independently at both the Commander action boundary and the exported executor, before option or context validation and before workspace, configuration, or terminal discovery. Therefore conflicting launcher flags, absent context evidence, and direct exported calls still receive the command-specific envelope before any repository, worktree, config, or launcher lookup.
+
+Managed context outranks the outer terminal. For example, Ghostty inside tmux uses a tmux window; Ghostty inside Herdr uses a Herdr tab; cmux uses a workspace (its vertical-tab equivalent). Bare macOS Ghostty 1.3+ uses a Ghostty tab. Bare Git Bash/MinTTY returns an actionable `TAB_DISPOSITION_UNSUPPORTED` and does not fall back to a new window. An automatically detected IDE whose CLI is unavailable continues canonical terminal/platform resolution; after that resolution, apply the selected launcher's tab mapping or capability, and do not classify the unavailable IDE as a selected unsupported IDE.
+
+| Launcher/context | Default `window` disposition | Explicit `tab` disposition |
+|---|---|---|
+| Windows Terminal | `wt.exe -w new new-tab`, preserving non-empty `WT_PROFILE_ID` with `-p` and exact path with `-d` | `wt.exe -w 0 new-tab` with the same profile/path handling; failure returns `LAUNCH_FAILED` without fallback |
+| Standalone Git Bash / configured MinTTY | Existing `git-bash.exe --no-cd` path, direct detached MinTTY compatibility fallback, then safe shell fallback for an independent window | `TAB_DISPOSITION_UNSUPPORTED`; the host exposes no stable tab target, so use the default window or Windows Terminal |
+| WezTerm | `wezterm cli spawn --new-window --cwd <path>` in the current domain, with a process-start fallback that still explicitly requests an independent window | `wezterm cli spawn --pane-id <WEZTERM_PANE> --cwd <path>` in the exact current GUI context; missing non-empty `WEZTERM_PANE` returns `TAB_DISPOSITION_UNSUPPORTED` before process execution |
+| Managed Kitty | Exact Arashi worktree session creation/focus/reuse, documented as the independent-session equivalent | The same exact managed Kitty tab/session primitive, reported as the tab equivalent rather than a window fallback |
+| Unmanaged Kitty | New Kitty OS window at the exact worktree path | `TAB_DISPOSITION_UNSUPPORTED` unless managed remote-control evidence is present; never probe an unrelated Kitty instance |
+| tmux and sesh | Existing `tmux new-window -c <path>` and sesh connect primitive, documented as the independent-session equivalent | The same tmux/sesh managed primitive, explicitly reported as the tab equivalent |
+| cmux | Existing create-and-focus workspace operation, documented as the independent-session equivalent | The same workspace/vertical-tab primitive, explicitly treated as cmux's in-session tab equivalent |
+| Herdr | Existing `herdr worktree open` open/focus of the exact worktree workspace, requiring a non-bare source checkout | `herdr tab create` in non-empty exact `HERDR_WORKSPACE_ID`; missing active-workspace evidence returns `TAB_DISPOSITION_UNSUPPORTED`, and this tab path does not require a non-bare source checkout |
+| Automatically detected IDE with unavailable CLI | Continue canonical terminal/platform resolution; use the selected terminal/platform launcher's default window or independent-session mapping | Continue canonical terminal/platform resolution, then apply that selected launcher's tab mapping/capability; do not classify the unavailable IDE as a selected unsupported IDE |
+| VS Code / Cursor / Kiro | Existing explicit `--new-window <exact-worktree-path>` workspace launch | `TAB_DISPOSITION_UNSUPPORTED`; editor workspaces are not terminal tabs |
+| Linux Ghostty | `ghostty +new-window --working-directory <path>` | `TAB_DISPOSITION_UNSUPPORTED`; never map the request to `+new-window` |
+| macOS Ghostty older than 1.3 or missing supported-version evidence | Existing explicit independent-process window mapping | `TAB_DISPOSITION_UNSUPPORTED`; no supported tab API is available |
+| macOS Ghostty 1.3+ | AppleScript `new window with configuration`, preserving exact cwd and current shell as data | AppleScript `new tab in <captured-window> with configuration`; missing supported-version evidence or an exact target window returns `TAB_DISPOSITION_UNSUPPORTED` before automation |
+| Terminal.app | One static AppleScript transaction creates a new window/tab object with exact cwd, current shell, and captured settings when available | One static AppleScript transaction creates a tab in the exact captured target window with the captured settings; a missing target returns `TAB_DISPOSITION_UNSUPPORTED` |
+| iTerm2 | One static AppleScript transaction creates a new window with the captured current profile when available | One static AppleScript transaction creates a tab in the exact captured target window with the captured profile; a missing target returns `TAB_DISPOSITION_UNSUPPORTED` |
+| Generic Linux/macOS/Windows fallback | Existing platform-specific independent process/window sequence | `TAB_DISPOSITION_UNSUPPORTED`; no generic cross-terminal tab protocol exists |
+
+For WezTerm and Herdr, an empty or missing exact pane/workspace identifier is unsupported. Terminal.app, iTerm2, and macOS Ghostty require an exact target window, and Ghostty also requires supported-version evidence. Any missing target or supported-version evidence returns `TAB_DISPOSITION_UNSUPPORTED` before any process, automation, or fallback attempt. Denied or failed macOS automation returns `LAUNCH_FAILED` and never falls back to a new window, another launcher, or generic terminal. Denied or failed read-only macOS automation preflight returns `LAUNCH_FAILED` before create mutation or switch launch, with no fallback. Across every supported row, preserve the selected app/profile, current shell, and exact cwd; pass paths as distinct process arguments or through a static data-only automation protocol, strip shell-directive state from launched children, and never interpolate user-derived paths or commands into shell or AppleScript source.
+
+Configured and implicit-standalone `switch --tab` and `create --tab` use the same resolver and failure semantics. Standalone invocations do not create or persist `.arashi` configuration; they use the already discovered standalone worktree layout without synthesizing configured defaults.
+
+Default Herdr launch continues to use `herdr worktree open` and requires a non-bare source checkout. `--tab --herdr` instead runs `herdr tab create` in the active workspace identified by `HERDR_WORKSPACE_ID` and does not require a non-bare source checkout.
 
 ## Create and Switch Defaults and Overrides
 
@@ -474,6 +563,7 @@ arashi create feature-auth --launch
 arashi create feature-auth --tmux
 arashi create feature-auth --sesh
 arashi create feature-auth --herdr
+arashi create feature-auth --tab
 arashi create feature-auth --no-launch
 arashi create feature-auth --no-switch
 arashi create feature-auth --move-changes
@@ -558,6 +648,7 @@ Arashi rejects `cd` plus `sesh` or `herdr`, and rejects opposite explicit launch
 - Configure switch with `defaults.switch.mode: "herdr"`; configure generic or matching editor-scoped create with `launch: "herdr"`. `--no-default-launch` bypasses configured switch Herdr for one invocation; `--no-launch` suppresses configured create launch.
 - Arashi resolves the repository's absolute non-bare main checkout for Herdr `--cwd`. Do not substitute a linked worktree or a bare repository; a missing source fails actionably without another launcher.
 - The approved argv contract is `herdr worktree open --cwd <source-checkout> --path <existing-worktree> --label '<repo-name>: <branch-name>' --focus --json`. Paths and labels are separate process arguments, not shell-interpolated text.
+- This default workspace-launch contract is distinct from `--tab --herdr`: tab disposition uses `herdr tab create` in the active workspace, requires a non-empty exact `HERDR_WORKSPACE_ID`, and does not resolve or require the non-bare source checkout used by `herdr worktree open`.
 - A first open and an already-open response are both successful when Herdr returns a validated `worktree_opened` result with a workspace ID. Repeated launch focuses the existing workspace and reapplies the deterministic label.
 - Arashi owns Git worktree creation and removal. Never substitute `herdr worktree create`, `herdr worktree remove`, or `herdr workspace create`.
 - `arashi remove` intentionally leaves Herdr workspaces untouched. For opt-in cleanup, resolve the workspace ID before removal and use `herdr workspace close <workspace-id>` in a pre-remove hook; automatic closure is unsafe because the workspace may contain agents or unsaved terminal state.

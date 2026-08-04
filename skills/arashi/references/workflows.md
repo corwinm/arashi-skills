@@ -35,6 +35,7 @@ Use this catalog to choose the right workflow by goal and confidence level.
 - For VS Code and VS Code-based editor workflows, see `https://arashi.haphazard.dev/workflows/vscode/`.
 - For cmux workspace launching, requirements, and troubleshooting, see `https://arashi.haphazard.dev/workflows/cmux/`.
 - For tmux and sesh workflows, see `https://arashi.haphazard.dev/workflows/tmux-and-sesh/`.
+- Default launch opens a new window or independent managed session. Use `--tab` only for a one-invocation tab request; it is not a persisted default. Managed context wins over the outer terminal: Ghostty+tmux → tmux window, Ghostty+Herdr → Herdr tab, and cmux → workspace/vertical-tab. Unsupported tab requests fail without a window fallback.
 - For agent guidance in a meta-repo, see `https://arashi.haphazard.dev/workflows/agents-and-specs/` or fetch the Markdown form at `https://arashi.haphazard.dev/workflows/agents-and-specs.md`.
 - For compact agent context across the docs, start with `https://arashi.haphazard.dev/llms.txt`; use `https://arashi.haphazard.dev/llms-full.txt` for a broader Markdown export.
 
