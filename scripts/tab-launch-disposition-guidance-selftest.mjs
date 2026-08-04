@@ -69,7 +69,6 @@ const requirements = new Map([
       "Bare Terminal.app returns `TAB_DISPOSITION_UNSUPPORTED` before target preflight, AppleScript, command execution, or fallback launch",
       "press Command-T manually, then run `arashi switch --cd`",
       "requires active Arashi shell integration",
-      'cd "$(arashi switch --no-cd --no-default-launch)"',
       "when automatic launcher resolution selects Terminal.app",
       "Bare Git Bash/MinTTY returns an actionable `TAB_DISPOSITION_UNSUPPORTED`",
       "does not fall back to a new window",
@@ -216,6 +215,11 @@ function validateSkill(root, label) {
     commands,
     /\| Tab disposition support \| Mapping \|/,
     `${label}/references/commands.md regressed to the abbreviated tab-only mapping`,
+  );
+  assert.doesNotMatch(
+    commands,
+    /cd "\$\(arashi switch --no-cd --no-default-launch\)"/,
+    `${label}/references/commands.md must not recommend launch-mode output as a path-only command substitution`,
   );
 
   const dispositionSection = commands.slice(
