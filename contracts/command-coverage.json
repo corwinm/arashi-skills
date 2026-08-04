@@ -4,7 +4,7 @@
   "commands": [
     { "name": "add", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "configured-only", "reason": "Adding child repositories requires persisted workspace configuration." } },
     { "name": "clone", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "configured-only", "reason": "Cloning child repositories requires a persisted repository map." } },
-    { "name": "create", "status": "covered", "reference": "references/commands.md", "requiredOptions": ["--tmux"], "standalone": { "support": "supported" } },
+    { "name": "create", "status": "covered", "reference": "references/commands.md", "requiredOptions": ["--tab", "--tmux"], "standalone": { "support": "supported" } },
     { "name": "doctor", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "supported" } },
     { "name": "exec", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "configured-only", "reason": "Cross-repository execution requires persisted repository selection." } },
     { "name": "handoff", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "supported" } },
@@ -42,7 +42,7 @@
     { "name": "shell init", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "not-applicable", "reason": "Shell integration output does not resolve an Arashi workspace." } },
     { "name": "shell install", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "not-applicable", "reason": "Shell integration installation does not resolve an Arashi workspace." } },
     { "name": "status", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "supported" } },
-    { "name": "switch", "status": "covered", "reference": "references/commands.md", "requiredOptions": ["--tmux"], "standalone": { "support": "supported" } },
+    { "name": "switch", "status": "covered", "reference": "references/commands.md", "requiredOptions": ["--tab", "--tmux"], "standalone": { "support": "supported" } },
     { "name": "sync", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "configured-only", "reason": "Cross-repository synchronization requires persisted repository configuration." } },
     { "name": "update", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "not-applicable", "reason": "CLI updates do not resolve an Arashi workspace." } }
   ]

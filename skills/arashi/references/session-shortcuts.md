@@ -42,6 +42,7 @@ arashi switch --all
 arashi switch --cursor feature-auth
 arashi switch --tmux feature-auth
 arashi switch --herdr feature-auth
+arashi switch --tab feature-auth
 arashi switch --no-cd
 arashi switch --no-default-launch
 ```
@@ -69,6 +70,15 @@ arashi create feature-auth --herdr
 ```
 
 `--herdr` explicitly selects Herdr even outside a Herdr-managed pane. Automatic contextual resolution follows tmux → Herdr → cmux → integrated IDE → Kitty → parent-shell `cd` → terminal/platform fallback. Herdr is selected automatically only when trimmed `HERDR_ENV` is exactly `1` and tmux is not active. Herdr opens the existing Arashi-created worktree with the label `<repo-name>: <branch-name>` and focuses the same workspace when it is already open.
+
+## Request a Tab for One Launch
+
+```bash
+arashi switch --tab feature-auth
+arashi create feature-auth --tab
+```
+
+The default remains a new window or independent managed session. `--tab` is one-shot and follows the innermost managed context: Ghostty in tmux opens a tmux window, Ghostty in Herdr opens a Herdr tab, and cmux opens a cmux workspace (its vertical-tab equivalent). Bare macOS Ghostty 1.3+ opens a Ghostty tab. Unsupported contexts fail without retrying a window.
 
 ## Optional Keybinds
 
