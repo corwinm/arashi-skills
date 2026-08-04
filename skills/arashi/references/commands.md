@@ -402,8 +402,10 @@ arashi switch --herdr feature-auth
 
 # request a tab/equivalent in the selected launcher for this invocation
 arashi switch --tab feature-auth
-arashi switch --tab --vscode feature-auth
 arashi switch --tab --herdr feature-auth
+
+# capability failure example: explicit IDEs do not expose tab launch
+arashi switch --tab --vscode feature-auth
 
 # bypass a configured explicit sesh or Herdr switch mode for one run
 arashi switch --no-default-launch
@@ -411,7 +413,7 @@ arashi switch --no-default-launch
 
 Expected outcomes:
 
-- command exits `0` and opens the selected target in a new context
+- success-oriented commands above exit `0` and open the selected target in a new context; the explicitly labeled VS Code capability example exits nonzero with `TAB_DISPOSITION_UNSUPPORTED`
 - configured `defaults.switch.mode` is the single switch default and accepts `auto`, `cd`, `launch`, `sesh`, and `herdr`; when omitted, Arashi keeps automatic launch behavior rather than preferring `cd`
 - contextual `auto` resolves in this order: tmux → Herdr → cmux → integrated IDE → Kitty → parent-shell `cd` → terminal application/platform fallback
 - in a cmux-managed terminal, automatic launch creates and focuses a cmux workspace at the exact selected worktree
