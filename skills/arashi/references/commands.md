@@ -95,7 +95,7 @@ arashi handoff --json --link https://github.com/corwinm/arashi-arashi/issues/186
 Expected outcomes:
 
 - Markdown mode includes workspace path/branch, current repository context, per-repository status, dirty or error repositories needing attention, related links, validation evidence, todos, risks, and next commands.
-- Markdown is the default; omit deprecated `--markdown` from preferred commands.
+- Markdown is the default; omit the deprecated compatibility spelling `--markdown` from preferred commands.
 - JSON mode emits one envelope with `command: "handoff"`, workspace metadata, per-repository status records, supplied context arrays, warnings, and generated next-command hints.
 - `arashi handoff` is read-only: it does not run validation commands, stage files, commit, push, delete worktrees, or write report files by default.
 - Only pass `--validation` entries for commands that actually ran; put pending or unverified checks in `--todo` or `--risk`.

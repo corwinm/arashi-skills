@@ -48,7 +48,7 @@ const requirements = new Map([
       "`--no-cd` maps to `--launch`",
       "`--no-default-launch` maps to `--ignore-configured-launcher`",
       "Markdown is the default",
-      "omit deprecated `--markdown`",
+      "omit the deprecated compatibility spelling `--markdown`",
       "`update --check` conflicts with `--dry-run` and `-n`",
       "before release lookup, installer planning, package-manager execution, binary replacement, or mutation",
       "both the native Commander path and the npm-managed wrapper path",
@@ -82,16 +82,19 @@ function validateDeprecatedUsage(root, label) {
     const content = readFileSync(join(root, relativePath), "utf8");
     const lines = content.split("\n");
     lines.forEach((line, index) => {
-      if (!/--no-cd|--no-default-launch|handoff --markdown/.test(line)) {
-        return;
-      }
-      if (/git-bash\.exe --no-cd/.test(line)) {
+      const cliGuidance = line.replaceAll("git-bash.exe --no-cd", "");
+      if (!/--no-cd|--no-default-launch|--markdown/.test(cliGuidance)) {
         return;
       }
       assert.match(
-        line,
+        cliGuidance,
         /[Dd]eprecated compatibility/,
         `${label}/${relativePath}:${index + 1} teaches deprecated CLI syntax outside explicit compatibility metadata`,
+      );
+      assert.doesNotMatch(
+        cliGuidance,
+        /\barashi\s+[^`\n]*(?:--no-cd|--no-default-launch|--markdown)/,
+        `${label}/${relativePath}:${index + 1} teaches actionable deprecated CLI syntax`,
       );
     });
   }
@@ -177,14 +180,24 @@ function validateDeliberateDrift() {
     writeFileSync(commandsPath, original);
 
     const skillPath = join(packagedSkillRoot, "SKILL.md");
+    const originalSkill = readFileSync(skillPath, "utf8");
     writeFileSync(
       skillPath,
-      `${readFileSync(skillPath, "utf8")}\n\nPreferred shortcut: run \`arashi switch --no-cd\`.\n`,
+      `${originalSkill}\n\nPreferred shortcut: run \`arashi switch --no-cd\`.\n`,
     );
     assert.throws(
       () => validateSkill(packagedSkillRoot, "deliberate-deprecated-guidance"),
       /SKILL\.md.*deprecated CLI syntax outside explicit compatibility metadata/,
       "checker accepted actionable deprecated guidance outside the three edited references",
+    );
+    writeFileSync(
+      skillPath,
+      `${originalSkill}\n\nFor deprecated compatibility, run \`arashi handoff --link value --markdown\`.\n`,
+    );
+    assert.throws(
+      () => validateSkill(packagedSkillRoot, "deliberate-same-line-actionable"),
+      /SKILL\.md.*actionable deprecated CLI syntax/,
+      "checker accepted actionable deprecated guidance with nearby compatibility keywords",
     );
   } finally {
     rmSync(driftRoot, { recursive: true, force: true });
