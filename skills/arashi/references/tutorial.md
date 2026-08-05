@@ -89,14 +89,15 @@ arashi switch --repos docs
 arashi switch --cursor feature-auth
 arashi switch --tmux feature-auth
 arashi switch --sesh
-arashi switch --no-cd
-arashi switch --no-default-launch
+arashi switch --launch feature-auth
+arashi switch --ignore-configured-launcher feature-auth
+arashi switch --launch --ignore-configured-launcher feature-auth
 ```
 
 Use `--sesh` only when running inside tmux with `sesh` installed.
 Use `--tmux` inside an active tmux client or session for deterministic plain tmux launch. It is a per-invocation override in configured and zero-config standalone repositories; for example, `arashi create feature-auth --tmux` creates and then launches the primary worktree.
 Use `--vscode`, `--cursor`, or `--kiro` when you want a one-off IDE launch without changing workspace defaults.
-Use `--no-cd` to force launch behavior for one invocation. Use `--no-default-launch` to bypass a configured explicit `sesh` or `herdr` switch mode; it does not erase configured `auto`, `cd`, or `launch` behavior.
+Use `--launch` to force launch behavior for one invocation; configured `sesh` or `herdr` remains selected. Use `--ignore-configured-launcher` alone to bypass a configured named launcher without independently changing `auto`, `cd`, or `launch` behavior. Combine them for normal automatic launcher resolution.
 
 ## Step 6: Optional Remove Hook Setup
 

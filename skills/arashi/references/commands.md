@@ -12,6 +12,8 @@ arashi --version
 arashi --help
 ```
 
+The installed `arashi --help` and `arashi <command> --help` are the parameter authority. Common command-local aliases are `-v/--verbose`, `-f/--force`, `-j/--json`, `-o/--only`, `-g/--group`, and `-n/--dry-run`; use long forms in consequential examples when they are clearer. Exceptions are intentional: `add -n/--name` remains command-local name syntax, and `exec --jobs` remains long-only so `-j` means JSON on `exec`. These aliases describe the current CLI surface and do not claim native shell completion.
+
 ## Installation
 
 Installation instructions are maintained on the Arashi website:
@@ -39,6 +41,8 @@ arashi update --dry-run
 # run a supported npm-managed update non-interactively
 arashi update --yes
 ```
+
+`update --check` conflicts with `--dry-run` and `-n`. Arashi rejects either combination before release lookup, installer planning, package-manager execution, binary replacement, or mutation in both the native Commander path and the npm-managed wrapper path.
 
 Expected outcomes:
 
@@ -91,6 +95,7 @@ arashi handoff --json --link https://github.com/corwinm/arashi-arashi/issues/186
 Expected outcomes:
 
 - Markdown mode includes workspace path/branch, current repository context, per-repository status, dirty or error repositories needing attention, related links, validation evidence, todos, risks, and next commands.
+- Markdown is the default; omit deprecated `--markdown` from preferred commands.
 - JSON mode emits one envelope with `command: "handoff"`, workspace metadata, per-repository status records, supplied context arrays, warnings, and generated next-command hints.
 - `arashi handoff` is read-only: it does not run validation commands, stage files, commit, push, delete worktrees, or write report files by default.
 - Only pass `--validation` entries for commands that actually ran; put pending or unverified checks in `--todo` or `--risk`.
@@ -118,6 +123,8 @@ Workspaces can declare semantic repository sets with `repos.<name>.groups` array
 ```
 
 Common group names include `core`, `docs`, `extensions`, `agents`, and `infra`. Use `--group <group>` on repo-selecting commands when a known semantic set matches the task better than enumerating repositories with `--only`.
+
+Repository selectors accept repeated occurrences, comma-separated values, or both. Shared normalization preserves encounter order, trims whitespace, ignores blank segments beside valid values, and deduplicates by first occurrence. Explicitly supplied selectors that normalize to empty, unknown values, and valid filters with no matches fail closed before repository discovery or mutation. `--only` and `--group` intersect; an empty intersection is an error rather than an empty successful run. `status --only` is configured-workspace-only, includes the established parent report while limiting child inspection, and is rejected in standalone mode along with `status --group`.
 
 Examples:
 
@@ -388,8 +395,8 @@ arashi switch --kiro feature-auth
 # request parent-shell cd when shell integration is active
 arashi switch --cd feature-auth
 
-# force launch behavior for one run
-arashi switch --no-cd
+# force launch behavior for one run while preserving a configured launcher
+arashi switch --launch feature-auth
 
 # sesh mode inside tmux
 arashi switch --sesh
@@ -407,8 +414,11 @@ arashi switch --tab --herdr feature-auth
 # capability failure example: explicit IDEs do not expose tab launch
 arashi switch --tab --vscode feature-auth
 
-# bypass a configured explicit sesh or Herdr switch mode for one run
-arashi switch --no-default-launch
+# bypass a configured explicit sesh or Herdr switch mode without forcing behavior
+arashi switch --ignore-configured-launcher feature-auth
+
+# force generic automatic launch and bypass a configured named launcher
+arashi switch --launch --ignore-configured-launcher feature-auth
 ```
 
 Expected outcomes:
@@ -427,8 +437,9 @@ Expected outcomes:
 - positively detected Kitty is automatic only, requires Kitty 0.43+ with permitted remote control, and reports `mode: "kitty"`; there is no explicit Kitty launcher flag, and `kitty` is not a persisted create or switch mode
 - once managed Kitty is selected, version, permission, state, duplicate, focus, or launch failure reports actionable `LAUNCH_FAILED` detail and does not fall back to another launcher
 - `arashi switch --cd` changes the current shell directory when invoked through the installed shell wrapper; without shell integration it warns and does not launch an alternate context
-- `arashi switch --no-cd` forces launch behavior while retaining a configured explicit `sesh` or `herdr` mode
-- `arashi switch --no-default-launch` bypasses only configured `sesh` or `herdr` and uses automatic launch; it does not erase configured `auto`, `cd`, or `launch`
+- `--launch` preserves a configured `sesh` or `herdr` launcher while forcing launch behavior
+- `--ignore-configured-launcher` alone bypasses only a configured `sesh` or `herdr` launcher; it preserves configured or contextual `auto`, `cd`, or `launch` behavior and does not independently force or prevent parent-shell `cd`
+- The exact generic automatic-launch request is `--launch --ignore-configured-launcher`; explicit launcher and tab selectors remain authoritative and keep their prerequisite, failure, and no-fallback policy
 - `--repos` matches repository names first (exact match preferred)
 - `--repos` with no matches lists available child repositories
 - `--path` matches one exact worktree path and skips fuzzy branch/path matching
@@ -441,7 +452,7 @@ Expected outcomes:
 
 Default launch opens a new window or independent managed session. `--tab` is a one-shot CLI-only launch disposition on `switch` and `create`; it is never persisted in `.arashi/config.json`, and the existing create/switch configuration contracts remain unchanged. A tab request preserves the selected app, profile, shell, and cwd and never silently falls back to a window, another launcher, or a generic terminal.
 
-`switch --tab` expresses explicit launch intent. It overrides configured or contextual parent-shell `cd` and bypasses configured launcher defaults, so it uses automatic launcher resolution without requiring `--no-default-launch`. It conflicts only with explicit `--cd` and composes with launcher selectors such as `--vscode`, `--cursor`, `--kiro`, `--tmux`, `--sesh`, and `--herdr`; an explicit selector remains authoritative while `--tab` controls its disposition, and the selected adapter decides capability. `switch --tab --no-cd` is compatible launch intent. `switch --tab --no-default-launch` remains compatible but is redundant. `switch --tab --json` returns `JSON_UNSUPPORTED_FOR_MODE` with `details.mode: "launch"` and exits `2`.
+`switch --tab` expresses explicit launch intent. It overrides configured or contextual parent-shell `cd` and bypasses configured launcher defaults, so it uses automatic launcher resolution without another override. It conflicts only with explicit `--cd` and composes with canonical `--launch`, `--ignore-configured-launcher`, and launcher selectors such as `--vscode`, `--cursor`, `--kiro`, `--tmux`, `--sesh`, and `--herdr`; an explicit selector remains authoritative while `--tab` controls its disposition, and the selected adapter decides capability. `switch --tab --launch` and `switch --tab --ignore-configured-launcher` are compatible same-intent combinations. `switch --tab --json` returns `JSON_UNSUPPORTED_FOR_MODE` with `details.mode: "launch"` and exits `2`.
 
 For create, the complete precedence examples are:
 
@@ -494,7 +505,7 @@ The exact tab JSON refusal envelopes include these command fields and modes:
 
 For each refusal, Arashi emits exactly one JSON document on stdout and keeps stderr silent. Enforce the guard independently at both the Commander action boundary and the exported executor, before option or context validation and before workspace, configuration, or terminal discovery. Therefore conflicting launcher flags, absent context evidence, and direct exported calls still receive the command-specific envelope before any repository, worktree, config, or launcher lookup.
 
-Managed context outranks the outer terminal. For example, Ghostty inside tmux uses a tmux window; Ghostty inside Herdr uses a Herdr tab; cmux uses a workspace (its vertical-tab equivalent). Bare macOS Ghostty 1.3+ uses a Ghostty tab. Bare Terminal.app returns `TAB_DISPOSITION_UNSUPPORTED` before target preflight, AppleScript, command execution, or fallback launch. To use a true Terminal.app tab, press Command-T manually, then run `arashi switch --cd`; this requires active Arashi shell integration. To request normal automatic launch, run `arashi switch --no-cd --no-default-launch` directly; it opens a new Terminal window when automatic launcher resolution selects Terminal.app. Bare Git Bash/MinTTY returns an actionable `TAB_DISPOSITION_UNSUPPORTED` and does not fall back to a new window. An automatically detected IDE whose CLI is unavailable continues canonical terminal/platform resolution; after that resolution, apply the selected launcher's tab mapping or capability, and do not classify the unavailable IDE as a selected unsupported IDE.
+Managed context outranks the outer terminal. For example, Ghostty inside tmux uses a tmux window; Ghostty inside Herdr uses a Herdr tab; cmux uses a workspace (its vertical-tab equivalent). Bare macOS Ghostty 1.3+ uses a Ghostty tab. Bare Terminal.app returns `TAB_DISPOSITION_UNSUPPORTED` before target preflight, AppleScript, command execution, or fallback launch. To use a true Terminal.app tab, press Command-T manually, then run `arashi switch --cd`; this requires active Arashi shell integration. To request normal automatic launch, run `arashi switch --launch --ignore-configured-launcher` directly; it opens a new Terminal window when automatic launcher resolution selects Terminal.app. Bare Git Bash/MinTTY returns an actionable `TAB_DISPOSITION_UNSUPPORTED` and does not fall back to a new window. An automatically detected IDE whose CLI is unavailable continues canonical terminal/platform resolution; after that resolution, apply the selected launcher's tab mapping or capability, and do not classify the unavailable IDE as a selected unsupported IDE.
 
 | Launcher/context | Default `window` disposition | Explicit `tab` disposition |
 |---|---|---|
@@ -598,13 +609,17 @@ Use `arashi shell install` to enable parent-shell switching for bash, zsh, or fi
 
 Precedence for create/switch launch behavior is: explicit flag > opt-out flag > config default > built-in default. `--tmux` is a per-invocation-only override: configured `auto` remains the persistent contextual path to plain tmux. In zero-config standalone and configured repositories alike, explicit tmux requires a non-empty trimmed `TMUX` and does not fall back after prerequisite or process failure.
 
-For switch, `--tmux` conflicts with `--cd` and any explicit launcher in `--sesh`, `--herdr`, `--vscode`, `--cursor`, or `--kiro`. `--tmux --no-cd` is compatible launch intent, and `--tmux --no-default-launch` keeps explicit tmux authoritative while bypassing configured launchers. For create, `--tmux` implies launch and target selection: `--tmux --no-launch` and `--tmux --no-switch` still create and launch the primary worktree, while create `--tmux` conflicts with `--sesh` or `--herdr`.
+For switch, `--tmux` conflicts with `--cd` and any explicit launcher in `--sesh`, `--herdr`, `--vscode`, `--cursor`, or `--kiro`. `--tmux --launch` is compatible launch intent, and `--tmux --ignore-configured-launcher` keeps explicit tmux authoritative while bypassing configured launchers. For create, `--tmux` implies launch and target selection: `--tmux --no-launch` and `--tmux --no-switch` still create and launch the primary worktree, while create `--tmux` conflicts with `--sesh` or `--herdr`.
 
 Both `switch --json --tmux` and `create --json --tmux` return one structured `JSON_UNSUPPORTED_FOR_MODE` document before context validation, conflicts, launch, hooks, or repository mutation. Switch retains its `launch` mode label; create retains its `interactive-or-launch` mode label. A missing tmux context therefore creates nothing. A `tmux new-window` process failure after successful create preserves successfully created worktrees and does not try another launcher.
 
 The configured vocabularies do not gain `tmux`: `defaults.switch.mode` still accepts only `auto`, `cd`, `launch`, `sesh`, and `herdr`, while `defaults.create.launch` still accepts only `none`, `auto`, `sesh`, and `herdr`. Configured `auto` can continue choosing plain tmux contextually.
 
-For switch, `--no-cd` forces launch while preserving a configured explicit launcher. `--no-default-launch` bypasses only configured `sesh` or `herdr`; it leaves configured `auto`, `cd`, and `launch` behavior intact. Do not combine switch `--herdr` with `--sesh` or an IDE launcher, or either Herdr flag with `--json`.
+For switch, `--launch` forces launch while preserving a configured explicit launcher. `--ignore-configured-launcher` bypasses only configured `sesh` or `herdr`; it leaves configured `auto`, `cd`, and `launch` behavior intact. Do not combine switch `--herdr` with `--sesh` or an IDE launcher, or either Herdr flag with `--json`.
+
+### Deprecated CLI compatibility migration
+
+Deprecated compatibility syntax remains accepted throughout Arashi 1.x: `--no-cd` maps to `--launch`, `--no-default-launch` maps to `--ignore-configured-launcher`, and `handoff --markdown` maps to omitting the format flag because Markdown is the default. Use only the canonical forms in actionable commands; removal is no earlier than 2.0 and requires a separately approved breaking-change issue.
 
 ### Legacy create-default migration
 
@@ -647,7 +662,7 @@ Arashi rejects `cd` plus `sesh` or `herdr`, and rejects opposite explicit launch
 ### Herdr launch contract and safety
 
 - `switch --herdr` opens or focuses the selected existing worktree. `create --herdr` creates worktrees first and then opens the primary worktree; launch failure preserves every successful Git creation.
-- Configure switch with `defaults.switch.mode: "herdr"`; configure generic or matching editor-scoped create with `launch: "herdr"`. `--no-default-launch` bypasses configured switch Herdr for one invocation; `--no-launch` suppresses configured create launch.
+- Configure switch with `defaults.switch.mode: "herdr"`; configure generic or matching editor-scoped create with `launch: "herdr"`. `--ignore-configured-launcher` bypasses configured switch Herdr for one invocation; `--no-launch` suppresses configured create launch.
 - Arashi resolves the repository's absolute non-bare main checkout for Herdr `--cwd`. Do not substitute a linked worktree or a bare repository; a missing source fails actionably without another launcher.
 - The approved argv contract is `herdr worktree open --cwd <source-checkout> --path <existing-worktree> --label '<repo-name>: <branch-name>' --focus --json`. Paths and labels are separate process arguments, not shell-interpolated text.
 - This default workspace-launch contract is distinct from `--tab --herdr`: tab disposition uses `herdr tab create` in the active workspace, requires a non-empty exact `HERDR_WORKSPACE_ID`, and does not resolve or require the non-bare source checkout used by `herdr worktree open`.
