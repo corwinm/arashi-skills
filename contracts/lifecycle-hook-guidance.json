@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "requiredFiles": [
+    "references/hooks.md",
+    "references/tutorial.md"
+  ],
+  "surfaces": {
+    "references/hooks.md": [
+      "install -m 755 .arashi/hooks/pre-create.sh.example .arashi/hooks/pre-create.sh",
+      "Copy-Item .arashi/hooks/pre-create.ps1.example .arashi/hooks/pre-create.ps1",
+      "Configured create does not discover repository-local or user-global hooks.",
+      "| Workspace `pre-create` | Once per command, before branch or worktree mutation | Configured workspace root |",
+      "| Repository `pre-create.<repo>` | After that child worktree is materialized, before its repository setup | New child worktree |",
+      "| Repository `post-create.<repo>` | After that repository pre-create hook | New child worktree |",
+      "| Workspace `post-create` | Once after coordinated Git creation, before move-changes or switch/launch handling | Configured workspace root |",
+      "repository → workspace → global-targeted → global-shared",
+      "Workspace and shared remove hooks therefore run once per target repository",
+      "Standalone mode discovers only user-global targeted and shared hooks",
+      "`~/.arashi/hooks/<main-root-basename>/<lifecycle><ext>` before `~/.arashi/hooks/<lifecycle><ext>`",
+      "repository-local or workspace-root `.arashi/hooks` content is inactive without configured workspace state",
+      "POSIX discovers only `.sh`; Windows discovers `.ps1`, `.cmd`, and `.bat` case-insensitively",
+      "Multiple supported candidates for one logical location fail before lifecycle mutation",
+      "Windows does not run `.sh` lifecycle hooks through implicit Git Bash",
+      "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File <absolute-script-path>",
+      "cmd.exe /d /e:on /v:off /s /c call <encoded-absolute-script-path>",
+      "`ARASHI_HOOK_NAME`, `ARASHI_HOOK_SCOPE`, `ARASHI_HOOK_SOURCE_PATH`, `ARASHI_HOOK_EXECUTION_PATH`, `ARASHI_HOOK_WORKSPACE_MODE`, and `ARASHI_MAIN_REPO_PATH`",
+      "`ARASHI_BRANCH_NAME` is the requested create branch",
+      "`ARASHI_HOOK_TARGET_REPOSITORY`, `ARASHI_HOOK_TARGET_REPO_PATH`, and `ARASHI_HOOK_TARGET_WORKTREE_PATH`",
+      "`ARASHI_PARENT_REPO_PATH` is set only for configured repository-specific create hooks",
+      "`ARASHI_REMOVE_TARGETS_JSON` is the canonical command-wide remove aggregate",
+      "supported throughout 1.x but non-canonical",
+      "may be removed no earlier than 2.0 through a separately approved breaking change",
+      "The default lifecycle-hook timeout is `300000` milliseconds",
+      "`hooks.timeout` accepts only integers from `1` through `2147483647`",
+      "Create-hook validation, timeout, or nonzero failure fails create and enters the owned Git rollback boundary",
+      "A failing `pre-remove` aborts removal before destructive mutation",
+      "`post-remove` still runs after removal attempts, including partial failures",
+      "Follow the repository's committed `packageManager` and lockfile; do not infer npm from `package.json` alone.",
+      "CI=true corepack pnpm --ignore-workspace install --frozen-lockfile",
+      "$env:CI = \"true\"",
+      "set \"CI=true\""
+    ],
+    "references/tutorial.md": [
+      "install -m 755 .arashi/hooks/pre-remove.sh.example .arashi/hooks/pre-remove.sh",
+      "Activate exactly one reviewed example at a time",
+      "On Windows, copy exactly one native `.ps1`, `.cmd`, or `.bat` example",
+      "For zero-config operation, do not activate configless local `.arashi/hooks`; standalone mode uses only targeted/shared user-global hooks."
+    ]
+  },
+  "forbiddenPatterns": [
+    "\\bARASHI_BRANCH\\b",
+    "\\bARASHI_BASE_BRANCH\\b",
+    "cp \\.arashi/hooks/[^\\n]+ \\.arashi/hooks/[^\\n]+\\n(?:cp \\.arashi/hooks/)",
+    "Windows lifecycle hooks require Git Bash"
+  ]
+}
