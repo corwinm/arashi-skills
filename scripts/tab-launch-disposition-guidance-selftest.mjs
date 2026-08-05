@@ -53,6 +53,7 @@ const requirements = new Map([
       "arashi create feature-auth --tab --dry-run",
       "`create --tab` implies launch and switch",
       "wins over `--no-launch` and `--no-switch`",
+      "bypasses configured generic or editor-scoped launch defaults",
       "`create --tab --launch` and `create --tab --switch` are compatible",
       "`create --tab --json` returns `JSON_UNSUPPORTED_FOR_MODE`",
       "`details.mode: \"interactive-or-launch\"`",
