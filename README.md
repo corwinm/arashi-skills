@@ -23,6 +23,7 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 ├── contracts/
 │   ├── command-coverage.json
 │   ├── create-launch-config.json
+│   ├── lifecycle-hook-guidance.json
 │   └── switch-config.json
 ├── skills/
 │   └── arashi/
@@ -69,6 +70,7 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 - Canonical gate command: `node scripts/security-gate.mjs --root . --exceptions security/audit-exceptions.json`
 - Security gate self-test: `node scripts/security-gate-selftest.mjs`
 - Standalone source/package coverage: `node scripts/standalone-guidance-selftest.mjs`
+- Lifecycle-hook source/package coverage: `node scripts/lifecycle-hook-guidance-selftest.mjs`
 - Switch-mode source/package coverage: `node scripts/switch-mode-guidance-selftest.mjs`
 - Explicit tmux source/package coverage: `node scripts/tmux-launch-guidance-selftest.mjs`
 - Managed Kitty source/package coverage: `node scripts/kitty-session-guidance-selftest.mjs`
