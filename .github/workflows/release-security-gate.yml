@@ -34,6 +34,10 @@ jobs:
         run: |
           node scripts/bare-init-worktree-default-guidance-selftest.mjs
 
+      - name: Validate lifecycle-hook guidance
+        run: |
+          node scripts/lifecycle-hook-guidance-selftest.mjs
+
       - name: Validate unified switch-mode guidance
         run: node scripts/switch-mode-guidance-selftest.mjs
 
@@ -66,12 +70,13 @@ jobs:
       - name: Create skill artifact
         run: tar -czf arashi-skill-package.tar.gz skills/ README.md LICENSE security/
 
-      - name: Validate packaged standalone, bare-init, switch-mode, create-launch, tmux, Kitty, and tab-disposition guidance
+      - name: Validate packaged standalone, bare-init, lifecycle-hook, switch-mode, create-launch, tmux, Kitty, and tab-disposition guidance
         run: |
           mkdir package-check
           tar -xzf arashi-skill-package.tar.gz -C package-check
           node scripts/standalone-guidance-selftest.mjs --skill-root package-check/skills/arashi
           node scripts/bare-init-worktree-default-guidance-selftest.mjs --skill-root package-check/skills/arashi
+          node scripts/lifecycle-hook-guidance-selftest.mjs --skill-root package-check/skills/arashi
           node scripts/switch-mode-guidance-selftest.mjs --skill-root package-check/skills/arashi
           node scripts/create-launch-guidance-selftest.mjs --skill-root package-check/skills/arashi
           node scripts/tmux-launch-guidance-selftest.mjs --skill-root package-check/skills/arashi
