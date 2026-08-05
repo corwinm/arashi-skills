@@ -52,6 +52,9 @@ const requirements = new Map([
       "`update --check` conflicts with `--dry-run` and `-n`",
       "before release lookup, installer planning, package-manager execution, binary replacement, or mutation",
       "both the native Commander path and the npm-managed wrapper path",
+      "Bare `update --json` is inspection-only",
+      "never prompts or applies an update",
+      "`update --json --yes` returns one `JSON_UNSUPPORTED_FOR_MODE` envelope",
       "do not claim native shell completion",
     ],
   ],
@@ -118,6 +121,19 @@ function validateSkill(root, label) {
       );
     }
   }
+  const commands = readFileSync(join(root, "references", "commands.md"), "utf8");
+  assert.ok(
+    commands.includes(
+      "Bare `update --json` is inspection-only in both paths: it reports the update plan in one envelope and never prompts or applies an update.",
+    ),
+    `${label}/references/commands.md has invalid bare update JSON policy; both native and npm paths must be inspection-only without prompt or mutation`,
+  );
+  assert.ok(
+    commands.includes(
+      "`update --json --yes` returns one `JSON_UNSUPPORTED_FOR_MODE` envelope for installer apply before mutation.",
+    ),
+    `${label}/references/commands.md has invalid JSON apply policy; installer-apply rejection must occur before mutation`,
+  );
   validateDeprecatedUsage(root, label);
 }
 
@@ -176,6 +192,20 @@ function validateDeliberateDrift() {
       () => validateSkill(packagedSkillRoot, "deliberate-drift"),
       /exact generic automatic-launch request/,
       "checker accepted semantic drift that made launcher-ignore force generic launch",
+    );
+    writeFileSync(commandsPath, original);
+
+    writeFileSync(commandsPath, original.replace("in both paths", "in the native path only"));
+    assert.throws(
+      () => validateSkill(packagedSkillRoot, "deliberate-native-only-json"),
+      /invalid bare update JSON policy/,
+      "checker accepted bare update JSON guidance that excluded the npm wrapper",
+    );
+    writeFileSync(commandsPath, original.replace("before mutation.", "after mutation."));
+    assert.throws(
+      () => validateSkill(packagedSkillRoot, "deliberate-after-mutation-json-apply"),
+      /invalid JSON apply policy/,
+      "checker accepted JSON installer apply rejection after mutation",
     );
     writeFileSync(commandsPath, original);
 

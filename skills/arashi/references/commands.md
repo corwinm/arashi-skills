@@ -44,6 +44,8 @@ arashi update --yes
 
 `update --check` conflicts with `--dry-run` and `-n`. Arashi rejects either combination before release lookup, installer planning, package-manager execution, binary replacement, or mutation in both the native Commander path and the npm-managed wrapper path.
 
+Bare `update --json` is inspection-only in both paths: it reports the update plan in one envelope and never prompts or applies an update. `update --json --yes` returns one `JSON_UNSUPPORTED_FOR_MODE` envelope for installer apply before mutation.
+
 Expected outcomes:
 
 - npm-managed installs update only when Arashi can confidently detect a supported package manager.
