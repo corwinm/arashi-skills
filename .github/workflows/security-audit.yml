@@ -62,3 +62,8 @@ jobs:
         run: |
           node scripts/tab-launch-disposition-guidance-selftest.mjs
           node scripts/tab-launch-disposition-guidance-selftest.mjs --skill-root package-check/skills/arashi
+
+      - name: Validate CLI flag rationalization guidance source and package boundary
+        run: |
+          node scripts/cli-flag-rationalization-guidance-selftest.mjs
+          node scripts/cli-flag-rationalization-guidance-selftest.mjs --skill-root package-check/skills/arashi

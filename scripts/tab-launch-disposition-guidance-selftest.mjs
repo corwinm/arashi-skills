@@ -36,9 +36,9 @@ const requirements = new Map([
       "`switch --tab` expresses explicit launch intent",
       "overrides configured or contextual parent-shell `cd`",
       "bypasses configured launcher defaults",
-      "automatic launcher resolution without requiring `--no-default-launch`",
+      "automatic launcher resolution without another override",
       "conflicts only with explicit `--cd`",
-      "composes with launcher selectors",
+      "composes with canonical `--launch`, `--ignore-configured-launcher`, and launcher selectors",
       "`switch --tab --json` returns `JSON_UNSUPPORTED_FOR_MODE`",
       "`details.mode: \"launch\"`",
       "exits `2`",
@@ -46,8 +46,7 @@ const requirements = new Map([
       "exactly one JSON document on stdout and keeps stderr silent",
       "Commander action boundary and the exported executor",
       "before option or context validation and before workspace, configuration, or terminal discovery",
-      "`switch --tab --no-cd` is compatible launch intent",
-      "`switch --tab --no-default-launch` remains compatible but is redundant",
+      "`switch --tab --launch` and `switch --tab --ignore-configured-launcher` are compatible same-intent combinations",
       "arashi create feature-auth --tab",
       "arashi create feature-auth --tab --no-launch --no-switch",
       "arashi create feature-auth --tab --dry-run",
@@ -221,7 +220,7 @@ function validateSkill(root, label) {
   );
   assert.doesNotMatch(
     commands,
-    /cd "\$\(arashi switch --no-cd --no-default-launch\)"/,
+    /cd "\$\(arashi switch --launch --ignore-configured-launcher\)"/,
     `${label}/references/commands.md must not recommend launch-mode output as a path-only command substitution`,
   );
 

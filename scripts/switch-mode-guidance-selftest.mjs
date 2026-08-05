@@ -24,9 +24,9 @@ const requirements = new Map([
       '"mode": "auto"',
       "`auto`, `cd`, `launch`, `sesh`, and `herdr`",
       "tmux → Herdr → cmux → integrated IDE → Kitty → parent-shell `cd` → terminal application/platform fallback",
-      "arashi switch --no-cd",
-      "arashi switch --no-default-launch",
-      "`--no-default-launch` bypasses only configured `sesh` or `herdr`",
+      "arashi switch --launch feature-auth",
+      "arashi switch --ignore-configured-launcher feature-auth",
+      "`--ignore-configured-launcher` bypasses only configured `sesh` or `herdr`",
       "`launchMode` and `launch_mode`",
       "`cd` plus `sesh` or `herdr`",
       "actionable migration error",
@@ -45,9 +45,9 @@ const requirements = new Map([
   [
     "references/session-shortcuts.md",
     [
-      "arashi switch --no-cd",
+      "arashi switch --launch feature-auth",
       "tmux → Herdr → cmux → integrated IDE → Kitty → parent-shell `cd` → terminal/platform fallback",
-      "configured explicit `sesh` or `herdr` mode",
+      "configured explicit `sesh` or `herdr` launcher",
     ],
   ],
 ]);

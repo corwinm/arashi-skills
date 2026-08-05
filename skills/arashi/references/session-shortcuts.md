@@ -43,8 +43,9 @@ arashi switch --cursor feature-auth
 arashi switch --tmux feature-auth
 arashi switch --herdr feature-auth
 arashi switch --tab feature-auth
-arashi switch --no-cd
-arashi switch --no-default-launch
+arashi switch --launch feature-auth
+arashi switch --ignore-configured-launcher feature-auth
+arashi switch --launch --ignore-configured-launcher feature-auth
 ```
 
 ## Connect with sesh
@@ -97,5 +98,6 @@ Avoid command-substitution keybinds that execute unsanitized output directly.
 - `arashi switch --herdr` opens or focuses the selected existing worktree in Herdr.
 - `arashi create <branch> --herdr` creates worktrees first, then opens the primary worktree in Herdr.
 - if shell integration is inactive, explicit `arashi switch --cd` warns without launching another context; configured `mode: "cd"` warns and falls back to automatic launch.
-- `arashi switch --no-cd` forces launch for one run and retains a configured explicit `sesh` or `herdr` mode.
-- `arashi switch --no-default-launch` bypasses a configured explicit `sesh` or `herdr` mode for one run, but does not erase configured `auto`, `cd`, or `launch` behavior.
+- `arashi switch --launch` forces launch for one run and preserves a configured explicit `sesh` or `herdr` launcher.
+- `arashi switch --ignore-configured-launcher` bypasses a configured explicit `sesh` or `herdr` launcher for one run, but does not independently force or prevent parent-shell `cd` for configured or contextual `auto`, `cd`, or `launch` behavior.
+- `arashi switch --launch --ignore-configured-launcher` requests generic automatic launch; an explicit launcher or `--tab` remains authoritative.

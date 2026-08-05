@@ -76,6 +76,7 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 - Managed Kitty source/package coverage: `node scripts/kitty-session-guidance-selftest.mjs`
 - Create-launch source/package coverage: `node scripts/create-launch-guidance-selftest.mjs`
 - Tab launch-disposition source/package coverage: `node scripts/tab-launch-disposition-guidance-selftest.mjs`
+- CLI flag rationalization source/package coverage: `node scripts/cli-flag-rationalization-guidance-selftest.mjs`
 - Cross-repository command contracts: `(cd ../.. && pnpm contracts:check)`
 - Policy and thresholds: `security/policy.md`
 - Baseline findings and remediation tracking: `security/baseline-findings.md`
