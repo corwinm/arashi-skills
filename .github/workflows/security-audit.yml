@@ -67,3 +67,8 @@ jobs:
         run: |
           node scripts/cli-flag-rationalization-guidance-selftest.mjs
           node scripts/cli-flag-rationalization-guidance-selftest.mjs --skill-root package-check/skills/arashi
+
+      - name: Validate shell-completion guidance source and package boundary
+        run: |
+          node scripts/shell-completion-guidance-selftest.mjs
+          node scripts/shell-completion-guidance-selftest.mjs --skill-root package-check/skills/arashi

@@ -22,10 +22,26 @@ Installation instructions are maintained on the Arashi website:
 
 Use the website flow for your platform and environment policy.
 
-Expected outcome:
+Expected outcomes:
 
 - `arashi --version` exits `0`
 - `arashi --help` exits `0`
+
+## Shell Completion
+
+Arashi generates native completion for each supported shell through one public command:
+
+```bash
+arashi completion bash
+arashi completion zsh
+arashi completion fish
+```
+
+Completion activation and the parent-shell wrapper are separate manual choices. `arashi shell init <shell>` emits only the manual wrapper; it does not activate completion. `arashi shell install` owns both wrapper and completion activation lines in its managed profile block, and repeated installs idempotently upgrade the complete block. Use the manual commands in [the tutorial](tutorial.md) when you want to activate either feature independently.
+
+Static command and option completion works outside a configured workspace. Dynamic candidates are limited to repository names for `--only`, configured groups for `--group`, worktrees or branches for worktree selectors, supported shell names, and finite constrained option values; unclassified slots receive no local candidates. Local discovery is bounded, read-only, non-mutating, and silently empty outside a workspace or when discovery fails. Generated completion functions invoke `command arashi` so wrapper functions cannot recursively intercept completion queries.
+
+Zsh and Fish can present candidate descriptions from Arashi's shared completion model. Bash's native programmable-completion UI does not generally display per-candidate descriptions, although the shared model retains them. The npm-managed wrapper and standalone binary expose the same completion behavior and generated shell output for a given release.
 
 ## Updating Arashi
 

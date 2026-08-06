@@ -57,6 +57,9 @@ jobs:
       - name: Validate CLI flag rationalization guidance
         run: node scripts/cli-flag-rationalization-guidance-selftest.mjs
 
+      - name: Validate shell-completion guidance
+        run: node scripts/shell-completion-guidance-selftest.mjs
+
   package-skill:
     runs-on: ubuntu-latest
     needs:
@@ -86,6 +89,7 @@ jobs:
           node scripts/kitty-session-guidance-selftest.mjs --skill-root package-check/skills/arashi
           node scripts/tab-launch-disposition-guidance-selftest.mjs --skill-root package-check/skills/arashi
           node scripts/cli-flag-rationalization-guidance-selftest.mjs --skill-root package-check/skills/arashi
+          node scripts/shell-completion-guidance-selftest.mjs --skill-root package-check/skills/arashi
 
       - name: Upload skill artifact
         uses: actions/upload-artifact@v7

@@ -48,6 +48,8 @@ const CONTENT_RULES = [
     key: "no-eval",
     severity: "high",
     pattern: /\beval\s+/i,
+    allowedPattern:
+      /^\s*eval "\$\(command arashi shell init (?:bash|zsh)\)"\s*$/,
     why: "eval executes dynamically assembled shell content and is difficult to audit safely.",
     fix: "Use explicit commands and avoid dynamic code execution patterns.",
   },
@@ -271,7 +273,7 @@ function scanContent(files, root) {
 
     lines.forEach((line, index) => {
       CONTENT_RULES.forEach((rule) => {
-        if (rule.pattern.test(line)) {
+        if (rule.pattern.test(line) && !rule.allowedPattern?.test(line)) {
           findings.push({
             code: rule.code,
             key: rule.key,

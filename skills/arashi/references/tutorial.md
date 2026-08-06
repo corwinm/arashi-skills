@@ -35,6 +35,33 @@ Success criteria:
 - if `arashi --version` exits immediately or returns `137`, stop and reinstall using a pinned version from the website guide
 - help output lists commands
 
+### Optional shell wrapper and completion activation
+
+Enable the wrapper and completion independently when configuring a shell manually. The wrapper enables parent-shell behavior such as `switch --cd`; completion supplies command, option, and safe local-value suggestions.
+
+For Bash:
+
+```bash
+eval "$(command arashi shell init bash)"
+source <(command arashi completion bash)
+```
+
+For Zsh:
+
+```zsh
+eval "$(command arashi shell init zsh)"
+source <(command arashi completion zsh)
+```
+
+For Fish:
+
+```fish
+command arashi shell init fish | source
+command arashi completion fish | source
+```
+
+Keep only the line for the feature you want when enabling one without the other. `arashi shell install` writes and idempotently upgrades both activation lines in its managed block; use it instead of maintaining the manual lines when you want Arashi to own the complete shell setup.
+
 ## Step 4: Run First Workflow
 
 Choose where you want the workspace repository to live before running `arashi init`:
