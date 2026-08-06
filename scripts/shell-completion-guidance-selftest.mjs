@@ -23,6 +23,14 @@ const suppliedSkillRoot =
 if (skillRootArgumentIndex >= 0 && !suppliedSkillRoot) {
   throw new Error("--skill-root requires a path");
 }
+const metaRootArgumentIndex = process.argv.indexOf("--meta-root");
+const suppliedMetaRoot =
+  metaRootArgumentIndex >= 0
+    ? process.argv[metaRootArgumentIndex + 1]
+    : undefined;
+if (metaRootArgumentIndex >= 0 && !suppliedMetaRoot) {
+  throw new Error("--meta-root requires a path");
+}
 
 const requirements = new Map([
   [
@@ -34,8 +42,13 @@ const requirements = new Map([
       "`arashi shell init <shell>` emits only the manual wrapper",
       "`arashi shell install` owns both wrapper and completion activation lines",
       "Static command and option completion works outside a configured workspace",
-      "repository names for `--only`, configured groups for `--group`, worktrees or branches for worktree selectors, supported shell names, and finite constrained option values",
-      "bounded, read-only, non-mutating, and silently empty outside a workspace or when discovery fails",
+      "each `--only` segment completes repository names",
+      "`switch [filter]` and `remove [target]` complete branch, worktree name, or path values",
+      "`--path` narrows them to exact worktree paths",
+      "`move --from` and `move --to` complete workspace branch, name, or path references",
+      "200 ms whole-query budget",
+      "no network requests, hooks, prompts, workspace mutation, or child-repository operations",
+      "Budget expiry or discovery failure is silently empty",
       "`command arashi` so wrapper functions cannot recursively intercept completion queries",
       "Bash's native programmable-completion UI does not generally display per-candidate descriptions",
       "npm-managed wrapper and standalone binary expose the same completion behavior",
@@ -57,10 +70,11 @@ const requirements = new Map([
   [
     "references/troubleshooting.md",
     [
-      "`arashi completion bash\\|zsh\\|fish` emits nothing or fails",
+      "arashi completion bash",
       "run `command arashi completion <shell>` directly",
       "Static completion remains available outside configured workspaces",
-      "Dynamic completion is intentionally empty when local discovery is unavailable or fails",
+      "Dynamic completion is intentionally empty",
+      "200 ms whole-query budget expires",
       "npm-managed install, run `arashi install` once",
       "standalone binary from the same release",
     ],
@@ -108,7 +122,7 @@ function validateSkill(root, label) {
   const commands = readFileSync(join(root, "references", "commands.md"), "utf8");
   assert.ok(
     commands.includes(
-      "Dynamic candidates are limited to repository names for `--only`, configured groups for `--group`, worktrees or branches for worktree selectors, supported shell names, and finite constrained option values; unclassified slots receive no local candidates.",
+      "Dynamic ownership is exact: each `--only` segment completes repository names; each `--group` segment completes configured groups; `switch [filter]` and `remove [target]` complete branch, worktree name, or path values, while `--path` narrows them to exact worktree paths; `move --from` and `move --to` complete workspace branch, name, or path references; supported-shell arguments and finite constrained options complete only their declared values; unclassified slots receive no local candidates.",
     ),
     `${label}/references/commands.md does not bind the bounded candidate classes to their constrained slots`,
   );
@@ -151,6 +165,25 @@ function validateWorkflowWiring() {
   }
 }
 
+function validateCoordinatedWorkflowWiring(metaRoot) {
+  const workflow = readFileSync(
+    join(metaRoot, ".github", "workflows", "cross-repo-command-contracts.yml"),
+    "utf8",
+  );
+  for (const expected of [
+    "completion:generate",
+    "completion:check",
+    "pnpm --dir repos/arashi-docs validate:shell-completion-docs",
+    "node repos/arashi-skills/scripts/shell-completion-guidance-selftest.mjs",
+    "node repos/arashi-skills/scripts/shell-completion-guidance-selftest.mjs --skill-root package-check/skills/arashi",
+  ]) {
+    assert.ok(
+      workflow.includes(expected),
+      `coordinated workflow does not directly reach ${expected}`,
+    );
+  }
+}
+
 function validateCommandCoverage() {
   const coverage = JSON.parse(
     readFileSync(join(repositoryRoot, "contracts", "command-coverage.json"), "utf8"),
@@ -177,7 +210,7 @@ function validateDeliberateDrift() {
     const original = readFileSync(commandsPath, "utf8");
 
     const dynamicContract =
-      "Dynamic candidates are limited to repository names for `--only`, configured groups for `--group`, worktrees or branches for worktree selectors, supported shell names, and finite constrained option values; unclassified slots receive no local candidates.";
+      "Dynamic ownership is exact: each `--only` segment completes repository names; each `--group` segment completes configured groups; `switch [filter]` and `remove [target]` complete branch, worktree name, or path values, while `--path` narrows them to exact worktree paths; `move --from` and `move --to` complete workspace branch, name, or path references; supported-shell arguments and finite constrained options complete only their declared values; unclassified slots receive no local candidates.";
     assert.equal(
       original.split(dynamicContract).length - 1,
       1,
@@ -192,7 +225,7 @@ function validateDeliberateDrift() {
     );
     assert.throws(
       () => validateSkill(packagedSkillRoot, "deliberate-dynamic-drift"),
-      /bounded candidate classes|configured groups for `--group`/,
+      /bounded candidate classes|each `--only` segment completes repository names|configured groups for `--group`/,
       "checker accepted unbounded dynamic candidates outside constrained slots",
     );
 
@@ -231,6 +264,7 @@ function main() {
   validateSkill(sourceSkillRoot, "source");
   validateCommandCoverage();
   validateWorkflowWiring();
+  if (suppliedMetaRoot) validateCoordinatedWorkflowWiring(resolve(suppliedMetaRoot));
   validateDeliberateDrift();
   console.log(
     `Shell-completion guidance self-test passed for source, workflows, and deliberate drift (${requirements.size} surfaces)`,

@@ -50,25 +50,30 @@ function testPassOnCleanContent() {
 
 function testAllowCanonicalShellInitEvalOnly() {
   const root = makeCase("allow-shell-init-eval");
-  writeFileSync(
-    join(root, "skills", "arashi", "SKILL.md"),
-    'eval "$(command arashi shell init bash)"\n',
-  );
+  const skillPath = join(root, "skills", "arashi", "SKILL.md");
+  for (const shell of ["bash", "zsh"]) {
+    writeFileSync(skillPath, `eval "$(command arashi shell init ${shell})"\n`);
+    const allowed = runGate(root);
+    assert.equal(
+      allowed.status,
+      0,
+      `gate should allow canonical trusted ${shell} wrapper activation`,
+    );
+  }
 
-  const allowed = runGate(root);
-  assert.equal(
-    allowed.status,
-    0,
-    "gate should allow the canonical trusted shell-init wrapper activation",
-  );
-
-  writeFileSync(
-    join(root, "skills", "arashi", "SKILL.md"),
-    'eval "$(command arashi completion bash)"\n',
-  );
-  const rejected = runGate(root);
-  assert.equal(rejected.status, 1, "gate should continue rejecting other eval commands");
-  assert.match(rejected.stdout, /ATH005/, "gate should report ATH005 for other eval commands");
+  for (const command of [
+    'eval "$(command arashi completion bash)"',
+    'eval "$(command arashi shell init fish)"',
+    'eval "$(arashi shell init bash)"',
+    'eval "$(command arashi shell init bash); touch /tmp/injected"',
+    'eval "$(command arashi shell init bash)$(printf injected)"',
+    "eval '$(command arashi shell init bash)'",
+  ]) {
+    writeFileSync(skillPath, `${command}\n`);
+    const rejected = runGate(root);
+    assert.equal(rejected.status, 1, `gate should reject ${command}`);
+    assert.match(rejected.stdout, /ATH005/, `gate should report ATH005 for ${command}`);
+  }
 
   rmSync(root, { recursive: true, force: true });
 }
