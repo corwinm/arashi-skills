@@ -30,6 +30,7 @@
       "`ARASHI_REMOVE_TARGETS_JSON` is the canonical command-wide remove aggregate",
       "`ARASHI_HOOK_INPUT` is executor-owned and is always `tty`, `disabled`, or `unavailable`",
       "`--no-hook-input` disables terminal input for that invocation without skipping hooks",
+      "`--no-hooks` skips execution, while create's unrelated `--interactive` option controls repository selection",
       "`--json` always takes precedence and sets `ARASHI_HOOK_INPUT=disabled`",
       "Disabled and unavailable hooks receive immediate EOF",
       "There is no persistent `hooks.input` configuration",

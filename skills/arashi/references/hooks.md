@@ -45,7 +45,7 @@ Arashi passes the script path as protected interpreter input and preflights the 
 `ARASHI_HOOK_INPUT` is executor-owned and is always `tty`, `disabled`, or `unavailable`. Arashi resolves one mode for the complete command invocation:
 
 - An eligible human `create` or `remove` invocation with terminal stdin receives `tty`; hooks inherit stdin and may prompt.
-- `--no-hook-input` disables terminal input for that invocation without skipping hooks. `--json` always takes precedence and sets `ARASHI_HOOK_INPUT=disabled`.
+- `--no-hook-input` disables terminal input for that invocation without skipping hooks. `--no-hooks` skips execution, while create's unrelated `--interactive` option controls repository selection. `--json` always takes precedence and sets `ARASHI_HOOK_INPUT=disabled`.
 - A non-TTY invocation that was not explicitly disabled receives `unavailable`.
 
 Disabled and unavailable hooks receive immediate EOF instead of an open, unwritten pipe. Dry runs do not execute hooks. There is no persistent `hooks.input` configuration; this policy is deliberately invocation-only.
