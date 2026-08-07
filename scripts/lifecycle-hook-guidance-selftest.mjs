@@ -6,6 +6,7 @@ import {
   existsSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -30,10 +31,8 @@ function validateSkill(root, label) {
     assert.ok(existsSync(join(root, relativePath)), `${label}/${relativePath} is missing`);
   }
 
-  const guidance = [];
   for (const [relativePath, expectedTexts] of Object.entries(contract.surfaces)) {
     const content = readFileSync(join(root, relativePath), "utf8");
-    guidance.push(content);
     for (const expected of expectedTexts) {
       assert.ok(
         content.includes(expected),
@@ -42,7 +41,7 @@ function validateSkill(root, label) {
     }
   }
 
-  const allGuidance = guidance.join("\n");
+  const allGuidance = collectInstallableGuidance(root);
   for (const pattern of contract.forbiddenPatterns) {
     assert.doesNotMatch(
       allGuidance,
@@ -51,12 +50,28 @@ function validateSkill(root, label) {
     );
   }
 
+  for (const line of allGuidance.split("\n")) {
+    if (/hooks\.input/i.test(line) && !/there is no persistent `?hooks\.input`?/i.test(line)) {
+      assert.fail(`${label} publishes contradictory persistent hooks.input guidance: ${line.trim()}`);
+    }
+  }
+
   const skill = readFileSync(join(root, "SKILL.md"), "utf8");
   assert.doesNotMatch(
     skill,
     /ARASHI_HOOK_TARGET|ARASHI_REMOVE_TARGETS_JSON|powershell\.exe|cmd\.exe/,
     `${label}/SKILL.md must remain a routing surface; detailed hook semantics belong in references`,
   );
+}
+
+function collectInstallableGuidance(root) {
+  const content = [];
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    const path = join(root, entry.name);
+    if (entry.isDirectory()) content.push(collectInstallableGuidance(path));
+    else if (/\.(?:md|txt|json)$/i.test(entry.name)) content.push(readFileSync(path, "utf8"));
+  }
+  return content.join("\n");
 }
 
 function validateWorkflowWiring() {
@@ -146,6 +161,23 @@ function validateDeliberateDrift() {
       () => validateSkill(driftSkillRoot, "deliberate-input-mode-drift"),
       /ARASHI_HOOK_INPUT/,
       "checker accepted deliberate hook-input mode drift",
+    );
+
+    writeFileSync(hooksPath, hooks);
+    const commandsPath = join(driftSkillRoot, "references", "commands.md");
+    const commands = readFileSync(commandsPath, "utf8");
+    writeFileSync(commandsPath, `${commands}\nPowerShell hooks use -NonInteractive.\n`);
+    assert.throws(
+      () => validateSkill(driftSkillRoot, "deliberate-powershell-drift"),
+      /-NonInteractive/,
+      "checker accepted stale PowerShell invocation outside the required surfaces",
+    );
+
+    writeFileSync(commandsPath, `${commands}\nConfigure hooks.input: auto for prompts.\n`);
+    assert.throws(
+      () => validateSkill(driftSkillRoot, "deliberate-persistent-input-drift"),
+      /persistent hooks\.input guidance/,
+      "checker accepted contradictory persistent hook-input guidance",
     );
   } finally {
     rmSync(driftRoot, { recursive: true, force: true });
