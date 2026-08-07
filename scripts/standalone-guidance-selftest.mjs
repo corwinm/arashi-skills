@@ -146,6 +146,7 @@ function validateCoverageContract() {
   const commands = new Map(contract.commands.map((command) => [command.name, command]));
   const expectedSupport = new Map([
     ...[
+      "completion",
       "create",
       "doctor",
       "handoff",

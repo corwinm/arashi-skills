@@ -22,10 +22,26 @@ Installation instructions are maintained on the Arashi website:
 
 Use the website flow for your platform and environment policy.
 
-Expected outcome:
+Expected outcomes:
 
 - `arashi --version` exits `0`
 - `arashi --help` exits `0`
+
+## Shell Completion
+
+Arashi generates native completion for each supported shell through one public command:
+
+```bash
+arashi completion bash
+arashi completion zsh
+arashi completion fish
+```
+
+Completion activation and the parent-shell wrapper are separate manual choices. `arashi shell init <shell>` emits only the manual wrapper; it does not activate completion. `arashi shell install` owns both wrapper and completion activation lines in its managed profile block, and repeated installs idempotently upgrade the complete block. Use the manual commands in [the tutorial](tutorial.md) when you want to activate either feature independently.
+
+Static command and option completion works outside a configured workspace. Dynamic ownership is exact: each `--only` segment completes repository names; each `--group` segment completes configured groups; `switch [filter]` and `remove [target]` complete branch, worktree name, or path values, while `--path` narrows them to exact worktree paths; `move --from` and `move --to` complete workspace branch, name, or path references; supported-shell arguments and finite constrained options complete only their declared values; unclassified slots receive no local candidates. Each request has a 200 ms whole-query budget and uses only local read-only discovery: no network requests, hooks, prompts, workspace mutation, or child-repository operations. Budget expiry or discovery failure is silently empty while static completion remains available. Generated completion functions invoke `command arashi` so wrapper functions cannot recursively intercept completion queries.
+
+Zsh and Fish can present candidate descriptions from Arashi's shared completion model. Bash's native programmable-completion UI does not generally display per-candidate descriptions, although the shared model retains them. The npm-managed wrapper and standalone binary expose the same completion behavior and generated shell output for a given release.
 
 ## Updating Arashi
 
