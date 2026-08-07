@@ -129,6 +129,24 @@ function validateDeliberateDrift() {
       /Repository `pre-create\.<repo>`/,
       "checker accepted deliberate repository hook timing/cwd drift",
     );
+
+    writeFileSync(hooksPath, hooks);
+    const inputMode =
+      "`ARASHI_HOOK_INPUT` is executor-owned and is always `tty`, `disabled`, or `unavailable`";
+    assert.equal(
+      hooks.split(inputMode).length - 1,
+      1,
+      "deliberate drift requires exactly one hook-input mode contract sentence",
+    );
+    writeFileSync(
+      hooksPath,
+      hooks.replace(inputMode, "Hook input mode depends on the active shell"),
+    );
+    assert.throws(
+      () => validateSkill(driftSkillRoot, "deliberate-input-mode-drift"),
+      /ARASHI_HOOK_INPUT/,
+      "checker accepted deliberate hook-input mode drift",
+    );
   } finally {
     rmSync(driftRoot, { recursive: true, force: true });
   }

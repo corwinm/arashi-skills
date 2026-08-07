@@ -2,7 +2,7 @@
 
 Use lifecycle hooks to automate trusted setup and cleanup around `arashi create` and `arashi remove`. For the canonical workflow guide, see https://arashi.haphazard.dev/workflows/hooks/.
 
-Hooks are executable code. Review each script and its provenance before activation, keep it scoped to the lifecycle that needs it, and do not place secrets in hook output.
+Hooks are executable code. Review each script and its provenance before activation, keep it scoped to the lifecycle that needs it, and do not place secrets in hook output. Never enter secrets through lifecycle-hook prompts; hook input is visible to the hook process and may be exposed by the script or its tools.
 
 ## Activate One Example
 
@@ -29,7 +29,7 @@ POSIX discovers only `.sh`; Windows discovers `.ps1`, `.cmd`, and `.bat` case-in
 PowerShell hooks use:
 
 ```text
-powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File <absolute-script-path>
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File <absolute-script-path>
 ```
 
 Command scripts use:
@@ -39,6 +39,47 @@ cmd.exe /d /e:on /v:off /s /c call <encoded-absolute-script-path>
 ```
 
 Arashi passes the script path as protected interpreter input and preflights the required system interpreter before mutation.
+
+## Terminal Input Contract
+
+`ARASHI_HOOK_INPUT` is executor-owned and is always `tty`, `disabled`, or `unavailable`. Arashi resolves one mode for the complete command invocation:
+
+- An eligible human `create` or `remove` invocation with terminal stdin receives `tty`; hooks inherit stdin and may prompt.
+- `--no-hook-input` disables terminal input for that invocation without skipping hooks. `--json` always takes precedence and sets `ARASHI_HOOK_INPUT=disabled`.
+- A non-TTY invocation that was not explicitly disabled receives `unavailable`.
+
+Disabled and unavailable hooks receive immediate EOF instead of an open, unwritten pipe. Dry runs do not execute hooks. There is no persistent `hooks.input` configuration; this policy is deliberately invocation-only.
+
+Before a TTY hook can read, Arashi prints its lifecycle, scope, and target attribution. Hooks execute sequentially, so prompts cannot overlap. Interactive stdout and stderr—including prompts without trailing newlines—are forwarded immediately to the corresponding terminal stream while Arashi retains the same output for diagnostics. JSON mode remains capture-only and writes exactly one JSON document to stdout.
+
+Check availability before reading and treat EOF or a declined answer as an ordinary hook decision. For Bash:
+
+```bash
+if [ "${ARASHI_HOOK_INPUT:-unavailable}" = "tty" ]; then
+  printf 'Continue setup? [y/N] ' >&2
+  IFS= read -r answer || exit 1
+  [ "$answer" = "y" ] || exit 1
+fi
+```
+
+For PowerShell:
+
+```powershell
+if ($env:ARASHI_HOOK_INPUT -eq "tty") {
+  $answer = Read-Host "Continue setup? [y/N]"
+  if ($answer -ne "y") { exit 1 }
+}
+```
+
+For cmd:
+
+```bat
+if /I not "%ARASHI_HOOK_INPUT%"=="tty" exit /b 0
+set /p "answer=Continue setup? [y/N] "
+if /I not "%answer%"=="y" exit /b 1
+```
+
+Use `--no-hook-input` for unattended human-format commands and always make native read commands handle EOF promptly. Never use lifecycle-hook prompts for passwords, tokens, signing material, or other secrets.
 
 ## Configured Create Lifecycle
 
