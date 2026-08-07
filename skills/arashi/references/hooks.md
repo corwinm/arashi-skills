@@ -75,7 +75,8 @@ For cmd:
 
 ```bat
 if /I not "%ARASHI_HOOK_INPUT%"=="tty" exit /b 0
-set /p "answer=Continue setup? [y/N] "
+set "answer="
+set /p "answer=Continue setup? [y/N] " || exit /b 1
 if /I not "%answer%"=="y" exit /b 1
 ```
 
