@@ -139,6 +139,8 @@ On Windows, copy exactly one native `.ps1`, `.cmd`, or `.bat` example for the lo
 
 Use [Lifecycle Hooks](hooks.md) for the configured create timing matrix, configured per-target remove scopes, authoritative environment fields, timeout/failure boundaries, and pinned package-manager examples. Treat every hook as trusted executable code and review its provenance before activation.
 
+Interactive lifecycle-hook input is available only for eligible human `create` and `remove` invocations whose stdin is a terminal. Use `--no-hook-input` when a human invocation must execute hooks without allowing prompts; JSON and non-TTY automation also receive immediate EOF. Hooks can inspect `ARASHI_HOOK_INPUT`, and the detailed guide includes safe native Bash, PowerShell, and cmd patterns. Do not enter secrets into hook prompts.
+
 For zero-config operation, do not activate configless local `.arashi/hooks`; standalone mode uses only targeted/shared user-global hooks. Prefer ordinary `arashi init` if repository-local or workspace-root policy is required.
 
 ## Step 7: Simulate and Recover
