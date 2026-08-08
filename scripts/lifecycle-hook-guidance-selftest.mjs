@@ -106,7 +106,7 @@ function collectInstallableGuidanceFiles(root, current = root) {
 function unsupportedHookInputCommands(content) {
   const unsupported = new Set();
   const actionablePatterns = [
-    /\barashi\s+([a-z][a-z0-9-]*)\b[^\n]*?--no-hook-input\b/gi,
+    /\barashi\s+([a-z][a-z0-9-]*)\b(?:(?!\barashi\s+[a-z][a-z0-9-]*\b)[^\n])*?--no-hook-input\b/gi,
     /\b(add|clone|completion|config|doctor|exec|handoff|init|install|list|move|prune|pull|push|setup|shell|status|switch|sync|update)\s+--no-hook-input\b/gi,
   ];
   for (const pattern of actionablePatterns) {
@@ -244,6 +244,24 @@ function validateDeliberateDrift() {
         validateSkill(driftSkillRoot, "deliberate-unsupported-command-drift"),
       /status --no-hook-input/,
       "checker accepted --no-hook-input guidance for an unsupported command",
+    );
+    writeFileSync(
+      commandsPath,
+      `${commands}\nRun \`arashi status\` before \`arashi create topic --no-hook-input\`.\n`,
+    );
+    assert.doesNotThrow(
+      () => validateSkill(driftSkillRoot, "valid-multiple-command-guidance"),
+      "checker associated --no-hook-input with an earlier command invocation",
+    );
+
+    writeFileSync(
+      commandsPath,
+      `${commands}\nRun \`arashi create topic\` before \`arashi status --no-hook-input\`.\n`,
+    );
+    assert.throws(
+      () => validateSkill(driftSkillRoot, "invalid-multiple-command-guidance"),
+      /status --no-hook-input/,
+      "checker missed --no-hook-input on a later unsupported command invocation",
     );
   } finally {
     rmSync(driftRoot, { recursive: true, force: true });
