@@ -30,6 +30,9 @@ jobs:
         run: |
           node scripts/standalone-guidance-selftest.mjs
 
+      - name: Validate SSH host-alias source guidance
+        run: node scripts/ssh-host-alias-guidance-selftest.mjs
+
       - name: Validate bare init worktree-default guidance
         run: |
           node scripts/bare-init-worktree-default-guidance-selftest.mjs
@@ -81,6 +84,7 @@ jobs:
           mkdir package-check
           tar -xzf arashi-skill-package.tar.gz -C package-check
           node scripts/standalone-guidance-selftest.mjs --skill-root package-check/skills/arashi
+          node scripts/ssh-host-alias-guidance-selftest.mjs --skill-root package-check/skills/arashi
           node scripts/bare-init-worktree-default-guidance-selftest.mjs --skill-root package-check/skills/arashi
           node scripts/lifecycle-hook-guidance-selftest.mjs --skill-root package-check/skills/arashi
           node scripts/switch-mode-guidance-selftest.mjs --skill-root package-check/skills/arashi

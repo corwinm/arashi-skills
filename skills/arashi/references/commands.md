@@ -325,6 +325,32 @@ Expected outcomes:
 
 Run `arashi doctor --json` to inspect missing rules, stale Arashi-owned entries, invalid stored scope, or unsafe configured paths without mutation. Follow its suggested repair; use `arashi init --ignore-scope local` to restore the default when that is the intended preference. Do not repair Arashi by setting `core.excludesFile` or editing any global Git configuration.
 
+## SSH Remote Aliases for Add and Clone
+
+Configured workspaces accept Git's explicit-user SCP form, omitted-user SCP form, and `ssh://` form. For example:
+
+```bash
+arashi add git@work-github:acme/api.git
+arashi add work-github:acme/api.git
+arashi add ssh://git@work-github/acme/api.git
+arashi add ssh://work-github/acme/api.git
+```
+
+The host token is opaque: Git/OpenSSH owns host resolution and authentication. Arashi does not read, manage, or resolve SSH configuration, does not run an independent SSH connectivity probe, and does not synchronize aliases, keys, identities, or routing. It passes the remote to Git and reports Git's failure in the normal command result.
+
+`add` trims outer whitespace once, then uses that same normalized remote for Git, result output, and persisted configuration. `clone` treats configured remotes as authoritative. If HTTPS is inferred or selected, Arashi preserves every configured SSH URL byte-for-byte and never automatically rewrites an SSH remote to HTTPS; a mixed clone run can therefore remain mixed. HTTPS-to-SSH conversion remains supported for an HTTPS source because that source supplies an explicit network host and path.
+
+An unresolved or unauthenticated alias follows the existing command safety behavior. Failed `add` uses the normal add rollback boundary for configuration, clone, setup, and managed-ignore state. During a multi-repository `clone`, one Git failure is recorded for that repository; clone continues with the remaining repositories and reports partial success through the existing human or JSON envelope.
+
+SSH aliases are machine-local, so every machine using a stored alias needs compatible OpenSSH routing. For shared configuration, prefer a canonical committed remote and use a local Git `url.<base>.insteadOf` rule when a developer needs identity-specific routing:
+
+```gitconfig
+[url "git@work-github:"]
+    insteadOf = git@github.com:
+```
+
+The committed Arashi remote can remain `git@github.com:acme/api.git`, while Git rewrites it locally for that developer. Arashi does not install or synchronize that rewrite.
+
 ## Adding a Repository from a Linked Parent Worktree
 
 A direct add from the canonical parent checkout keeps the existing one-clone flow: Arashi clones beneath that checkout's configured `reposDir` and updates that checkout's `.arashi/config.json`.

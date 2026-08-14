@@ -39,6 +39,11 @@ jobs:
           tar -xzf arashi-skill-package.tar.gz -C package-check
           node scripts/bare-init-worktree-default-guidance-selftest.mjs --skill-root package-check/skills/arashi
 
+      - name: Validate SSH host-alias guidance source and package boundary
+        run: |
+          node scripts/ssh-host-alias-guidance-selftest.mjs
+          node scripts/ssh-host-alias-guidance-selftest.mjs --skill-root package-check/skills/arashi
+
       - name: Validate lifecycle-hook guidance source and package boundary
         run: |
           node scripts/lifecycle-hook-guidance-selftest.mjs
