@@ -325,6 +325,18 @@ Expected outcomes:
 
 Run `arashi doctor --json` to inspect missing rules, stale Arashi-owned entries, invalid stored scope, or unsafe configured paths without mutation. Follow its suggested repair; use `arashi init --ignore-scope local` to restore the default when that is the intended preference. Do not repair Arashi by setting `core.excludesFile` or editing any global Git configuration.
 
+## Adding a Repository from a Linked Parent Worktree
+
+A direct add from the canonical parent checkout keeps the existing one-clone flow: Arashi clones beneath that checkout's configured `reposDir` and updates that checkout's `.arashi/config.json`.
+
+From a linked parent worktree, Arashi clones the child beneath the canonical parent checkout's configured `reposDir`, leaves that canonical clone on the detected child default branch, and creates the active child path as a linked worktree on the active parent branch. Only the active parent worktree's `.arashi/config.json` receives the new repository entry; linked add does not edit the canonical parent checkout's tracked configuration. Do not manually create a second clone.
+
+If a matching `origin/<active-parent-branch>` remote-tracking ref exists, the coordinated local branch tracks that ref; otherwise Arashi creates it from the detected child default branch. The canonical clone remains on the child default branch while the active child worktree checks out the coordinated branch.
+
+Before materialization, linked add evaluates effective ignore coverage for both canonical and active destinations. With `local` scope, the common repository exclude authority must cover both destinations; with `tracked` scope, the canonical destination must already be ignored from the canonical checkout before Arashi may reconcile the active branch's `.gitignore`; with `none`, Arashi writes no ignore files, reports each unignored destination, and may continue under the explicit opt-out policy. Linked add never edits the canonical checkout's tracked `.gitignore`; if tracked scope does not already protect the canonical destination, reconcile and commit that rule on the parent main branch before retrying.
+
+Materialization and config persistence are one rollback boundary. If linked-worktree cleanup or final-state observation is incomplete, rollback retains the canonical clone, coordinated branch, and applicable managed-ignore coverage because the surviving linked child depends on the canonical clone's Git common directory. Human and JSON results distinguish the config-relative repository path, canonical clone/default branch, and active worktree/coordinated branch; `--json` remains one document without human progress on stdout.
+
 ## Repository Cloning and Recovery
 
 Before choosing lower-level recovery commands, use `arashi doctor --json` for structured, non-mutating workspace health diagnostics. Follow the reported finding codes, severities, and suggested commands to decide whether to run `status`, `clone`, `prune`, or repository-specific Git commands next.
