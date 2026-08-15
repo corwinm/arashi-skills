@@ -22,6 +22,7 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 .
 ├── contracts/
 │   ├── command-coverage.json
+│   ├── create-base-branch.json
 │   ├── create-launch-config.json
 │   ├── lifecycle-hook-guidance.json
 │   └── switch-config.json
@@ -75,6 +76,7 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 - Explicit tmux source/package coverage: `node scripts/tmux-launch-guidance-selftest.mjs`
 - Managed Kitty source/package coverage: `node scripts/kitty-session-guidance-selftest.mjs`
 - Create-launch source/package coverage: `node scripts/create-launch-guidance-selftest.mjs`
+- Create-base source/package coverage: `node scripts/create-base-guidance-selftest.mjs`
 - Tab launch-disposition source/package coverage: `node scripts/tab-launch-disposition-guidance-selftest.mjs`
 - CLI flag rationalization source/package coverage: `node scripts/cli-flag-rationalization-guidance-selftest.mjs`
 - Shell-completion source/package coverage: `node scripts/shell-completion-guidance-selftest.mjs`

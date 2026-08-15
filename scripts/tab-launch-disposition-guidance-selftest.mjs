@@ -224,9 +224,13 @@ function validateSkill(root, label) {
     `${label}/references/commands.md must not recommend launch-mode output as a path-only command substitution`,
   );
 
+  const dispositionStart = commands.indexOf(
+    "### Launch disposition (`--tab`)",
+  );
+  const dispositionEnd = commands.indexOf("\n## ", dispositionStart);
   const dispositionSection = commands.slice(
-    commands.indexOf("### Launch disposition (`--tab`)"),
-    commands.indexOf("## Create and Switch Defaults and Overrides"),
+    dispositionStart,
+    dispositionEnd === -1 ? commands.length : dispositionEnd,
   );
   const documentedEnvelopes = [
     ...dispositionSection.matchAll(/```json\n([\s\S]*?)\n```/g),
