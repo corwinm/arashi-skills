@@ -594,6 +594,49 @@ Configured and implicit-standalone `switch --tab` and `create --tab` use the sam
 
 Default Herdr launch continues to use `herdr worktree open` and requires a non-bare source checkout. `--tab --herdr` instead runs `herdr tab create` in the active workspace identified by `HERDR_WORKSPACE_ID` and does not require a non-bare source checkout.
 
+## Create from a Coordinated Base Branch
+
+Use the workspace-generic `defaults.create.baseBranch` setting when follow-up branches should start from the same long-running branch in the parent and managed repositories. It is not editor-scoped or per-repository configuration:
+
+```json
+{
+  "defaults": {
+    "create": {
+      "baseBranch": "feature/FEAT-1234"
+    }
+  }
+}
+```
+
+For one invocation, use `arashi create <target> --base <branch>`; for example, `arashi create feature/FEAT-1234/docs --base feature/FEAT-1234`. Precedence is CLI > configuration > legacy behavior: `--base` overrides `defaults.create.baseBranch`, and omitting both preserves the established configured and standalone start-point behavior.
+
+Arashi resolves the requested base in every effective selected repository, including repositories whose target will be reused, using the local branch first and then `origin/<branch>`; it captures the resolved commit OID, and all resolution failures are aggregated before hooks or any workspace mutation. `--only` and `--group` limit that effective set and still compose by intersection. Resolution is read-only and does not fetch another remote. New targets use the captured commit OID even if the selected ref moves after preflight.
+
+`--base` applies only to newly created targets. For a target accepted with `--conflict REUSE_EXISTING`, base resolution remains required, but the target receives no mutation: Arashi keeps its exact existing OID and does not reset, rebase, recreate, or rewrite it. Arashi does not assert or check ancestry and does not represent or claim that the reused target was derived from the requested base.
+
+In implicit standalone mode, explicit `--base` is invocation-only and does not load or persist `defaults.create.baseBranch`; when omitted, standalone create continues to start new targets from the current `HEAD`. Human `--dry-run` output reports the requested base and each repository's resolved ref without mutation. With `--json` or `--dry-run --json`, stdout remains exactly one JSON document. `requestedBranch` is the normalized logical branch after removing at most one leading `origin/`, `source` is exactly `cli` or `config`, and `targetAction` is exactly `created` or `reused`.
+
+Successful base data contains the complete selected set. Each repository entry has exactly `repositoryName`, `repositoryPath`, `resolvedRef`, `resolvedOid`, and `targetAction`; `repositoryPath` is canonical absolute, and entries use effective selected-repository order. Missing bases return `CREATE_BASE_RESOLUTION_FAILED`; error details contain exactly `requestedBranch`, `source`, and `repositories`, with only affected repositories from the selected set, while unaffected selected repositories are excluded. Each failure entry has exactly `repositoryName`, `repositoryPath`, and `attemptedRefs`; `repositoryPath` is canonical absolute, entries use effective selected-repository order, and `attemptedRefs` are ordered as `refs/heads/<branch>` followed by `refs/remotes/origin/<branch>`. `ARASHI_BRANCH_NAME` remains the target-branch hook context; do not invent `ARASHI_BASE_BRANCH`.
+
+### Compatibility workaround for older Arashi releases
+
+If the installed CLI does not yet accept `create --base`, first verify that the base exists and the target does not exist in every effective selected repository. Then pre-create target branches from the shared base and let `REUSE_EXISTING` materialize them without changing their ancestry:
+
+```bash
+BASE_BRANCH="feature/FEAT-1234"
+TARGET_BRANCH="feature/FEAT-1234/docs"
+
+# Managed children, not the parent. Add matching --only/--group filters when needed.
+arashi exec -- git branch "$TARGET_BRANCH" "$BASE_BRANCH"
+
+# Parent/meta-repository.
+git branch "$TARGET_BRANCH" "$BASE_BRANCH"
+
+arashi create "$TARGET_BRANCH" --conflict REUSE_EXISTING
+```
+
+Stop if any pre-create command fails; inspect and reconcile the already-created target branches before retrying. This workaround is only safe when the intended base exists everywhere and every pre-existing target's exact OID and ancestry have been independently verified.
+
 ## Create and Switch Defaults and Overrides
 
 Use command defaults in `.arashi/config.json` to control post-create behavior and select one canonical switch mode:

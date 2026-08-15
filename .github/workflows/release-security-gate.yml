@@ -54,6 +54,9 @@ jobs:
       - name: Validate unified create-launch guidance
         run: node scripts/create-launch-guidance-selftest.mjs
 
+      - name: Validate create-base guidance
+        run: node scripts/create-base-guidance-selftest.mjs
+
       - name: Validate tab launch-disposition guidance
         run: node scripts/tab-launch-disposition-guidance-selftest.mjs
 
@@ -89,6 +92,7 @@ jobs:
           node scripts/lifecycle-hook-guidance-selftest.mjs --skill-root package-check/skills/arashi
           node scripts/switch-mode-guidance-selftest.mjs --skill-root package-check/skills/arashi
           node scripts/create-launch-guidance-selftest.mjs --skill-root package-check/skills/arashi
+          node scripts/create-base-guidance-selftest.mjs --skill-root package-check/skills/arashi
           node scripts/tmux-launch-guidance-selftest.mjs --skill-root package-check/skills/arashi
           node scripts/kitty-session-guidance-selftest.mjs --skill-root package-check/skills/arashi
           node scripts/tab-launch-disposition-guidance-selftest.mjs --skill-root package-check/skills/arashi
