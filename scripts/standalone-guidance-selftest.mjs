@@ -134,7 +134,7 @@ function validateSkill(root, label) {
   );
   assert.doesNotMatch(
     allGuidance,
-    /git\s+config\s+--global|(?:>>?|tee\s+-a?)\s+[^\n]*\.gitignore/i,
+    /git\s+config\s+--global[^\n]*(?:core\.excludesFile|\.gitignore)|(?:>>?|tee\s+-a?)\s+[^\n]*\.gitignore/i,
     `${label} contains an automatic global or tracked ignore edit`
   );
 }
