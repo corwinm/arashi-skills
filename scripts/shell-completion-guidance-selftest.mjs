@@ -173,7 +173,7 @@ function validateCoordinatedWorkflowWiring(metaRoot) {
   for (const expected of [
     "completion:generate",
     "completion:check",
-    "pnpm --dir repos/arashi-docs validate:shell-completion-docs",
+    "pnpm --dir repos/arashi-docs validate:semantic-docs",
     "node repos/arashi-skills/scripts/shell-completion-guidance-selftest.mjs",
     "node repos/arashi-skills/scripts/shell-completion-guidance-selftest.mjs --skill-root package-check/skills/arashi",
   ]) {
