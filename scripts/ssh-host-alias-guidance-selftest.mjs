@@ -119,24 +119,6 @@ function validateSkill(root, label) {
   }
 }
 
-function validateWorkflowWiring() {
-  for (const relativePath of [
-    ".github/workflows/security-audit.yml",
-    ".github/workflows/release-security-gate.yml"
-  ]) {
-    const workflow = readFileSync(join(repositoryRoot, relativePath), "utf8");
-    assert.match(
-      workflow,
-      /^\s*(?:run:\s*)?node scripts\/ssh-host-alias-guidance-selftest\.mjs\s*$/m,
-      `${relativePath} does not run the SSH host-alias source guidance check`
-    );
-    assert.match(
-      workflow,
-      /^\s*node scripts\/ssh-host-alias-guidance-selftest\.mjs --skill-root package-check\/skills\/arashi\s*$/m,
-      `${relativePath} does not run the extracted-package SSH host-alias guidance check`
-    );
-  }
-}
 
 function validateDeliberateDrift() {
   const driftRoot = mkdtempSync(join(tmpdir(), "arashi-ssh-alias-drift-"));
@@ -194,9 +176,8 @@ function main() {
   }
 
   validateSkill(sourceSkillRoot, "source");
-  validateWorkflowWiring();
   validateDeliberateDrift();
-  console.log("SSH host-alias guidance self-test passed for source, workflows, and deliberate drift");
+  console.log("SSH host-alias guidance self-test passed for source contracts and deliberate drift");
 }
 
 main();

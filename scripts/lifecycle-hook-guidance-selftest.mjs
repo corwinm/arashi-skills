@@ -177,34 +177,6 @@ function unsupportedHookInputCommands(content) {
   return [...unsupported];
 }
 
-function validateWorkflowWiring() {
-  for (const relativePath of [
-    ".github/workflows/security-audit.yml",
-    ".github/workflows/release-security-gate.yml",
-  ]) {
-    const workflow = readFileSync(join(repositoryRoot, relativePath), "utf8");
-    assert.match(
-      workflow,
-      /^\s*(?:run:\s*)?node scripts\/lifecycle-hook-guidance-selftest\.mjs\s*$/m,
-      `${relativePath} does not run the authored lifecycle-hook guidance check`,
-    );
-    assert.match(
-      workflow,
-      /^\s*node scripts\/lifecycle-hook-guidance-selftest\.mjs --skill-root package-check\/skills\/arashi\s*$/m,
-      `${relativePath} does not run the extracted-package lifecycle-hook guidance check`,
-    );
-    assert.match(
-      workflow,
-      /^\s*(?:run:\s*)?tar -czf arashi-skill-package\.tar\.gz skills\/(?: README\.md LICENSE security\/)?\s*$/m,
-      `${relativePath} does not create the release-shaped archive`,
-    );
-    assert.match(
-      workflow,
-      /^\s*tar -xzf arashi-skill-package\.tar\.gz -C package-check\s*$/m,
-      `${relativePath} does not extract the archive before packaged validation`,
-    );
-  }
-}
 
 function validateDeliberateDrift() {
   const driftRoot = mkdtempSync(join(tmpdir(), "arashi-hook-guidance-drift-"));
@@ -359,10 +331,9 @@ function main() {
   }
 
   validateSkill(sourceSkillRoot, "source");
-  validateWorkflowWiring();
   validateDeliberateDrift();
   console.log(
-    `lifecycle-hook guidance self-test passed for source, workflows, and deliberate drift (${Object.keys(contract.surfaces).length} surfaces)`,
+    `lifecycle-hook guidance self-test passed for source and deliberate drift (${Object.keys(contract.surfaces).length} surfaces)`,
   );
 }
 

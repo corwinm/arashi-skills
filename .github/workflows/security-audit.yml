@@ -27,58 +27,25 @@ jobs:
       - name: Run security gate self-test
         run: node scripts/security-gate-selftest.mjs
 
-      - name: Validate standalone guidance source and package boundary
+      - name: Test semantic guidance infrastructure
         run: |
-          node scripts/standalone-guidance-selftest.mjs
+          node scripts/guidance-registration-selftest.mjs
+          node scripts/guidance-aggregate-selftest.mjs
+          node scripts/release-archive-selftest.mjs
 
-      - name: Validate bare init worktree-default guidance source and package boundary
+      - name: Validate authored guidance
+        run: node scripts/validate-guidance.mjs
+
+      - name: Create canonical skill artifact
+        run: node scripts/create-release-archive.mjs --output arashi-skill-package.tar.gz
+
+      - name: Extract canonical skill artifact
         run: |
-          node scripts/bare-init-worktree-default-guidance-selftest.mjs
-          tar -czf arashi-skill-package.tar.gz skills/
           mkdir package-check
           tar -xzf arashi-skill-package.tar.gz -C package-check
-          node scripts/bare-init-worktree-default-guidance-selftest.mjs --skill-root package-check/skills/arashi
 
-      - name: Validate SSH host-alias guidance source and package boundary
-        run: |
-          node scripts/ssh-host-alias-guidance-selftest.mjs
-          node scripts/ssh-host-alias-guidance-selftest.mjs --skill-root package-check/skills/arashi
+      - name: Validate canonical packaged guidance
+        run: node scripts/validate-guidance.mjs --skill-root package-check/skills/arashi
 
-      - name: Validate lifecycle-hook guidance source and package boundary
-        run: |
-          node scripts/lifecycle-hook-guidance-selftest.mjs
-          node scripts/lifecycle-hook-guidance-selftest.mjs --skill-root package-check/skills/arashi
-
-      - name: Validate unified switch-mode guidance
-        run: node scripts/switch-mode-guidance-selftest.mjs
-
-      - name: Validate explicit tmux launch guidance
-        run: node scripts/tmux-launch-guidance-selftest.mjs
-
-      - name: Validate managed Kitty session guidance
-        run: |
-          node scripts/kitty-session-guidance-selftest.mjs
-          node scripts/kitty-session-guidance-selftest.mjs --skill-root package-check/skills/arashi
-
-      - name: Validate unified create-launch guidance
-        run: node scripts/create-launch-guidance-selftest.mjs
-
-      - name: Validate create-base guidance source and package boundary
-        run: |
-          node scripts/create-base-guidance-selftest.mjs
-          node scripts/create-base-guidance-selftest.mjs --skill-root package-check/skills/arashi
-
-      - name: Validate tab launch-disposition guidance source and package boundary
-        run: |
-          node scripts/tab-launch-disposition-guidance-selftest.mjs
-          node scripts/tab-launch-disposition-guidance-selftest.mjs --skill-root package-check/skills/arashi
-
-      - name: Validate CLI flag rationalization guidance source and package boundary
-        run: |
-          node scripts/cli-flag-rationalization-guidance-selftest.mjs
-          node scripts/cli-flag-rationalization-guidance-selftest.mjs --skill-root package-check/skills/arashi
-
-      - name: Validate shell-completion guidance source and package boundary
-        run: |
-          node scripts/shell-completion-guidance-selftest.mjs
-          node scripts/shell-completion-guidance-selftest.mjs --skill-root package-check/skills/arashi
+      - name: Test workflow composition
+        run: node scripts/workflow-composition-selftest.mjs

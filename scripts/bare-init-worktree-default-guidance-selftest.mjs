@@ -97,35 +97,6 @@ function validateSkill(root, label) {
   );
 }
 
-function validateWorkflowWiring() {
-  const workflowRequirements = new Map([
-    [
-      ".github/workflows/security-audit.yml",
-      [
-        /^\s*node scripts\/bare-init-worktree-default-guidance-selftest\.mjs\s*$/m,
-        /^\s*tar -czf arashi-skill-package\.tar\.gz skills\/\s*$/m,
-        /^\s*tar -xzf arashi-skill-package\.tar\.gz -C package-check\s*$/m,
-        /^\s*node scripts\/bare-init-worktree-default-guidance-selftest\.mjs --skill-root package-check\/skills\/arashi\s*$/m,
-      ],
-    ],
-    [
-      ".github/workflows/release-security-gate.yml",
-      [
-        /^\s*node scripts\/bare-init-worktree-default-guidance-selftest\.mjs\s*$/m,
-        /^\s*run: tar -czf arashi-skill-package\.tar\.gz skills\/ README\.md LICENSE security\/\s*$/m,
-        /^\s*tar -xzf arashi-skill-package\.tar\.gz -C package-check\s*$/m,
-        /^\s*node scripts\/bare-init-worktree-default-guidance-selftest\.mjs --skill-root package-check\/skills\/arashi\s*$/m,
-      ],
-    ],
-  ]);
-
-  for (const [relativePath, expectedPatterns] of workflowRequirements) {
-    const content = readFileSync(join(repositoryRoot, relativePath), "utf8");
-    for (const expected of expectedPatterns) {
-      assert.match(content, expected, `${relativePath} is missing ${expected}`);
-    }
-  }
-}
 
 function main() {
   if (suppliedSkillRoot) {
@@ -135,7 +106,6 @@ function main() {
   }
 
   validateSkill(sourceSkillRoot, "source");
-  validateWorkflowWiring();
 
   const packageRoot = mkdtempSync(join(tmpdir(), "arashi-bare-init-skill-package-"));
   try {
