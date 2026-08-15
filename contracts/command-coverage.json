@@ -5,7 +5,7 @@
     { "name": "add", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "configured-only", "reason": "Adding child repositories requires persisted workspace configuration." } },
     { "name": "clone", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "configured-only", "reason": "Cloning child repositories requires a persisted repository map." } },
     { "name": "completion", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "supported" } },
-    { "name": "create", "status": "covered", "reference": "references/commands.md", "requiredOptions": ["--tab", "--tmux"], "standalone": { "support": "supported" } },
+    { "name": "create", "status": "covered", "reference": "references/commands.md", "requiredOptions": ["--base", "--tab", "--tmux"], "standalone": { "support": "supported" } },
     { "name": "doctor", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "supported" } },
     { "name": "exec", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "configured-only", "reason": "Cross-repository execution requires persisted repository selection." } },
     { "name": "handoff", "status": "covered", "reference": "references/commands.md", "standalone": { "support": "supported" } },

@@ -62,9 +62,9 @@
   },
   "forbiddenPatterns": [
     "\\bARASHI_BRANCH\\b",
-    "\\bARASHI_BASE_BRANCH\\b",
     "cp \\.arashi/hooks/[^\\n]+ \\.arashi/hooks/[^\\n]+\\n(?:cp \\.arashi/hooks/)",
     "Windows lifecycle hooks require Git Bash",
     "-NonInteractive"
-  ]
+  ],
+  "unsupportedEnvironmentVariables": ["ARASHI_BASE_BRANCH"]
 }

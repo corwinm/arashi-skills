@@ -61,6 +61,18 @@ function validateSkill(root, label) {
     );
   }
 
+  for (const { content, relativePath } of guidanceFiles) {
+    for (const variable of contract.unsupportedEnvironmentVariables ?? []) {
+      for (const sentence of semanticSentences(content)) {
+        if (advertisesUnsupportedVariable(sentence, variable)) {
+          assert.fail(
+            `${label}/${relativePath} affirmatively advertises unsupported lifecycle-hook variable ${variable}: ${sentence}`,
+          );
+        }
+      }
+    }
+  }
+
   for (const line of allGuidance.split("\n")) {
     if (
       /hooks\.input/i.test(line) &&
@@ -101,6 +113,52 @@ function collectInstallableGuidanceFiles(root, current = root) {
     }
   }
   return files;
+}
+
+function semanticSentences(content) {
+  return content
+    .replace(/```[\s\S]*?```/g, (block) => block.replace(/\n/g, " "))
+    .split(/(?<=[.!?])\s+|\n{2,}/)
+    .map((sentence) => sentence.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+}
+
+function contrastClauses(sentence) {
+  return sentence
+    .split(/\s*(?:;|\b(?:although|but|however|though|whereas|while|yet)\b[:,]?)\s*/i)
+    .filter(Boolean);
+}
+
+function actionIsNegated(clause, actionIndex) {
+  const prefix = clause.slice(0, actionIndex).toLowerCase();
+  if (
+    /\b(?:does?|do|is|are|was|were|will|must|should|can|may)\s+not(?:\s+\w+){0,3}\s*$/.test(
+      prefix,
+    ) ||
+    /\bnever(?:\s+\w+){0,2}\s*$/.test(prefix)
+  ) {
+    return true;
+  }
+  const lastNot = Math.max(prefix.lastIndexOf(" not "), prefix.lastIndexOf(" never "));
+  if (lastNot === -1) return false;
+  const sharedScope = prefix.slice(lastNot);
+  return /\b(?:or|nor)\b/.test(sharedScope) && !/\band\b/.test(sharedScope);
+}
+
+function advertisesUnsupportedVariable(sentence, variable) {
+  const escaped = variable.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  if (!new RegExp(`\\b${escaped}\\b`, "i").test(sentence)) return false;
+  if (new RegExp(`${escaped}\\s*=`, "i").test(sentence)) return true;
+
+  return contrastClauses(sentence).some((clause) => {
+    if (!new RegExp(`\\b${escaped}\\b`, "i").test(clause)) return false;
+    for (const match of clause.matchAll(
+      /\b(?:export|exports|exported|provide|provides|provided|set|sets|define|defines|defined|populate|populates|expose|exposes)\b/gi,
+    )) {
+      if (!actionIsNegated(clause, match.index)) return true;
+    }
+    return false;
+  });
 }
 
 function unsupportedHookInputCommands(content) {
@@ -263,6 +321,31 @@ function validateDeliberateDrift() {
       /status --no-hook-input/,
       "checker missed --no-hook-input on a later unsupported command invocation",
     );
+
+    writeFileSync(commandsPath, commands);
+    const tutorialPath = join(driftSkillRoot, "references", "tutorial.md");
+    const tutorial = readFileSync(tutorialPath, "utf8");
+    writeFileSync(
+      tutorialPath,
+      `${tutorial}\nArashi does not provide ARASHI_BASE_BRANCH to lifecycle hooks.\nLifecycle hooks never export ARASHI_BASE_BRANCH.\n`,
+    );
+    assert.doesNotThrow(
+      () => validateSkill(driftSkillRoot, "valid-negated-base-variable-guidance"),
+      "lifecycle checker rejected legitimate negated ARASHI_BASE_BRANCH guidance",
+    );
+
+    for (const [index, claim] of [
+      "Arashi provides ARASHI_BASE_BRANCH to lifecycle hooks.",
+      "Lifecycle hooks export ARASHI_BASE_BRANCH for create.",
+      "Set ARASHI_BASE_BRANCH=feature/base in create hooks.",
+    ].entries()) {
+      writeFileSync(tutorialPath, `${tutorial}\n${claim}\n`);
+      assert.throws(
+        () => validateSkill(driftSkillRoot, `invalid-base-variable-${index}`),
+        /ARASHI_BASE_BRANCH/,
+        `lifecycle checker accepted affirmative ARASHI_BASE_BRANCH guidance: ${claim}`,
+      );
+    }
   } finally {
     rmSync(driftRoot, { recursive: true, force: true });
   }

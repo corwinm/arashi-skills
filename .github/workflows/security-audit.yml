@@ -63,6 +63,11 @@ jobs:
       - name: Validate unified create-launch guidance
         run: node scripts/create-launch-guidance-selftest.mjs
 
+      - name: Validate create-base guidance source and package boundary
+        run: |
+          node scripts/create-base-guidance-selftest.mjs
+          node scripts/create-base-guidance-selftest.mjs --skill-root package-check/skills/arashi
+
       - name: Validate tab launch-disposition guidance source and package boundary
         run: |
           node scripts/tab-launch-disposition-guidance-selftest.mjs
