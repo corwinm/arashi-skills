@@ -231,7 +231,7 @@ function unsupportedBaseVariableClaim(sentence) {
     if (!/ARASHI_BASE_BRANCH/i.test(clause)) return false;
     return hasAffirmativeAction(
       clause,
-      /\b(?:export|exports|exported|provide|provides|provided|set|sets|define|defines|defined|populate|populates|expose|exposes)\b/gi,
+      /\b(?:available|export|exports|exported|provide|provides|provided|set|sets|define|defines|defined|populate|populates|expose|exposes|use|uses|used)\b/gi,
     );
   });
 }
@@ -305,7 +305,10 @@ function validateSkill(root, label) {
     "`ARASHI_BRANCH_NAME` remains the target-branch hook context",
     "do not invent `ARASHI_BASE_BRANCH`",
     "pre-create target branches",
-    "arashi create \"$TARGET_BRANCH\" --conflict REUSE_EXISTING",
+    'SELECTORS=(--group docs)',
+    'arashi exec "${SELECTORS[@]}" -- git branch "$TARGET_BRANCH" "$BASE_BRANCH"',
+    'arashi create "$TARGET_BRANCH" "${SELECTORS[@]}" --conflict REUSE_EXISTING',
+    "same selectors on both commands",
     "Managed children, not the parent",
   ]) {
     assert.ok(
@@ -363,6 +366,11 @@ function validateSkill(root, label) {
     guidance,
     /implicit standalone[^\n]*invocation-only[^\n]*does not load or persist `defaults\.create\.baseBranch`/i,
     `${label}/references/commands.md does not bind standalone --base to CLI-only non-persistence`,
+  );
+  assert.match(
+    guidance,
+    /SELECTORS=\(--group docs\)[\s\S]*arashi exec "\$\{SELECTORS\[@\]\}" -- git branch "\$TARGET_BRANCH" "\$BASE_BRANCH"[\s\S]*arashi create "\$TARGET_BRANCH" "\$\{SELECTORS\[@\]\}" --conflict REUSE_EXISTING/,
+    `${label}/references/commands.md does not repeat identical selectors for pre-create and final create`,
   );
 
   validatePackageWideClaims(root, label);
@@ -632,7 +640,7 @@ function validateDeliberateDrift(fixtureSkillRoot = sourceSkillRoot) {
     );
     writeFileSync(
       negatedEnvironmentPath,
-      `${readFileSync(negatedEnvironmentPath, "utf8")}\nArashi does not provide ARASHI_BASE_BRANCH to create hooks.\nCreate hooks never export ARASHI_BASE_BRANCH.\n`,
+      `${readFileSync(negatedEnvironmentPath, "utf8")}\nArashi does not provide ARASHI_BASE_BRANCH to create hooks.\nCreate hooks never export ARASHI_BASE_BRANCH.\nARASHI_BASE_BRANCH is not available to lifecycle hooks.\nDo not use ARASHI_BASE_BRANCH in create hooks.\n`,
     );
     assert.doesNotThrow(
       () => validateSkill(negatedEnvironmentRoot, "negated-environment-guidance"),
@@ -643,7 +651,10 @@ function validateDeliberateDrift(fixtureSkillRoot = sourceSkillRoot) {
       "Export ARASHI_BASE_BRANCH=feature/base for create hooks.",
       "Arashi provides ARASHI_BASE_BRANCH to create hooks.",
       "Create hooks export ARASHI_BASE_BRANCH for the requested base.",
+      "ARASHI_BASE_BRANCH is available to lifecycle hooks.",
+      "Use ARASHI_BASE_BRANCH in create hooks.",
     ];
+    const acceptedEnvironmentClaims = [];
     for (const [index, claim] of affirmativeEnvironmentClaims.entries()) {
       const environmentRoot = join(driftRoot, `environment-${index}`, "arashi");
       cpSync(fixtureSkillRoot, environmentRoot, { recursive: true });
@@ -652,12 +663,20 @@ function validateDeliberateDrift(fixtureSkillRoot = sourceSkillRoot) {
         environmentPath,
         `${readFileSync(environmentPath, "utf8")}\n${claim}\n`,
       );
-      assert.throws(
-        () => validateSkill(environmentRoot, `environment-${index}-drift`),
-        /unsupported ARASHI_BASE_BRANCH variable/,
-        `checker accepted affirmative ARASHI_BASE_BRANCH guidance: ${claim}`,
-      );
+      try {
+        validateSkill(environmentRoot, `environment-${index}-drift`);
+        acceptedEnvironmentClaims.push(claim);
+      } catch (error) {
+        if (!/unsupported ARASHI_BASE_BRANCH variable/.test(String(error?.message))) {
+          acceptedEnvironmentClaims.push(`${claim} (wrong diagnostic: ${error?.message})`);
+        }
+      }
     }
+    assert.deepEqual(
+      acceptedEnvironmentClaims,
+      [],
+      `checker accepted affirmative ARASHI_BASE_BRANCH guidance: ${acceptedEnvironmentClaims.join(" | ")}`,
+    );
 
     const environmentRoot = join(driftRoot, "environment", "arashi");
     cpSync(fixtureSkillRoot, environmentRoot, { recursive: true });

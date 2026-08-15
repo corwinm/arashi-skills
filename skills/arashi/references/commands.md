@@ -620,19 +620,21 @@ Successful base data contains the complete selected set. Each repository entry h
 
 ### Compatibility workaround for older Arashi releases
 
-If the installed CLI does not yet accept `create --base`, first verify that the base exists and the target does not exist in every effective selected repository. Then pre-create target branches from the shared base and let `REUSE_EXISTING` materialize them without changing their ancestry:
+If the installed CLI does not yet accept `create --base`, first verify that the base exists and the target does not exist in every effective selected repository. Choose the selection once (`--only`, `--group`, or their intersection), then use the same selectors on both commands: the managed-child pre-create and the final `create`. This prevents the final materialization step from widening back to unselected repositories. Then pre-create target branches from the shared base and let `REUSE_EXISTING` materialize them without changing their ancestry:
 
 ```bash
 BASE_BRANCH="feature/FEAT-1234"
 TARGET_BRANCH="feature/FEAT-1234/docs"
+SELECTORS=(--group docs) # Or the required --only/--group intersection.
 
-# Managed children, not the parent. Add matching --only/--group filters when needed.
-arashi exec -- git branch "$TARGET_BRANCH" "$BASE_BRANCH"
+# Managed children, not the parent.
+arashi exec "${SELECTORS[@]}" -- git branch "$TARGET_BRANCH" "$BASE_BRANCH"
 
 # Parent/meta-repository.
 git branch "$TARGET_BRANCH" "$BASE_BRANCH"
 
-arashi create "$TARGET_BRANCH" --conflict REUSE_EXISTING
+# Repeat the identical selectors used for managed-child pre-creation.
+arashi create "$TARGET_BRANCH" "${SELECTORS[@]}" --conflict REUSE_EXISTING
 ```
 
 Stop if any pre-create command fails; inspect and reconcile the already-created target branches before retrying. This workaround is only safe when the intended base exists everywhere and every pre-existing target's exact OID and ancestry have been independently verified.
