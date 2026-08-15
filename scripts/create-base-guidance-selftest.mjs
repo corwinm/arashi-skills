@@ -224,16 +224,38 @@ function createBaseContradiction(sentence) {
   return undefined;
 }
 
+function baseVariableAssertionIsExplicitlyNegative(assertion) {
+  const variable = "ARASHI_BASE_BRANCH";
+  const beforeVariable = `[^.;]{0,160}\\b${variable}\\b`;
+  const afterVariable = `\\b${variable}\\b[^.;]{0,160}`;
+
+  return [
+    new RegExp(
+      `\\b(?:do|does|did|is|are|was|were|will|must|should|can|may)\\s+not\\b${beforeVariable}`,
+      "i",
+    ),
+    new RegExp(`\\bnever\\b${beforeVariable}`, "i"),
+    new RegExp(`\\bnot\\s+to\\b${beforeVariable}`, "i"),
+    new RegExp(`\\bwithout\\b${beforeVariable}`, "i"),
+    new RegExp(
+      `${afterVariable}\\b(?:is|are|was|were|will|must|should|can|may)\\s+not\\b`,
+      "i",
+    ),
+    new RegExp(
+      `${afterVariable}\\b(?:forbidden|unsupported|unavailable|absent)\\b`,
+      "i",
+    ),
+    new RegExp(`\\bno\\b${beforeVariable}`, "i"),
+  ].some((pattern) => pattern.test(assertion));
+}
+
 function unsupportedBaseVariableClaim(sentence) {
   if (!/ARASHI_BASE_BRANCH/i.test(sentence)) return false;
-  if (/ARASHI_BASE_BRANCH\s*=/.test(sentence)) return true;
-  return contrastClauses(sentence).some((clause) => {
-    if (!/ARASHI_BASE_BRANCH/i.test(clause)) return false;
-    return hasAffirmativeAction(
-      clause,
-      /\b(?:available|export|exports|exported|provide|provides|provided|set|sets|define|defines|defined|populate|populates|expose|exposes|use|uses|used)\b/gi,
-    );
-  });
+
+  return contrastClauses(sentence)
+    .flatMap((clause) => clause.split(/\s+\band\b\s+/i))
+    .filter((assertion) => /ARASHI_BASE_BRANCH/i.test(assertion))
+    .some((assertion) => !baseVariableAssertionIsExplicitlyNegative(assertion));
 }
 
 function validatePackageWideClaims(root, label) {
@@ -640,7 +662,7 @@ function validateDeliberateDrift(fixtureSkillRoot = sourceSkillRoot) {
     );
     writeFileSync(
       negatedEnvironmentPath,
-      `${readFileSync(negatedEnvironmentPath, "utf8")}\nArashi does not provide ARASHI_BASE_BRANCH to create hooks.\nCreate hooks never export ARASHI_BASE_BRANCH.\nARASHI_BASE_BRANCH is not available to lifecycle hooks.\nDo not use ARASHI_BASE_BRANCH in create hooks.\n`,
+      `${readFileSync(negatedEnvironmentPath, "utf8")}\nArashi does not provide ARASHI_BASE_BRANCH to create hooks.\nCreate hooks never export ARASHI_BASE_BRANCH.\nARASHI_BASE_BRANCH is not available to lifecycle hooks.\nDo not use ARASHI_BASE_BRANCH in create hooks.\nCompatibility guidance tells users not to invent ARASHI_BASE_BRANCH.\n`,
     );
     assert.doesNotThrow(
       () => validateSkill(negatedEnvironmentRoot, "negated-environment-guidance"),
@@ -652,6 +674,7 @@ function validateDeliberateDrift(fixtureSkillRoot = sourceSkillRoot) {
       "Arashi provides ARASHI_BASE_BRANCH to create hooks.",
       "Create hooks export ARASHI_BASE_BRANCH for the requested base.",
       "ARASHI_BASE_BRANCH is available to lifecycle hooks.",
+      "Lifecycle hooks receive ARASHI_BASE_BRANCH for create.",
       "Use ARASHI_BASE_BRANCH in create hooks.",
     ];
     const acceptedEnvironmentClaims = [];
