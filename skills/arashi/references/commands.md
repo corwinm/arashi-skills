@@ -630,8 +630,13 @@ SELECTORS=(--group docs) # Or the required --only/--group intersection.
 # Managed children, not the parent.
 arashi exec "${SELECTORS[@]}" -- git branch "$TARGET_BRANCH" "$BASE_BRANCH"
 
-# Parent/meta-repository.
-git branch "$TARGET_BRANCH" "$BASE_BRANCH"
+# Verify and target the parent/meta workspace root explicitly.
+WORKSPACE_ROOT="$(git rev-parse --show-toplevel)"
+test -f "$WORKSPACE_ROOT/.arashi/config.json" || {
+  printf '%s\n' "Run this workaround from the configured Arashi workspace root." >&2
+  exit 1
+}
+git -C "$WORKSPACE_ROOT" branch "$TARGET_BRANCH" "$BASE_BRANCH"
 
 # Repeat the identical selectors used for managed-child pre-creation.
 arashi create "$TARGET_BRANCH" "${SELECTORS[@]}" --conflict REUSE_EXISTING

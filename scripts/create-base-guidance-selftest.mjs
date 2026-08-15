@@ -107,15 +107,22 @@ function section(content, heading) {
   return content.slice(start, end === -1 ? content.length : end);
 }
 
-function markdownFiles(root) {
+function installableGuidanceFiles(root) {
   const files = [];
   const visit = (directory) => {
     for (const name of readdirSync(directory).sort()) {
       const path = join(directory, name);
       if (statSync(path).isDirectory()) {
         visit(path);
-      } else if (name.endsWith(".md")) {
-        files.push(path);
+      } else if (/\.(?:md|txt|json)$/i.test(name)) {
+        const content = readFileSync(path, "utf8");
+        if (/\.json$/i.test(name)) {
+          assert.doesNotThrow(
+            () => JSON.parse(content),
+            `${relative(root, path)} must contain valid JSON`,
+          );
+        }
+        files.push({ content, path });
       }
     }
   };
@@ -259,9 +266,8 @@ function unsupportedBaseVariableClaim(sentence) {
 }
 
 function validatePackageWideClaims(root, label) {
-  for (const path of markdownFiles(root)) {
+  for (const { content, path } of installableGuidanceFiles(root)) {
     const relativePath = relative(root, path);
-    const content = readFileSync(path, "utf8");
     for (const sentence of semanticSentences(content)) {
       const contradiction = createBaseContradiction(sentence);
       assert.equal(
@@ -329,6 +335,9 @@ function validateSkill(root, label) {
     "pre-create target branches",
     'SELECTORS=(--group docs)',
     'arashi exec "${SELECTORS[@]}" -- git branch "$TARGET_BRANCH" "$BASE_BRANCH"',
+    'WORKSPACE_ROOT="$(git rev-parse --show-toplevel)"',
+    'test -f "$WORKSPACE_ROOT/.arashi/config.json"',
+    'git -C "$WORKSPACE_ROOT" branch "$TARGET_BRANCH" "$BASE_BRANCH"',
     'arashi create "$TARGET_BRANCH" "${SELECTORS[@]}" --conflict REUSE_EXISTING',
     "same selectors on both commands",
     "Managed children, not the parent",
@@ -391,8 +400,8 @@ function validateSkill(root, label) {
   );
   assert.match(
     guidance,
-    /SELECTORS=\(--group docs\)[\s\S]*arashi exec "\$\{SELECTORS\[@\]\}" -- git branch "\$TARGET_BRANCH" "\$BASE_BRANCH"[\s\S]*arashi create "\$TARGET_BRANCH" "\$\{SELECTORS\[@\]\}" --conflict REUSE_EXISTING/,
-    `${label}/references/commands.md does not repeat identical selectors for pre-create and final create`,
+    /SELECTORS=\(--group docs\)[\s\S]*arashi exec "\$\{SELECTORS\[@\]\}" -- git branch "\$TARGET_BRANCH" "\$BASE_BRANCH"[\s\S]*WORKSPACE_ROOT="\$\(git rev-parse --show-toplevel\)"[\s\S]*test -f "\$WORKSPACE_ROOT\/\.arashi\/config\.json"[\s\S]*git -C "\$WORKSPACE_ROOT" branch "\$TARGET_BRANCH" "\$BASE_BRANCH"[\s\S]*arashi create "\$TARGET_BRANCH" "\$\{SELECTORS\[@\]\}" --conflict REUSE_EXISTING/,
+    `${label}/references/commands.md does not bind parent branch creation to a verified workspace root while repeating identical selectors`,
   );
 
   validatePackageWideClaims(root, label);
@@ -699,6 +708,40 @@ function validateDeliberateDrift(fixtureSkillRoot = sourceSkillRoot) {
       acceptedEnvironmentClaims,
       [],
       `checker accepted affirmative ARASHI_BASE_BRANCH guidance: ${acceptedEnvironmentClaims.join(" | ")}`,
+    );
+
+    const installableFormatClaims = [
+      {
+        name: "environment-text",
+        relativePath: join("references", "base-note.txt"),
+        content: "Lifecycle hooks receive ARASHI_BASE_BRANCH for create.\n",
+      },
+      {
+        name: "environment-json",
+        relativePath: join("references", "base-note.json"),
+        content: `${JSON.stringify({ note: "Lifecycle hooks receive ARASHI_BASE_BRANCH for create." }, null, 2)}\n`,
+      },
+    ];
+    const acceptedInstallableFormatClaims = [];
+    for (const fixture of installableFormatClaims) {
+      const formatRoot = join(driftRoot, fixture.name, "arashi");
+      cpSync(fixtureSkillRoot, formatRoot, { recursive: true });
+      writeFileSync(join(formatRoot, fixture.relativePath), fixture.content);
+      try {
+        validateSkill(formatRoot, `${fixture.name}-drift`);
+        acceptedInstallableFormatClaims.push(fixture.relativePath);
+      } catch (error) {
+        if (!/unsupported ARASHI_BASE_BRANCH variable/.test(String(error?.message))) {
+          acceptedInstallableFormatClaims.push(
+            `${fixture.relativePath} (wrong diagnostic: ${error?.message})`,
+          );
+        }
+      }
+    }
+    assert.deepEqual(
+      acceptedInstallableFormatClaims,
+      [],
+      `checker accepted affirmative ARASHI_BASE_BRANCH guidance in installable formats: ${acceptedInstallableFormatClaims.join(" | ")}`,
     );
 
     const environmentRoot = join(driftRoot, "environment", "arashi");
