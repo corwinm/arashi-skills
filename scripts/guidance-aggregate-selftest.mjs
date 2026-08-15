@@ -92,7 +92,23 @@ async function main() {
     const blocked = runFixture(preflight, [], { MARKER: blockedMarker });
     assert.notEqual(blocked.status, 0);
     assert.match(output(blocked), /omitted maintained checker.*scripts\/alpha-guidance-selftest\.mjs/i);
-    assert.throws(() => readFileSync(blockedMarker), /ENOENT/, "no checker may run after preflight failure");
+    assert.throws(() => readFileSync(blockedMarker), /ENOENT/, "no checker may run after source preflight failure");
+
+    const blockedPackage = runFixture(
+      preflight,
+      ["--skill-root", packageRoot],
+      { MARKER: blockedMarker },
+    );
+    assert.notEqual(blockedPackage.status, 0);
+    assert.match(
+      output(blockedPackage),
+      /omitted maintained checker.*scripts\/alpha-guidance-selftest\.mjs/i,
+    );
+    assert.throws(
+      () => readFileSync(blockedMarker),
+      /ENOENT/,
+      "no checker may run after package preflight failure",
+    );
 
     const failures = makeFixture([
       { name: "alpha", source: "#!/usr/bin/env node\nconsole.error('alpha inherited diagnostic');\nprocess.exit(7);\n" },
