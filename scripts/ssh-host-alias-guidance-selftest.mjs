@@ -75,7 +75,9 @@ function validateSkill(root, label) {
     "clone continues with the remaining repositories and reports partial success",
     "SSH aliases are machine-local",
     "canonical committed remote",
-    "local Git `url.<base>.insteadOf` rule",
+    "machine-global Git `url.<base>.insteadOf` rule",
+    "`~/.gitconfig`",
+    "git config --global url.\"git@work-github:\".insteadOf git@github.com:",
     "Arashi does not install or synchronize that rewrite"
   ]) {
     assert.ok(
@@ -91,8 +93,8 @@ function validateSkill(root, label) {
   );
   assert.match(
     aliasGuidance,
-    /shared configuration[^\n]*canonical committed remote[^\n]*local Git `url\.<base>\.insteadOf` rule/,
-    `${label}/commands.md does not bind shared portability to canonical remotes and local Git rewriting`
+    /shared configuration[^\n]*canonical committed remote[^\n]*machine-global Git `url\.<base>\.insteadOf` rule/,
+    `${label}/commands.md does not bind shared portability to canonical remotes and machine-global Git rewriting`
   );
 
   assert.match(

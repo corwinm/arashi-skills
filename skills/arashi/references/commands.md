@@ -342,7 +342,13 @@ The host token is opaque: Git/OpenSSH owns host resolution and authentication. A
 
 An unresolved or unauthenticated alias follows the existing command safety behavior. Failed `add` uses the normal add rollback boundary for configuration, clone, setup, and managed-ignore state. During a multi-repository `clone`, one Git failure is recorded for that repository; clone continues with the remaining repositories and reports partial success through the existing human or JSON envelope.
 
-SSH aliases are machine-local, so every machine using a stored alias needs compatible OpenSSH routing. For shared configuration, prefer a canonical committed remote and use a local Git `url.<base>.insteadOf` rule when a developer needs identity-specific routing:
+SSH aliases are machine-local, so every machine using a stored alias needs compatible OpenSSH routing. For shared configuration, prefer a canonical committed remote and use a machine-global Git `url.<base>.insteadOf` rule in `~/.gitconfig`, not repository-local `.git/config`, when a developer needs identity-specific routing:
+
+```bash
+git config --global url."git@work-github:".insteadOf git@github.com:
+```
+
+The command writes the equivalent global Git configuration:
 
 ```gitconfig
 [url "git@work-github:"]
