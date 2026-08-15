@@ -457,24 +457,6 @@ function validateContracts() {
   );
 }
 
-function validateWorkflowWiring() {
-  for (const relativePath of [
-    ".github/workflows/security-audit.yml",
-    ".github/workflows/release-security-gate.yml",
-  ]) {
-    const workflow = readFileSync(join(repositoryRoot, relativePath), "utf8");
-    assert.match(
-      workflow,
-      /^\s*(?:run:\s*)?node scripts\/create-base-guidance-selftest\.mjs\s*$/m,
-      `${relativePath} does not run the create-base source guidance check`,
-    );
-    assert.match(
-      workflow,
-      /^\s*node scripts\/create-base-guidance-selftest\.mjs --skill-root package-check\/skills\/arashi\s*$/m,
-      `${relativePath} does not run the extracted-package create-base guidance check`,
-    );
-  }
-}
 
 function validateDeliberateDrift(fixtureSkillRoot = sourceSkillRoot) {
   const driftRoot = mkdtempSync(join(tmpdir(), "arashi-create-base-drift-"));
@@ -774,10 +756,9 @@ function main() {
 
   validateSkill(sourceSkillRoot, "source");
   validateContracts();
-  validateWorkflowWiring();
   validateDeliberateDrift();
   console.log(
-    "create-base guidance self-test passed for source, contracts, workflows, and deliberate drift",
+    "create-base guidance self-test passed for source, contracts, and deliberate drift",
   );
 }
 

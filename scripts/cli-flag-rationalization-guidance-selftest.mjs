@@ -137,35 +137,6 @@ function validateSkill(root, label) {
   validateDeprecatedUsage(root, label);
 }
 
-function validateWorkflowWiring() {
-  const workflows = [
-    ".github/workflows/security-audit.yml",
-    ".github/workflows/release-security-gate.yml",
-  ];
-  for (const workflowPath of workflows) {
-    const workflow = readFileSync(join(repositoryRoot, workflowPath), "utf8");
-    assert.match(
-      workflow,
-      /^\s*(?:run:\s*)?node scripts\/cli-flag-rationalization-guidance-selftest\.mjs\s*$/m,
-      `${workflowPath} does not run the source CLI flag rationalization self-test`,
-    );
-    assert.match(
-      workflow,
-      /^\s*node scripts\/cli-flag-rationalization-guidance-selftest\.mjs --skill-root package-check\/skills\/arashi\s*$/m,
-      `${workflowPath} does not run the extracted-package CLI flag rationalization self-test`,
-    );
-    assert.match(
-      workflow,
-      /^\s*(?:run:\s*)?tar -czf arashi-skill-package\.tar\.gz skills\/(?: README\.md LICENSE security\/)?\s*$/m,
-      `${workflowPath} does not create a release-shaped package before validation`,
-    );
-    assert.match(
-      workflow,
-      /^\s*tar -xzf arashi-skill-package\.tar\.gz -C package-check\s*$/m,
-      `${workflowPath} does not extract the package before validation`,
-    );
-  }
-}
 
 function validateDeliberateDrift() {
   const driftRoot = mkdtempSync(join(tmpdir(), "arashi-cli-guidance-drift-"));
@@ -242,10 +213,9 @@ function main() {
   }
 
   validateSkill(sourceSkillRoot, "source");
-  validateWorkflowWiring();
   validateDeliberateDrift();
   console.log(
-    `CLI flag rationalization guidance self-test passed for source, workflows, and deliberate drift (${requirements.size} surfaces)`,
+    `CLI flag rationalization guidance self-test passed for source and deliberate drift (${requirements.size} surfaces)`,
   );
 }
 

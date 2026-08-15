@@ -302,35 +302,6 @@ function validateRepositoryContracts() {
   }
 }
 
-function validateWorkflowWiring() {
-  const workflows = [
-    ".github/workflows/security-audit.yml",
-    ".github/workflows/release-security-gate.yml",
-  ];
-  for (const workflowPath of workflows) {
-    const workflow = readFileSync(join(repositoryRoot, workflowPath), "utf8");
-    assert.match(
-      workflow,
-      /^\s*(?:run:\s*)?node scripts\/tab-launch-disposition-guidance-selftest\.mjs\s*$/m,
-      `${workflowPath} does not run the source tab-disposition self-test`,
-    );
-    assert.match(
-      workflow,
-      /^\s*node scripts\/tab-launch-disposition-guidance-selftest\.mjs --skill-root package-check\/skills\/arashi\s*$/m,
-      `${workflowPath} does not run the extracted-package tab-disposition self-test`,
-    );
-    assert.match(
-      workflow,
-      /^\s*(?:run:\s*)?tar -czf arashi-skill-package\.tar\.gz skills\/(?: README\.md LICENSE security\/)?\s*$/m,
-      `${workflowPath} does not build the release-shaped skill archive`,
-    );
-    assert.match(
-      workflow,
-      /^\s*tar -xzf arashi-skill-package\.tar\.gz -C package-check\s*$/m,
-      `${workflowPath} does not extract the skill archive before package validation`,
-    );
-  }
-}
 
 function validateDeliberateDrift() {
   const driftRoot = mkdtempSync(join(tmpdir(), "arashi-tab-guidance-drift-"));
@@ -395,10 +366,9 @@ function main() {
 
   validateSkill(sourceSkillRoot, "source");
   validateRepositoryContracts();
-  validateWorkflowWiring();
   validateDeliberateDrift();
   console.log(
-    `tab launch-disposition guidance self-test passed for source, contracts, workflows, and deliberate drift (${requirements.size} surfaces)`,
+    `tab launch-disposition guidance self-test passed for source contracts and deliberate drift (${requirements.size} surfaces)`,
   );
 }
 

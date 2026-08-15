@@ -70,16 +70,11 @@ Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/REA
 
 - Canonical gate command: `node scripts/security-gate.mjs --root . --exceptions security/audit-exceptions.json`
 - Security gate self-test: `node scripts/security-gate-selftest.mjs`
-- Standalone source/package coverage: `node scripts/standalone-guidance-selftest.mjs`
-- Lifecycle-hook source/package coverage: `node scripts/lifecycle-hook-guidance-selftest.mjs`
-- Switch-mode source/package coverage: `node scripts/switch-mode-guidance-selftest.mjs`
-- Explicit tmux source/package coverage: `node scripts/tmux-launch-guidance-selftest.mjs`
-- Managed Kitty source/package coverage: `node scripts/kitty-session-guidance-selftest.mjs`
-- Create-launch source/package coverage: `node scripts/create-launch-guidance-selftest.mjs`
-- Create-base source/package coverage: `node scripts/create-base-guidance-selftest.mjs`
-- Tab launch-disposition source/package coverage: `node scripts/tab-launch-disposition-guidance-selftest.mjs`
-- CLI flag rationalization source/package coverage: `node scripts/cli-flag-rationalization-guidance-selftest.mjs`
-- Shell-completion source/package coverage: `node scripts/shell-completion-guidance-selftest.mjs`
+- All authored semantic guidance: `node scripts/validate-guidance.mjs`
+- Canonical release archive: `node scripts/create-release-archive.mjs --output arashi-skill-package.tar.gz`
+- All extracted-package semantic guidance: `node scripts/validate-guidance.mjs --skill-root package-check/skills/arashi`
+- Registration, aggregate, archive, and workflow self-tests: `node scripts/guidance-registration-selftest.mjs`, `node scripts/guidance-aggregate-selftest.mjs`, `node scripts/release-archive-selftest.mjs`, and `node scripts/workflow-composition-selftest.mjs`
+- Focused TDD/diagnostics remain available as `node scripts/<feature>-guidance-selftest.mjs` with optional `--skill-root <extracted-skill-root>`.
 - Cross-repository command contracts: `(cd ../.. && pnpm contracts:check)`
 - Policy and thresholds: `security/policy.md`
 - Baseline findings and remediation tracking: `security/baseline-findings.md`

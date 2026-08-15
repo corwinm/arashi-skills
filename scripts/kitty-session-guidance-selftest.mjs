@@ -125,33 +125,6 @@ function validateSourceContracts() {
     "switch autoOrder must place Kitty after IDE and before cd/platform fallback",
   );
 
-  const workflowRequirements = new Map([
-    [
-      ".github/workflows/security-audit.yml",
-      [
-        "node scripts/kitty-session-guidance-selftest.mjs",
-        "node scripts/kitty-session-guidance-selftest.mjs --skill-root package-check/skills/arashi",
-      ],
-    ],
-    [
-      ".github/workflows/release-security-gate.yml",
-      [
-        "node scripts/kitty-session-guidance-selftest.mjs",
-        "node scripts/kitty-session-guidance-selftest.mjs --skill-root package-check/skills/arashi",
-      ],
-    ],
-  ]);
-
-  for (const [relativePath, expectedCommands] of workflowRequirements) {
-    const workflow = readFileSync(join(repositoryRoot, relativePath), "utf8");
-    for (const command of expectedCommands) {
-      assert.match(
-        workflow,
-        new RegExp(`^\\s*${command.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*$`, "m"),
-        `${relativePath} is missing exact command ${JSON.stringify(command)}`,
-      );
-    }
-  }
 }
 
 function validateDeliberateMismatch() {
@@ -189,7 +162,7 @@ function main() {
   validateSourceContracts();
   validateDeliberateMismatch();
   console.log(
-    `Kitty session guidance self-test passed for source, workflow/package contracts, and deliberate mismatch (${requirements.size} surfaces)`,
+    `Kitty session guidance self-test passed for source contracts and deliberate mismatch (${requirements.size} surfaces)`,
   );
 }
 

@@ -1,0 +1,14 @@
+[
+  "scripts/bare-init-worktree-default-guidance-selftest.mjs",
+  "scripts/cli-flag-rationalization-guidance-selftest.mjs",
+  "scripts/create-base-guidance-selftest.mjs",
+  "scripts/create-launch-guidance-selftest.mjs",
+  "scripts/kitty-session-guidance-selftest.mjs",
+  "scripts/lifecycle-hook-guidance-selftest.mjs",
+  "scripts/shell-completion-guidance-selftest.mjs",
+  "scripts/ssh-host-alias-guidance-selftest.mjs",
+  "scripts/standalone-guidance-selftest.mjs",
+  "scripts/switch-mode-guidance-selftest.mjs",
+  "scripts/tab-launch-disposition-guidance-selftest.mjs",
+  "scripts/tmux-launch-guidance-selftest.mjs"
+]

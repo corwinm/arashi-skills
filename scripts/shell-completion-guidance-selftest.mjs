@@ -23,14 +23,6 @@ const suppliedSkillRoot =
 if (skillRootArgumentIndex >= 0 && !suppliedSkillRoot) {
   throw new Error("--skill-root requires a path");
 }
-const metaRootArgumentIndex = process.argv.indexOf("--meta-root");
-const suppliedMetaRoot =
-  metaRootArgumentIndex >= 0
-    ? process.argv[metaRootArgumentIndex + 1]
-    : undefined;
-if (metaRootArgumentIndex >= 0 && !suppliedMetaRoot) {
-  throw new Error("--meta-root requires a path");
-}
 
 const requirements = new Map([
   [
@@ -135,54 +127,6 @@ function validateSkill(root, label) {
   validateNoStaleClaims(root, label);
 }
 
-function validateWorkflowWiring() {
-  const workflows = [
-    ".github/workflows/security-audit.yml",
-    ".github/workflows/release-security-gate.yml",
-  ];
-  for (const workflowPath of workflows) {
-    const workflow = readFileSync(join(repositoryRoot, workflowPath), "utf8");
-    assert.match(
-      workflow,
-      /^\s*(?:run:\s*)?node scripts\/shell-completion-guidance-selftest\.mjs\s*$/m,
-      `${workflowPath} does not run the source shell-completion guidance self-test`,
-    );
-    assert.match(
-      workflow,
-      /^\s*node scripts\/shell-completion-guidance-selftest\.mjs --skill-root package-check\/skills\/arashi\s*$/m,
-      `${workflowPath} does not run the extracted-package shell-completion guidance self-test`,
-    );
-    assert.match(
-      workflow,
-      /^\s*(?:run:\s*)?tar -czf arashi-skill-package\.tar\.gz skills\/(?: README\.md LICENSE security\/)?\s*$/m,
-      `${workflowPath} does not create a release-shaped package before validation`,
-    );
-    assert.match(
-      workflow,
-      /^\s*tar -xzf arashi-skill-package\.tar\.gz -C package-check\s*$/m,
-      `${workflowPath} does not extract the package before validation`,
-    );
-  }
-}
-
-function validateCoordinatedWorkflowWiring(metaRoot) {
-  const workflow = readFileSync(
-    join(metaRoot, ".github", "workflows", "cross-repo-command-contracts.yml"),
-    "utf8",
-  );
-  for (const expected of [
-    "completion:generate",
-    "completion:check",
-    "pnpm --dir repos/arashi-docs validate:semantic-docs",
-    "node repos/arashi-skills/scripts/shell-completion-guidance-selftest.mjs",
-    "node repos/arashi-skills/scripts/shell-completion-guidance-selftest.mjs --skill-root package-check/skills/arashi",
-  ]) {
-    assert.ok(
-      workflow.includes(expected),
-      `coordinated workflow does not directly reach ${expected}`,
-    );
-  }
-}
 
 function validateCommandCoverage() {
   const coverage = JSON.parse(
@@ -263,11 +207,9 @@ function main() {
 
   validateSkill(sourceSkillRoot, "source");
   validateCommandCoverage();
-  validateWorkflowWiring();
-  if (suppliedMetaRoot) validateCoordinatedWorkflowWiring(resolve(suppliedMetaRoot));
   validateDeliberateDrift();
   console.log(
-    `Shell-completion guidance self-test passed for source, workflows, and deliberate drift (${requirements.size} surfaces)`,
+    `Shell-completion guidance self-test passed for source and deliberate drift (${requirements.size} surfaces)`,
   );
 }
 
