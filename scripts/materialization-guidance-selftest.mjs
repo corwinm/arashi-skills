@@ -85,7 +85,8 @@ function isNegatedBefore(statement, index) {
   for (const match of beforeAction.matchAll(contrast)) clauseStart = (match.index ?? 0) + match[0].length;
   const prefix = statement.slice(Math.max(clauseStart, index - 80), index).toLowerCase();
   return /\b(?:does?|do|is|are|must|should|can|may|will)\s+not(?:\s+\w+){0,5}\s*$/.test(prefix) ||
-    /\b(?:cannot|can't)(?:\s+\w+){0,4}\s*$/.test(prefix) ||
+    /\b(?:cannot|can[’']t)(?:\s+\w+){0,4}\s*$/.test(prefix) ||
+    /\b(?:doesn|isn|aren|wasn|weren|mustn|shouldn|wouldn|won|couldn|mayn|willn|don|hasn|haven|hadn|needn)[’']t(?:\s+\w+){0,5}\s*$/.test(prefix) ||
     /\bnever(?:\s+\w+){0,4}\s*$/.test(prefix) ||
     /\bwithout(?:\s+\w+){0,4}\s*$/.test(prefix);
 }
@@ -313,6 +314,16 @@ function validateControlledFixtures() {
         "A materialization destination cannot escape the new worktree. A symlink cannot fall back to a copy, hard link, or junction.\n",
       );
       requireValid(negationRoot, `${mode}-cannot-control`);
+
+      const contractionControl = mkdtempSync(join(tmpdir(), `arashi-materialization-${mode}-contraction-control-`));
+      roots.push(contractionControl);
+      const contractionRoot = mode === "authored-source" ? contractionControl : join(contractionControl, "skills", "arashi");
+      writeCompleteFixture(contractionRoot);
+      writeFileSync(
+        join(contractionRoot, "references", "safety-contractions.md"),
+        "A materialization destination doesn't overwrite an existing file. A symlink won't fall back to a copy, hard link, or junction. Standalone isn't available for repos.<name>.copy or repos.<name>.symlink.\n",
+      );
+      requireValid(contractionRoot, `${mode}-contraction-control`);
 
       for (const drift of driftCases) {
         const fixture = mkdtempSync(join(tmpdir(), `arashi-materialization-${mode}-${drift.name}-`));
