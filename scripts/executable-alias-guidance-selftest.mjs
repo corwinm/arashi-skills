@@ -31,34 +31,11 @@ const aliasGuidance = [
   "installation-channel details about collision handling, shell integration, completion, updates, and manual installation",
 ];
 
-const arashiCommandNames = [
-  "add",
-  "clone",
-  "completion",
-  "config",
-  "create",
-  "doctor",
-  "exec",
-  "handoff",
-  "init",
-  "install",
-  "list",
-  "move",
-  "prune",
-  "pull",
-  "push",
-  "remove",
-  "setup",
-  "shell",
-  "status",
-  "switch",
-  "sync",
-  "update",
+const actionableAwCommandPatterns = [
+  /`aw\s+[^`\s]+(?:\s+[^`]*)?`/im,
+  /`aw`\s+-{1,2}\S+/im,
+  /(?<![`\w])aw\s+(?:-{1,2}\S+|[A-Za-z0-9][\w:-]*)/im,
 ];
-const actionableAwCommandPattern = new RegExp(
-  `(?:^|[\\s\`])aw(?:\`)?\\s+(?:--(?:help|version)\\b|(?:${arashiCommandNames.join("|")})\\b)`,
-  "im",
-);
 
 function normalizeProse(content) {
   return content.replace(/[`*_]/g, "").replace(/\s+/g, " ");
@@ -74,12 +51,21 @@ function definesExecutableAlias(content) {
 }
 
 function claimsCommanderAssociation(content) {
-  const prose = normalizeProse(content);
-  return [
-    /(?:\baw\b|\b(?:executable|command) alias\b|\bshorthand\b)[^.!?]{0,80}\b(?:registered|defined|provided|created|implemented|handled|parsed)\s+by\s+Commander\b/i,
-    /\bCommander\b[^.!?]{0,80}\b(?:registers|defines|provides|creates|implements|handles|parses)\b[^.!?]{0,80}(?:\baw\b|\b(?:executable|command) alias\b|\bshorthand\b)/i,
-    /(?<!not (?:a |an ))\bCommander command alias\b/i,
-  ].some((pattern) => pattern.test(prose));
+  const approvedNegation = /\bnot\s+(?:a\s+|an\s+)?Commander command alias\b/i;
+  return content.split(/\n\s*\n/).some((rawParagraph) => {
+    const paragraph = normalizeProse(rawParagraph);
+    const statements = paragraph.split(/(?:(?<=[.!?;])\s+|\s+(?:but|however|yet)\s+)/i);
+    return statements.some(
+      (statement) =>
+        /\baw\b/i.test(statement) &&
+        /\bCommander\b/i.test(statement) &&
+        !approvedNegation.test(statement),
+    );
+  });
+}
+
+function containsActionableAwInvocation(content) {
+  return actionableAwCommandPatterns.some((pattern) => pattern.test(content));
 }
 
 function walkMarkdown(root, directory = root) {
@@ -151,9 +137,9 @@ function validateSkill(root, label) {
         `${label}/${relativePath} contains an executable-alias definition that must be owned only by references/tutorial.md`,
       );
     }
-    assert.doesNotMatch(
-      content,
-      actionableAwCommandPattern,
+    assert.equal(
+      containsActionableAwInvocation(content),
+      false,
       `${label}/${relativePath} duplicates workflows with aw command spellings`,
     );
   }
@@ -266,6 +252,39 @@ function validateDeliberateDrift() {
         /Commander association/,
         `semantic Commander definition claim in ${fixtureLabel}`,
       );
+
+      for (const [claim, driftName] of [
+        ["The Commander parser exposes `aw` as an executable alias.", "commander-parser-exposes"],
+        ["The Commander parser recognizes `aw` as the executable shorthand.", "commander-parser-recognizes"],
+        ["Commander routes `aw` to the canonical executable.", "commander-routes"],
+        ["The Commander parser exposes\n`aw` as an executable alias.", "commander-wrapped-sentence"],
+      ]) {
+        writeFileSync(workflowsPath, `${originalWorkflows}\n${claim}\n`);
+        requireRejection(
+          () => validateSkill(fixtureSkillRoot, `${fixtureLabel}-${driftName}`),
+          /Commander association/,
+          `${driftName} claim in ${fixtureLabel}`,
+        );
+      }
+
+      for (const [invocation, driftName] of [
+        ["Run `aw -h` to discover the shorthand command workflow.", "tutorial-aw-short-help"],
+        ["Run aw -V to inspect the shorthand version.", "tutorial-aw-short-version"],
+      ]) {
+        writeFileSync(tutorialPath, `${originalTutorial}\n${invocation}\n`);
+        requireRejection(
+          () => validateSkill(fixtureSkillRoot, `${fixtureLabel}-${driftName}`),
+          /duplicates workflows with aw command spellings/,
+          `${driftName} invocation in ${fixtureLabel}`,
+        );
+      }
+
+      writeFileSync(workflowsPath, originalWorkflows);
+      writeFileSync(
+        tutorialPath,
+        `${originalTutorial}\nThe standalone \`aw\` identity remains distribution-level prose.\n`,
+      );
+      validateSkill(fixtureSkillRoot, `${fixtureLabel}-standalone-identity`);
     }
     assert.deepEqual(
       acceptedDrifts,
