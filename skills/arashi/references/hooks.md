@@ -53,14 +53,14 @@ A string is Bash shorthand. For portable host-specific commands, use a non-empty
       "pre-create": {
         "bash": "set -eu; printf '%s\\n' \"$ARASHI_BRANCH_NAME\"",
         "powershell": "$ErrorActionPreference = 'Stop'; Write-Output $env:ARASHI_BRANCH_NAME",
-        "cmd": "echo %ARASHI_BRANCH_NAME% || exit /b 1"
+        "cmd": "echo Inline pre-create hook running || exit /b 1"
       }
     }
   },
   "repos": {
     "api": {
       "hooks": {
-        "post-create": "set -eu; corepack pnpm install --frozen-lockfile"
+        "post-create": "set -eu; CI=true corepack pnpm --ignore-workspace install --frozen-lockfile"
       }
     }
   }
@@ -170,7 +170,7 @@ The default lifecycle-hook timeout is `300000` milliseconds. Configured `hooks.t
 - Create-hook validation, timeout, or nonzero failure fails create and enters the owned Git rollback boundary. A workspace pre-create failure occurs before any branch/worktree mutation; later failures report both the hook outcome and any rollback warning.
 - A failing `pre-remove` aborts removal before destructive mutation.
 - `post-remove` still runs after removal attempts, including partial failures, and a post-remove failure makes the command result nonzero without erasing earlier removal or hook outcomes.
-- Human and JSON output derive from the complete ordered outcome ledger. Hook stdout/stderr never contaminates JSON stdout. Dry-run previews discovery but does not spawn hooks or fabricate execution outcomes.
+- Human and JSON output derive from the complete ordered outcome ledger. Hook stdout/stderr never contaminates JSON stdout. Remove dry-run previews discovery but does not spawn hooks or fabricate execution outcomes.
 
 ## Package-Manager Setup
 

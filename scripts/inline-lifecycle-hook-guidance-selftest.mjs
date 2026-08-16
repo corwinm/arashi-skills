@@ -85,6 +85,7 @@ function validateSkill(root, label) {
     /`sourceKind: "inline-config"`[^\n]*`sourceOwnerKind`[^\n]*`sourceOwnerName`[^\n]*`sourceScriptPath` is `null` or omitted[^\n]*never disclose snippet text/i,
     `${label}/references/hooks.md does not bind source metadata to no-disclosure`,
   );
+  validateCopyableHookGuidance(hooks, `${label}/references/hooks.md`);
 
   const commands = readFileSync(join(root, "references", "commands.md"), "utf8");
   assert.match(commands, /installed `arashi --help` and `arashi <command> --help` are the parameter authority/i);
@@ -99,6 +100,36 @@ function validateSkill(root, label) {
     /hooks\.scripts\.<lifecycle>|sourceOwnerKind|interpreter_unavailable/,
     `${label}/SKILL.md must remain a minimal router; inline-hook details belong in references`,
   );
+}
+
+function section(content, heading) {
+  const start = content.indexOf(`## ${heading}`);
+  assert.notEqual(start, -1, `missing ${heading} section`);
+  const end = content.indexOf("\n## ", start + 1);
+  return content.slice(start, end === -1 ? content.length : end);
+}
+
+function validateCopyableHookGuidance(hooks, label) {
+  const problems = [];
+  const configured = section(hooks, "Configured Inline Hooks");
+  const jsonMatch = configured.match(/```json\s*\n([\s\S]*?)\n```/);
+  assert.ok(jsonMatch, `${label} is missing the configured inline-hook JSON example`);
+  const example = JSON.parse(jsonMatch[1]);
+  const cmd = example?.hooks?.scripts?.["pre-create"]?.cmd;
+  if (cmd !== "echo Inline pre-create hook running || exit /b 1") {
+    problems.push("cmd example must avoid reflecting ARASHI_BRANCH_NAME or other unconstrained values into command text");
+  }
+  const nestedPnpm = example?.repos?.api?.hooks?.["post-create"];
+  if (nestedPnpm !== "set -eu; CI=true corepack pnpm --ignore-workspace install --frozen-lockfile") {
+    problems.push("nested pnpm child example must set CI=true and pass --ignore-workspace");
+  }
+  if (/\bDry-run previews discovery but does not spawn hooks or fabricate execution outcomes\./.test(hooks)) {
+    problems.push("dry-run discovery guidance must not make an unscoped all-command claim");
+  }
+  if (!hooks.includes("Remove dry-run previews discovery but does not spawn hooks or fabricate execution outcomes.")) {
+    problems.push("dry-run discovery guidance must be scoped to remove");
+  }
+  assert.deepEqual(problems, [], `${label} has unsafe or contradictory copyable guidance:\n- ${problems.join("\n- ")}`);
 }
 
 function isActionNegated(clause, actionIndex) {
@@ -196,7 +227,21 @@ function createCompleteFixture(root) {
     "Remove dry-run keeps source-aware previews; Configured-create dry-run performs no hook discovery, returns an empty hook ledger, and has no hook preview surface.",
     "`sourceKind: \"inline-config\"`, `sourceOwnerKind`, `sourceOwnerName`, and `sourceScriptPath` is `null` or omitted; Outcomes, previews, diagnostics, and logs never disclose snippet text.",
   ];
-  writeFileSync(join(root, "references", "hooks.md"), `${[...requiredHookGuidance, ...bindingLines].join("\n")}\n`);
+  const configuredExample = [
+    "## Configured Inline Hooks",
+    "```json",
+    JSON.stringify({
+      hooks: { scripts: { "pre-create": { cmd: "echo Inline pre-create hook running || exit /b 1" } } },
+      repos: { api: { hooks: { "post-create": "set -eu; CI=true corepack pnpm --ignore-workspace install --frozen-lockfile" } } },
+    }, null, 2),
+    "```",
+    "## Timeout and Failure Boundaries",
+    "Remove dry-run previews discovery but does not spawn hooks or fabricate execution outcomes.",
+  ];
+  writeFileSync(
+    join(root, "references", "hooks.md"),
+    `${[...requiredHookGuidance, ...bindingLines, ...configuredExample].join("\n")}\n`,
+  );
 }
 
 function validateControlledMismatch() {
@@ -215,6 +260,15 @@ function validateControlledMismatch() {
 
     writeFileSync(hooksPath, `${original}\n"pre-create.api": "echo bad"\n`);
     assert.throws(() => validateSkill(root, "encoded-key-drift"), /encoded repository lifecycle/);
+
+    writeFileSync(hooksPath, original.replace("echo Inline pre-create hook running", "echo %ARASHI_BRANCH_NAME%"));
+    assert.throws(() => validateSkill(root, "cmd-expansion-drift"), /cmd example must avoid reflecting/);
+
+    writeFileSync(hooksPath, original.replace("CI=true corepack pnpm --ignore-workspace", "corepack pnpm"));
+    assert.throws(() => validateSkill(root, "pnpm-isolation-drift"), /must set CI=true and pass --ignore-workspace/);
+
+    writeFileSync(hooksPath, original.replace("Remove dry-run previews discovery", "Dry-run previews discovery"));
+    assert.throws(() => validateSkill(root, "dry-run-scope-drift"), /unscoped all-command claim|scoped to remove/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
