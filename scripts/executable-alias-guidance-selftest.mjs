@@ -36,6 +36,7 @@ const actionableAwCommandPatterns = [
   /`aw`\s+-{1,2}\S+/im,
   /\b(?:run|execute|invoke|use|try)\s+`aw`(?=[\s.,;:!?]|$)/im,
   /^\s*aw\s*$/im,
+  /^\s*aw\s*(?=&&|\|\||[|;<>])/im,
   /(?<![`\w])aw\s+(?:-{1,2}\S+|[A-Za-z0-9][\w:-]*)/im,
 ];
 
@@ -49,6 +50,7 @@ function definesExecutableAlias(content) {
     /\baw\b[^.!?]{0,80}\b(?:is|remains|serves as)\b[^.!?]{0,50}\b(?:(?:a|an|another|the)\s+)?(?:supported\s+)?(?:executable\s+)?(?:shorthand|entrypoint|alias|name)\b/i,
     /\baw\b[^.!?]{0,100}\b(?:supported|available|provided|equivalent)\b[^.!?]{0,100}\b(?:executable|entrypoint|shorthand|alias|name)\b/i,
     /\b(?:supported|available|provided|equivalent)\b[^.!?]{0,100}\baw\b[^.!?]{0,100}\b(?:executable|entrypoint|shorthand|alias|name)\b/i,
+    /\b(?:ships?|provides?|offers?|has)\b[^.!?]{0,80}\b(?:executable|entrypoint|alias)\s+names?\b[^.!?]{0,80}\baw\b/i,
   ].some((pattern) => pattern.test(prose));
 }
 
@@ -240,6 +242,16 @@ function validateDeliberateDrift() {
         `duplicate executable-name definition guidance in ${fixtureLabel}`,
       );
 
+      writeFileSync(
+        workflowsPath,
+        `${originalWorkflows}\nArashi ships with executable names \`arashi\` and \`aw\`.\n`,
+      );
+      requireRejection(
+        () => validateSkill(fixtureSkillRoot, `${fixtureLabel}-plural-executable-names-definition`),
+        /executable-alias definition.*owned only by references\/tutorial\.md/,
+        `plural executable-names definition guidance in ${fixtureLabel}`,
+      );
+
       writeFileSync(workflowsPath, originalWorkflows);
       writeFileSync(
         tutorialPath,
@@ -292,6 +304,10 @@ function validateDeliberateDrift() {
         ["Run aw -V to inspect the shorthand version.", "tutorial-aw-short-version"],
         ["Run `aw`.", "tutorial-aw-bare-inline"],
         ["Run:\n```bash\naw\n```", "tutorial-aw-bare-fence"],
+        ["Run:\n```bash\naw && echo done\n```", "tutorial-aw-shell-list"],
+        ["Run:\n```bash\naw | cat\n```", "tutorial-aw-pipeline"],
+        ["Run:\n```bash\naw > output.txt\n```", "tutorial-aw-redirection"],
+        ["Run:\n```bash\naw; echo done\n```", "tutorial-aw-semicolon-list"],
         ["Run:\n```bash\n\"aw\" status\n'aw' --help\n```", "tutorial-aw-quoted-command"],
         ["Run:\n```bash\naw \\\n  status\n```", "tutorial-aw-line-continuation"],
       ]) {
