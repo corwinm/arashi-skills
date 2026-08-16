@@ -20,6 +20,8 @@ Use the website install guide and follow the instructions for your platform:
 
 - https://arashi.haphazard.dev
 
+`aw` is the supported **Arashi Workspace** executable shorthand. Supported npm and direct installations provide equivalent `arashi` and `aw` executable names, but `arashi` remains the canonical product and command vocabulary. The shorthand is a distribution-level entrypoint, not a Commander command alias or a second command vocabulary. Keep workflow examples and command discovery canonical: use `arashi --version`, `arashi --help`, and `arashi <command> --help`. Follow the canonical website guide for installation-channel details about collision handling, shell integration, completion, updates, and manual installation.
+
 If you use the official curl installer, it can offer shell integration during install so `arashi switch --cd` works without an extra setup step. For unattended installs, use `ARASHI_SHELL_INTEGRATION=yes` or `ARASHI_SHELL_INTEGRATION=no`.
 
 ## Step 3: Verify CLI

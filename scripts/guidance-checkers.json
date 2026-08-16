@@ -3,6 +3,7 @@
   "scripts/cli-flag-rationalization-guidance-selftest.mjs",
   "scripts/create-base-guidance-selftest.mjs",
   "scripts/create-launch-guidance-selftest.mjs",
+  "scripts/executable-alias-guidance-selftest.mjs",
   "scripts/kitty-session-guidance-selftest.mjs",
   "scripts/lifecycle-hook-guidance-selftest.mjs",
   "scripts/shell-completion-guidance-selftest.mjs",
