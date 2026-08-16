@@ -24,4 +24,3 @@ Use CLI help output when current flags or parameters are needed.
 - Remove lifecycle hooks: [Hooks](../references/hooks.md)
 - tmux / sesh shortcuts: [Session Shortcuts](../references/session-shortcuts.md)
 - End-to-end onboarding: [Tutorial](../references/tutorial.md)
-- Publication policy: [Publication Policy](../references/publication.md)

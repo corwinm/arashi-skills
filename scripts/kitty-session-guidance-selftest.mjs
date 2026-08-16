@@ -28,18 +28,12 @@ if (skillRootArgumentIndex >= 0 && !suppliedSkillRoot) {
 const requirements = new Map([
   [
     "references/prerequisites.md",
-    [
-      "Kitty 0.43+",
-      "kitten --version",
-      "remote control",
-      "allow_remote_control",
-    ],
+    ["Kitty 0.43+", "kitten --version", "remote control", "allow_remote_control"],
   ],
   [
-    "references/commands.md",
+    "references/commands/switch-and-launch.md",
     [
       "tmux → Herdr → cmux → integrated IDE → Kitty → parent-shell `cd` → terminal application/platform fallback",
-      "tmux → Herdr → cmux → integrated IDE → Kitty → terminal/platform",
       '`mode: "kitty"`',
       "no explicit Kitty launcher flag",
       "not a persisted create or switch mode",
@@ -47,25 +41,14 @@ const requirements = new Map([
     ],
   ],
   [
-    "references/workflows.md",
+    "references/commands/create.md",
     [
-      "Kitty 0.43+",
-      "exact Arashi-managed marker",
-      "stable identity",
-      "`<repo-name>: <branch-name>`",
-      "same managed Kitty flow",
-      "live-only",
-      "`.kitty-session`",
-      "`arashi remove` does not close Kitty",
+      "tmux → Herdr → cmux → integrated IDE → Kitty → terminal/platform",
       "preserves every successfully created worktree",
     ],
   ],
-  [
-    "references/session-shortcuts.md",
-    [
-      "tmux → Herdr → cmux → integrated IDE → Kitty → parent-shell `cd` → terminal/platform fallback",
-    ],
-  ],
+  ["references/workflows.md", ["Kitty", "commands/switch-and-launch.md"]],
+  ["references/session-shortcuts.md", ["commands/switch-and-launch.md"]],
   [
     "references/troubleshooting.md",
     [
@@ -75,12 +58,6 @@ const requirements = new Map([
       "duplicate exact marked Kitty windows",
       "does not close ambiguous Kitty windows",
       "preserve the created worktrees",
-      "cross-process identity lock",
-      "10-second wait",
-      "live owner",
-      "dead owner",
-      "30 seconds",
-      "ownership-safe release",
     ],
   ],
 ]);

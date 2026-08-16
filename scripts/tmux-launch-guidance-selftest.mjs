@@ -30,10 +30,7 @@ const requirements = new Map([
   [
     "references/tutorial.md",
     [
-      "arashi switch --tmux feature-auth",
-      "arashi create feature-auth --tmux",
-      "zero-config standalone",
-      "per-invocation"
+      "commands/switch-and-launch.md",
     ]
   ],
   [
@@ -47,7 +44,7 @@ const requirements = new Map([
     ]
   ],
   [
-    "references/commands.md",
+    "references/commands/switch-and-launch.md",
     [
       "arashi switch --tmux feature-auth",
       "arashi create feature-auth --tmux",
@@ -81,7 +78,7 @@ function validateSkill(root, label) {
     }
   }
 
-  const commands = readFileSync(join(root, "references", "commands.md"), "utf8");
+  const commands = readFileSync(join(root, "references", "commands", "switch-and-launch.md"), "utf8");
   assert.match(
     commands,
     /defaults\.switch\.mode[^\n]*`auto`, `cd`, `launch`, `sesh`, and `herdr`/,

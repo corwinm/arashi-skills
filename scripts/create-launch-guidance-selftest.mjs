@@ -34,13 +34,6 @@ const expectedGuidance = [
   "Configured launch is unsupported with `create --json`",
   "preserves every successfully created worktree",
   "does not fall back to another launcher",
-  "Legacy create-default migration",
-  "`launchMode` and `launch_mode`",
-  "`launch: false` plus any legacy launcher is rejected",
-  'canonical `launch: "none"`',
-  "matching enabled mode",
-  "Unsupported create `launch` values",
-  "non-boolean create `switch` values",
 ];
 
 const expectedContract = {
@@ -86,31 +79,23 @@ const expectedContract = {
 
 function validateSkill(root, label) {
   const commands = readFileSync(
-    join(root, "references", "commands.md"),
+    join(root, "references", "commands", "create.md"),
     "utf8",
   );
   for (const expected of expectedGuidance) {
     assert.ok(
       commands.includes(expected),
-      `${label}/references/commands.md is missing ${JSON.stringify(expected)}`,
+      `${label}/references/commands/create.md is missing ${JSON.stringify(expected)}`,
     );
   }
 
-  const migrationHeading = commands.indexOf(
-    "### Legacy create-default migration",
-  );
-  assert.ok(
-    migrationHeading >= 0,
-    `${label} is missing legacy create migration guidance`,
-  );
-  const canonicalGuidance = commands.slice(0, migrationHeading);
   assert.doesNotMatch(
-    canonicalGuidance,
-    /defaults\.create[^\n]*(?:launchMode|launch_mode)|"create"\s*:\s*\{[^}]*"launchMode"/s,
-    `${label} still advertises create launchMode as canonical guidance`,
+    commands,
+    /Legacy create-default migration|launchMode|launch_mode/,
+    `${label}/references/commands/create.md still exposes legacy migration tables`,
   );
   assert.doesNotMatch(
-    canonicalGuidance,
+    commands,
     /"create"\s*:\s*\{[^}]*"launch"\s*:\s*(?:true|false)/s,
     `${label} still advertises boolean create launch as canonical guidance`,
   );

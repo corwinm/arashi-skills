@@ -35,7 +35,7 @@ const requiredHookGuidance = [
   "short reviewable commands",
   "substantial, reusable scripts",
   "`--no-hooks` is create-only and remove does not accept it",
-  "`--no-hook-input` is shared by create and remove",
+  "`--no-hook-input` disables terminal input for that invocation without skipping hooks",
   "Remove dry-run keeps source-aware previews",
   "Configured-create dry-run performs no hook discovery, returns an empty hook ledger, and has no hook preview surface",
   "`sourceKind: \"inline-config\"`",

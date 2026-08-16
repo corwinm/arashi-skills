@@ -26,7 +26,7 @@ if (skillRootArgumentIndex >= 0 && !suppliedSkillRoot) {
 
 const requirements = new Map([
   [
-    "references/commands.md",
+    "references/commands/setup.md",
     [
       "arashi completion bash",
       "arashi completion zsh",
@@ -49,14 +49,7 @@ const requirements = new Map([
   [
     "references/tutorial.md",
     [
-      "Enable the wrapper and completion independently when configuring a shell manually",
-      "eval \"$(command arashi shell init bash)\"",
-      "source <(command arashi completion bash)",
-      "eval \"$(command arashi shell init zsh)\"",
-      "source <(command arashi completion zsh)",
-      "command arashi shell init fish | source",
-      "command arashi completion fish | source",
-      "`arashi shell install` writes and idempotently upgrades both activation lines in its managed block",
+      "commands/setup.md",
     ],
   ],
   [
@@ -111,18 +104,18 @@ function validateSkill(root, label) {
     }
   }
 
-  const commands = readFileSync(join(root, "references", "commands.md"), "utf8");
+  const commands = readFileSync(join(root, "references", "commands", "setup.md"), "utf8");
   assert.ok(
     commands.includes(
       "Dynamic ownership is exact: each `--only` segment completes repository names; each `--group` segment completes configured groups; `switch [filter]` and `remove [target]` complete branch, worktree name, or path values, while `--path` narrows them to exact worktree paths; `move --from` and `move --to` complete workspace branch, name, or path references; supported-shell arguments and finite constrained options complete only their declared values; unclassified slots receive no local candidates.",
     ),
-    `${label}/references/commands.md does not bind the bounded candidate classes to their constrained slots`,
+    `${label}/references/commands/setup.md does not bind the bounded candidate classes to their constrained slots`,
   );
   assert.ok(
     commands.includes(
       "The npm-managed wrapper and standalone binary expose the same completion behavior and generated shell output for a given release.",
     ),
-    `${label}/references/commands.md does not state npm/standalone release parity`,
+    `${label}/references/commands/setup.md does not state npm/standalone release parity`,
   );
   validateNoStaleClaims(root, label);
 }
@@ -138,7 +131,7 @@ function validateCommandCoverage() {
     {
       name: "completion",
       status: "covered",
-      reference: "references/commands.md",
+      reference: "references/commands/setup.md",
       standalone: { support: "supported" },
     },
     "contracts/command-coverage.json does not classify completion guidance and standalone support",
@@ -150,7 +143,7 @@ function validateDeliberateDrift() {
   try {
     const packagedSkillRoot = join(driftRoot, "arashi");
     cpSync(sourceSkillRoot, packagedSkillRoot, { recursive: true });
-    const commandsPath = join(packagedSkillRoot, "references", "commands.md");
+    const commandsPath = join(packagedSkillRoot, "references", "commands", "setup.md");
     const original = readFileSync(commandsPath, "utf8");
 
     const dynamicContract =

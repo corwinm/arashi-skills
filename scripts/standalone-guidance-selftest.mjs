@@ -24,39 +24,25 @@ const requirements = new Map([
       "non-bare Git project",
       "ad hoc work",
       "Prefer configured mode",
-      "configured mode",
       "child repositories",
       "tracked `.gitignore`",
-      "global Git"
-    ]
+      "global Git",
+    ],
   ],
   [
     "references/workflows.md",
     [
+      "Configured workflow",
+      "ordinary `arashi init`",
       "Standalone Repository Workflow",
       "arashi init --zero-config",
-      "destination=\".worktrees/$branch\"",
-      "git check-ignore --no-index -q -- \"$destination\"",
-      ".worktrees/<branch>",
-      "arashi create feature/skill-integration --no-launch --no-switch",
-      "arashi list",
-      "arashi status",
-      "arashi switch",
-      "arashi remove",
-      "arashi prune",
-      "arashi doctor",
-      "arashi move",
-      "arashi handoff",
+      "commands/workspace.md",
       "main worktree",
       "linked worktree",
-      "--only",
-      "--group",
-      "status --group",
-      "ordinary `arashi init`"
-    ]
+    ],
   ],
   [
-    "references/commands.md",
+    "references/commands/workspace.md",
     [
       "arashi init --zero-config",
       "arashi init --zero-config --dry-run",
@@ -74,19 +60,20 @@ const requirements = new Map([
       "setup",
       "--repos",
       "--all",
-      "ordinary `arashi init`"
-    ]
+      "ordinary `arashi init`",
+    ],
   ],
   [
     "references/troubleshooting.md",
     [
       "exact `.worktrees/<branch>` destination is not ignored",
       "arashi init --zero-config",
+      "literal `.worktrees/` rule",
       "repository-local exclude",
       "passive discovery does not repair",
       "tracked `.gitignore`",
-      "global Git configuration"
-    ]
+      "global Git configuration",
+    ],
   ],
   [
     "references/hooks.md",
@@ -99,9 +86,9 @@ const requirements = new Map([
       "main repository",
       "repository-local",
       "workspace-root",
-      "does not create or activate"
-    ]
-  ]
+      "does not create or activate",
+    ],
+  ],
 ]);
 
 function validateSkill(root, label) {
@@ -116,8 +103,8 @@ function validateSkill(root, label) {
   }
 
   const workflow = readFileSync(join(root, "references", "workflows.md"), "utf8");
-  const configuredPosition = workflow.indexOf("- Beginner: `arashi init`");
-  const standalonePosition = workflow.indexOf("- Ad hoc in an unconfigured project:");
+  const configuredPosition = workflow.indexOf("## Configured workflow");
+  const standalonePosition = workflow.indexOf("## Standalone Repository Workflow");
   assert.ok(standalonePosition >= 0, `${label} is missing the ad hoc standalone workflow route`);
   assert.ok(
     configuredPosition >= 0 && configuredPosition < standalonePosition,
@@ -136,6 +123,12 @@ function validateSkill(root, label) {
     allGuidance,
     /git\s+config\s+--global[^\n]*(?:core\.excludesFile|\.gitignore)|(?:>>?|tee\s+-a?)\s+[^\n]*\.gitignore/i,
     `${label} contains an automatic global or tracked ignore edit`
+  );
+  const troubleshooting = readFileSync(join(root, "references", "troubleshooting.md"), "utf8");
+  assert.doesNotMatch(
+    troubleshooting,
+    /add only the missing exact destination/i,
+    `${label} incorrectly claims zero-config init adds an exact destination exclude`
   );
 }
 
@@ -184,11 +177,18 @@ function validateCoverageContract() {
     }
 
     if (command.status === "covered") {
-      assert.match(command.reference ?? "", /^references\/[a-z0-9-]+\.md$/);
+      assert.match(command.reference ?? "", /^references\/(?:commands\/)?[a-z0-9-]+\.md$/);
       assert.ok(
         existsSync(join(sourceSkillRoot, command.reference)),
         `${name} coverage reference does not exist`
       );
+      if (["list", "setup"].includes(name)) {
+        const owner = readFileSync(join(sourceSkillRoot, command.reference), "utf8");
+        assert.ok(
+          owner.includes(`arashi ${name}`),
+          `${name} coverage owner does not document arashi ${name}`
+        );
+      }
     } else {
       assert.equal(command.status, "excluded", `${name} has an invalid coverage status`);
       assert.ok(command.reason?.trim(), `${name} exclusion needs a reason`);

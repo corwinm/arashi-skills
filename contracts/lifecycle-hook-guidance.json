@@ -13,7 +13,7 @@
       "| Repository `pre-create.<repo>` | After that child worktree is materialized, before its repository setup | New child worktree |",
       "| Repository `post-create.<repo>` | After that repository pre-create hook | New child worktree |",
       "| Workspace `post-create` | Once after coordinated Git creation, before move-changes or switch/launch handling | Configured workspace root |",
-      "repository → workspace → global-targeted → global-shared",
+      "repository \u2192 workspace \u2192 global-targeted \u2192 global-shared",
       "Workspace and shared remove hooks therefore run once per target repository",
       "Standalone mode discovers only user-global targeted and shared hooks",
       "`~/.arashi/hooks/<main-root-basename>/<lifecycle><ext>` before `~/.arashi/hooks/<lifecycle><ext>`",
@@ -55,12 +55,7 @@
       "set \"CI=true\""
     ],
     "references/tutorial.md": [
-      "install -m 755 .arashi/hooks/pre-remove.sh.example .arashi/hooks/pre-remove.sh",
-      "Activate exactly one reviewed example at a time",
-      "On Windows, copy exactly one native `.ps1`, `.cmd`, or `.bat` example",
-      "For zero-config operation, do not activate configless local `.arashi/hooks`; standalone mode uses only targeted/shared user-global hooks.",
-      "Interactive lifecycle-hook input is available only for eligible human `create` and `remove` invocations",
-      "Use `--no-hook-input` when a human invocation must execute hooks without allowing prompts"
+      "[Hooks](hooks.md)"
     ]
   },
   "forbiddenPatterns": [
@@ -69,5 +64,7 @@
     "Windows lifecycle hooks require Git Bash",
     "-NonInteractive"
   ],
-  "unsupportedEnvironmentVariables": ["ARASHI_BASE_BRANCH"]
+  "unsupportedEnvironmentVariables": [
+    "ARASHI_BASE_BRANCH"
+  ]
 }

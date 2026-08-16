@@ -1,67 +1,106 @@
-# Troubleshooting Matrix
+# Troubleshooting
 
-Use this matrix to map symptoms to root cause and a deterministic fix.
-
-| Symptom | Likely Cause | Recovery Action |
-|---------|--------------|-----------------|
-| `npm: command not found` | Node.js/npm not installed or not on `PATH` | Install Node.js LTS, restart shell, rerun `npm --version`. |
-| `node: command not found` | Node.js not installed or not on `PATH` | Install Node.js LTS, restart shell, rerun `node --version`. |
-| `git: command not found` | Git not installed or not on `PATH` | Install Git, restart shell, rerun `git --version`. |
-| `arashi: command not found` | Arashi not installed or install location not on `PATH` | Install Arashi using the website guide at `https://arashi.haphazard.dev`, ensure install location is on `PATH`, then rerun `arashi --version`. |
-| Website install steps fail | Network access, permissions, package manager configuration issue, or a bad published release artifact | Retry from stable network, confirm toolchain requirements, and follow the fallback path documented on the website. |
-| `arashi --version` exits immediately or returns `137` | Installed binary is invalid for the current platform or a published release artifact is bad | For npm installs, run `arashi install` once to refresh the platform binary; otherwise reinstall using a pinned version from the website guide, verify `arashi --version`, and report the bad release artifact. |
-| `arashi completion bash\\|zsh\\|fish` emits nothing or fails | The shell name is unsupported, the npm platform binary is missing or stale, profile activation is invoking a wrapper recursively, local discovery failed, or the 200 ms whole-query budget expires | Verify the shell argument, then run `command arashi completion <shell>` directly. For an npm-managed install, run `arashi install` once and retry; for a standalone install, reinstall the standalone binary from the same release. Static completion remains available outside configured workspaces. Dynamic completion is intentionally empty when local discovery is unavailable, fails, or the 200 ms whole-query budget expires; it performs no network requests, hooks, prompts, workspace mutation, or child-repository operations. |
-| Repository security checks fail on exception metadata | Exception entry is stale or malformed | Remediate findings or renew exceptions with owner, rationale, and valid expiry metadata. |
-| `arashi init` fails | Directory not writable, unsupported bootstrap target, or wrong starting location | Ensure the directory is writable, run `arashi init` from the intended repository root or parent directory, and use `.` or a direct child directory name when prompted. |
-| Standalone `arashi create` reports that the exact `.worktrees/<branch>` destination is not ignored | The root convention exists, but Git's effective tracked, repository-local, or existing global rules do not cover this branch destination | Run `arashi init --zero-config`, then verify the exact destination with `git check-ignore --no-index`. Do not automatically edit tracked `.gitignore`, a global excludes file, or global Git configuration. |
-| A repository has `.worktrees/`, but ignore coverage remains missing | Passive discovery does not repair standalone bootstrap state | Run `arashi init --zero-config` to repair the repository-local exclude, then rerun `arashi doctor --json`. |
-| A standalone command rejects child repositories, groups, or coordination | `add`, `clone`, `sync`, `pull`, `push`, `exec`, and `setup`, plus repository/group selectors, require persisted configured state | Upgrade with ordinary `arashi init`; do not treat standalone mode as an empty configured workspace. |
-| Managed repository or worktree paths appear as untracked, or managed ignore state may be stale | A safe configured path lacks an effective rule, an Arashi-owned entry is stale, or `none` is selected | Run `arashi doctor --json` and follow its non-mutating finding. If repository-local management is intended, run `arashi init --ignore-scope local`; rerun doctor to verify. |
-| `.gitignore` changes during `init`, `pull`, `clone`, `add`, or `create` | The clone-local `tracked` preference is active and reconciliation added a missing safe rule or removed a stale Arashi-owned rule | Confirm the tracked rule changes are intended for the team. Keep them if intentional, or run `arashi init --ignore-scope local` to restore the local default for later reconciliation. |
-| Managed ignore reconciliation reports an invalid stored scope | Clone-local `arashi.ignoreScope` contains an unsupported value | Run `arashi doctor --json`, follow its Git-config repair guidance, then explicitly select `arashi init --ignore-scope local`, `tracked`, or `none`. Do not put the preference in `.arashi/config.json`. |
-| A global ignore rule already covers a managed path | Git reports an existing effective rule through the user's global excludes file | Leave the effective rule in place; Arashi should not duplicate it. Never create, edit, or unset global Git configuration as an Arashi repair. |
-| Managed ignore reconciliation skips a path as unsafe | `reposDir` or `worktreesDir` resolves to repository root, an absolute path, or parent traversal | Choose a safe repository-relative subdirectory in workspace configuration, then rerun the lifecycle command and `arashi doctor --json`. Do not add the broad path automatically to any ignore file. |
-| SSH alias clone fails to resolve or authenticate | Git/OpenSSH could not resolve the machine-local alias or authenticate with local SSH settings | Fix the local Git/OpenSSH routing and retry the requested command. The normal add rollback boundary still applies; for a multi-repository clone, clone continues with remaining repositories and reports partial success. Arashi does not read or probe SSH configuration. |
-| `arashi create` fails due to branch conflict | Branch already exists with incompatible worktree state | Use a unique branch name or remove conflicting worktree, then retry. |
-| Workspace health, clone, status, or prune symptoms are unclear | Configuration, repository state, stale worktree metadata, hooks, shell integration, or install/update drift | Run `arashi doctor --json` first and follow the structured finding severities and suggested commands. |
-| `arashi remove` reports stale/prunable metadata | Git has a worktree record for a missing directory | Run `arashi doctor --json` first; if it reports stale metadata, use `arashi prune --dry-run --json` to inspect, then `arashi prune --json` to clean. |
-| `sesh connect` fails | `sesh` missing or tmux not configured | Install/configure sesh and tmux, or use plain `cd` shortcut flow. |
-| `--tmux` requires an active tmux client or session | `TMUX` is absent, empty, or whitespace-only | Run the command from an active tmux client or session, or explicitly choose a different launcher. For `create --tmux`, this preflight fails before creating worktrees or running create hooks; Arashi does not fall back. |
-| Explicit tmux launch reports `LAUNCH_FAILED` | `tmux new-window` failed after tmux context validation | Fix the tmux/process error and retry intentionally. Arashi does not fall back; after `create --tmux`, preserve the created worktrees because launch failure does not roll them back. |
-| Herdr launch reports that the command is unavailable | Herdr is not installed or is not on `PATH` | Install a Herdr release compatible with the verified v0.7.4 command contract, rerun `herdr --version`, then retry. Arashi does not fall back after Herdr is selected. |
-| Herdr launch reports a server or socket failure | The Herdr CLI cannot reach a running default session/server | Start or restore the intended Herdr session, verify access from the same shell, and retry. Do not force another launcher unless the user chooses one explicitly. |
-| Herdr launch reports an invalid response | The installed Herdr CLI/server does not match the validated `worktree_opened` JSON contract | Compare the CLI/server with the verified Herdr v0.7.4 contract and confirm a compatible running server. Treat `LAUNCH_FAILED` as a real failure; do not assume the workspace opened. |
-| Herdr launch reports that no non-bare source checkout is available | The repository is bare and cannot provide Herdr's required main-checkout `--cwd` | Create or use a non-bare main checkout before retrying. If this followed `arashi create --herdr`, keep the successfully created worktrees; Arashi does not roll them back. |
-| A Herdr workspace remains after `arashi remove` | Arashi intentionally does not close Herdr workspaces because they may contain agents or unsaved terminal state | Close it manually with `herdr workspace close <workspace-id>`. For opt-in automation, resolve the ID while the checkout exists and run that command from a pre-remove hook; never use `herdr worktree remove`. |
-| Managed Kitty launch reports a version or remote control failure | Kitty is older than Kitty 0.43+, `kitten` is unavailable, or the user's remote control permission/password policy denied access | Run `kitten --version`, upgrade if needed, and review Kitty's `allow_remote_control` and password policy. Preserve the actionable `LAUNCH_FAILED`; Arashi does not fall back after Kitty is selected. |
-| Managed Kitty launch reports duplicate exact marked Kitty windows | More than one live window carries the worktree's exact Arashi identity marker | Inspect the named windows in Kitty and close the unintended duplicate manually. Arashi fails closed and does not close ambiguous Kitty windows or silently choose one. |
-| Managed Kitty reports an identity-lock failure | Another process owns the worktree's cross-process identity lock, the 10-second wait expired, or lock storage is unavailable | Let a live owner finish and retry. Arashi recovers a dead owner automatically, waits 30 seconds before recovering malformed owner metadata, and uses ownership-safe release so one process cannot delete another process's lock. |
-| Managed Kitty post-create launch fails | Version, permission, structured-state validation, focus, or launch failed after worktree creation | Fix the reported Kitty cause and retry intentionally. Preserve the created worktrees; Arashi reports partial success and does not roll them back or switch to a generic terminal. |
-| A Kitty window remains after `arashi remove` | Managed Kitty sessions are live-only and Kitty owns its windows | Close the window manually in Kitty if desired. Arashi does not generate session files or perform remove-time or automatic window cleanup. |
-| Tab launch reports `TAB_DISPOSITION_UNSUPPORTED` | The selected context cannot reliably create a true tab while preserving app/profile/shell/cwd; examples include Terminal.app, bare Git Bash/MinTTY, unmanaged Kitty, Linux Ghostty, an IDE workspace, or generic terminal fallback | Choose a supported managed/terminal context or omit `--tab` for the default independent launch. In Terminal.app, press Command-T and run `arashi switch --cd` only when shell integration is active. Do not retry as a window automatically. |
-| A conditional tab adapter has no exact target evidence | The launch is missing `WEZTERM_PANE`, `HERDR_WORKSPACE_ID`, exact macOS target, or supported Ghostty version | Treat this as `TAB_DISPOSITION_UNSUPPORTED` before any process or fallback attempt. Start from the intended pane/workspace/window with the required version evidence; do not guess a target. |
-| macOS tab automation preflight is denied or fails | Denied or failed read-only macOS automation preflight for iTerm2 or Ghostty is an attempted supported launch, not missing capability | Treat `LAUNCH_FAILED` without fallback as authoritative before create mutation or switch launch. Grant or repair automation only if desired, then retry intentionally; never create first, open a replacement window, or choose another launcher automatically. |
-| `create --tab` reports a runtime launch failure after creation | The tab mapping was knowably supported, but its process, protocol, target, or automation failed after worktrees were created | Fix the reported launcher failure and retry intentionally; created worktrees remain intact. Do not retry as a window or another launcher. |
-| Herdr reports that no non-bare source checkout is available | Default Herdr launch still needs a non-bare source checkout for `herdr worktree open`; `--tab --herdr` does not | For default Herdr workspace launch, create or select a non-bare main checkout. For tab disposition, run from an active Herdr workspace with a non-empty `HERDR_WORKSPACE_ID`; Arashi uses `herdr tab create` instead. |
-
-For an exact standalone create ignore check, resolve the main worktree, substitute the branch, and require the final command to exit `0`:
+Start with the narrowest diagnostic:
 
 ```bash
-root="$(git -c core.quotePath=false worktree list --porcelain | sed -n '1s/^worktree //p')"
-cd "$root" || exit 1
-branch=feature/example
-destination=".worktrees/$branch"
-git check-ignore --no-index -v -- "$destination"
+arashi doctor --json
+arashi <command> --help
 ```
 
-If it exits non-zero, run `arashi init --zero-config`. Do not automatically edit tracked `.gitignore`, a global excludes file, or global Git configuration.
+Preserve the failing command, exit status, structured error code, selected repository scope, and any worktrees already created. Do not retry a mutating command with broader selectors or a different launcher until the failure is understood.
 
-## Recovery Playbook
+## CLI is missing or exits immediately
 
-1. confirm prerequisites from `references/prerequisites.md`
-2. confirm `arashi --version` succeeds
-3. run `arashi doctor --json` for structured, non-mutating workspace health diagnostics
-4. run lower-level follow-up commands such as `arashi status`, `arashi clone`, or `arashi prune --dry-run --json` only when doctor findings or the symptom point to them
-5. run your repository's configured security checks
-6. rerun the failing workflow command
-7. verify expected outcomes in `references/workflows.md`
+**First diagnostic:** run `arashi --version` and identify whether the installation is npm-managed or a standalone binary.
+
+**Recovery:** follow the current installation instructions at https://arashi.haphazard.dev. Node/npm is required only for the npm path. Network access is required only for installation, update checks, or remote operations.
+
+**Escalate:** capture the install channel, platform/architecture, version output, and exit status. Do not replace a working standalone binary merely because Node is absent.
+
+## Update or completion behaves unexpectedly
+
+**First diagnostic:** inspect `arashi update --help` or run `arashi update --check`. For completion, run `command arashi completion <shell>` directly so a wrapper function cannot recurse.
+
+**Recovery:** `arashi completion bash` (or zsh/fish) should produce static completion. Static completion remains available outside configured workspaces. Dynamic completion is intentionally empty when discovery fails or the 200 ms whole-query budget expires; it performs no network requests, hooks, prompts, mutation, or child-repository operations.
+
+If completion exists but activation is missing on an npm-managed install, run `arashi install` once. A standalone binary from the same release exposes the same generated completion behavior. See [Setup, update, and completion](commands/setup.md).
+
+## Workspace configuration or status is unhealthy
+
+**First diagnostic:** use `arashi doctor --json`; then inspect `arashi status` and `.arashi/config.json` only as directed by the diagnostic.
+
+**Recovery:** run ordinary `arashi init` for a project adopting configured mode. Preserve an existing configured worktree directory and ignore scope unless the user deliberately changes it. For child repositories or custom paths, follow [Workspace and repositories](commands/workspace.md).
+
+**Escalate:** report the exact failed check and path classification rather than editing `.gitignore`, Git common excludes, or global configuration speculatively.
+
+## Standalone destination is not ignored
+
+**Symptom:** the exact `.worktrees/<branch>` destination is not ignored.
+
+**First diagnostic:** preview `arashi init --zero-config --dry-run` and verify the exact planned destination with `git check-ignore --no-index`.
+
+**Recovery:** run `arashi init --zero-config` to append the literal `.worktrees/` rule to the repository-local exclude when safe. Passive discovery does not repair ignore coverage. Do not edit tracked `.gitignore` or global Git configuration automatically.
+
+**Escalate:** if the destination is external, unsafe, or already affected by a different effective rule, stop and show the classification. Adopt configured mode when custom paths or persistent policy are needed.
+
+## SSH alias clone fails to resolve or authenticate
+
+**First diagnostic:** reproduce the remote with Git/OpenSSH. Arashi does not read or probe SSH configuration, resolve aliases independently, or rewrite SSH URLs to HTTPS.
+
+**Recovery:** correct the user's machine-local SSH configuration or Git `url.<base>.insteadOf` rule. Keep a canonical committed remote when shared configuration must work across machines.
+
+**Outcome:** add remains inside its normal add rollback boundary. During clone, clone continues with remaining repositories and reports partial success. See [Workspace and repositories](commands/workspace.md) for exact URL-preservation policy.
+
+## Selection is empty or broader than expected
+
+**First diagnostic:** run the corresponding inspection with the same `--only` and `--group` values. Repeated and comma-separated selectors normalize in encounter order and intersect.
+
+**Recovery:** correct unknown/empty values or choose the intended group. A valid filter with no matches fails closed. Do not remove the selector simply to make the command run.
+
+## Create fails before mutation
+
+**First diagnostic:** inspect the structured error, selected repositories, base resolution, hook validation, and launcher mode. JSON refusals and option conflicts may occur before repository discovery.
+
+**Recovery:** fix all reported preflight failures, then retry with the identical selectors. `REUSE_EXISTING` preserves an existing target; do not reset or recreate it to satisfy a requested base. Use `--no-launch --no-switch` for unattended creation.
+
+## Launch or switch fails
+
+**First diagnostic:** identify the requested/selected launcher and its prerequisite. `LAUNCH_FAILED` means the selected launch was attempted and failed; `TAB_DISPOSITION_UNSUPPORTED` means the selected launcher cannot satisfy an explicit tab request. Neither authorizes fallback.
+
+**Recovery:** fix the requested integration or explicitly choose another supported mode. Preserve exact paths as process arguments; do not invent environment/session identifiers or weaken user security policy.
+
+### tmux
+
+`--tmux` requires an active tmux client or session and a non-empty trimmed `TMUX`. Missing context is detected before creating worktrees. A tmux process failure does not fall back; after create, preserve the created worktrees and report launch failure separately.
+
+### managed Kitty
+
+Managed launch requires Kitty 0.43+ and user-permitted remote control. Diagnose version, permission, exact managed marker, and live session state. `LAUNCH_FAILED` does not permit another launcher. If duplicate exact marked Kitty windows exist, Arashi does not close ambiguous Kitty windows; resolve them manually under the user's Kitty policy.
+
+For an identity-lock failure, another process may own the worktree's cross-process identity lock, the 10-second wait may have expired, or storage may be unavailable. Let a live owner finish and retry. Arashi recovers a dead owner automatically, waits 30 seconds before recovering malformed owner metadata, and uses ownership-safe release so one process cannot delete another process's lock. If launch followed create, preserve the created worktrees.
+
+### Herdr, cmux, or editor
+
+Verify the selected tool's current command contract and genuine managed context. Do not fabricate `HERDR_WORKSPACE_ID`, cmux identifiers, sockets, editor hosts, or tmux state. Default Herdr workspace launch requires a non-bare source checkout; `--tab --herdr` instead requires an active Herdr workspace.
+
+## Hook fails or prompts unexpectedly
+
+**First diagnostic:** identify lifecycle, scope/owner, source kind, execution path, interpreter, input mode, timeout, and exit status. Use [Hooks](hooks.md) for the lifecycle order and environment contract.
+
+**Recovery:** review executable hook content, use the repository's package manager/lockfile, and reproduce the hook from its documented execution directory. Never enter secrets through lifecycle-hook prompts. Use `--no-hook-input` to execute eligible create/remove hooks with immediate EOF, or create-only `--no-hooks` to skip execution deliberately.
+
+**Outcome:** create-hook failure enters the owned rollback boundary; a failing pre-remove stops destructive mutation; post-remove still reports after attempted removal, including partial failures.
+
+## Remove or prune is unsafe
+
+**First diagnostic:** run `arashi remove <target> --dry-run` and inspect branch/worktree ambiguity, dirty state, and hook previews. Use `git worktree list` before pruning stale metadata.
+
+**Recovery:** narrow the target, preserve dirty work, and retry only after the preview matches the request. Use `arashi prune` for stale Git metadata, not as a substitute for reviewing a live worktree.
+
+## Recovery playbook
+
+1. Stop after the first unexplained mutation or partial failure.
+2. Record `arashi doctor --json`, `arashi status`, the exact command/selectors, and Git worktree state.
+3. Preserve successful creations and dirty worktrees.
+4. Fix the owner-specific prerequisite or policy.
+5. Retry with the same narrow scope; verify before widening.

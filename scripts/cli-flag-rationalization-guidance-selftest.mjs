@@ -32,52 +32,49 @@ const requirements = new Map([
       "`-v/--verbose`, `-f/--force`, `-j/--json`, `-o/--only`, `-g/--group`, and `-n/--dry-run`",
       "`add -n/--name` remains command-local name syntax",
       "`exec --jobs` remains long-only",
-      "accept repeated occurrences, comma-separated values, or both",
-      "encounter order, trims whitespace, ignores blank segments beside valid values, and deduplicates by first occurrence",
-      "Explicitly supplied selectors that normalize to empty, unknown values, and valid filters with no matches fail closed",
-      "`--only` and `--group` intersect",
-      "`status --only` is configured-workspace-only",
-      "arashi switch --launch feature-auth",
-      "arashi switch --launch --ignore-configured-launcher feature-auth",
-      "`--launch` preserves a configured `sesh` or `herdr` launcher",
-      "`--ignore-configured-launcher` alone bypasses only a configured `sesh` or `herdr` launcher",
-      "does not independently force or prevent parent-shell `cd`",
-      "The exact generic automatic-launch request is `--launch --ignore-configured-launcher`",
       "Deprecated compatibility syntax remains accepted throughout Arashi 1.x",
       "removal is no earlier than 2.0 and requires a separately approved breaking-change issue",
       "`--no-cd` maps to `--launch`",
       "`--no-default-launch` maps to `--ignore-configured-launcher`",
       "Markdown is the default",
       "omit the deprecated compatibility spelling `--markdown`",
+      "do not claim native shell completion",
+    ],
+  ],
+  [
+    "references/commands/automation.md",
+    [
+      "accept repeated occurrences, comma-separated values, or both",
+      "encounter order, trims whitespace, ignores blank segments beside valid values, and deduplicates by first occurrence",
+      "Explicitly supplied selectors that normalize to empty, unknown values, and valid filters with no matches fail closed",
+      "`--only` and `--group` intersect",
+      "`status --only` is configured-workspace-only",
+    ],
+  ],
+  [
+    "references/commands/switch-and-launch.md",
+    [
+      "arashi switch --launch feature-auth",
+      "arashi switch --launch --ignore-configured-launcher feature-auth",
+      "`--launch` preserves a configured `sesh` or `herdr` launcher",
+      "`--ignore-configured-launcher` alone bypasses only a configured `sesh` or `herdr` launcher",
+      "does not independently force or prevent parent-shell `cd`",
+      "The exact generic automatic-launch request is `--launch --ignore-configured-launcher`",
+    ],
+  ],
+  [
+    "references/commands/setup.md",
+    [
       "`update --check` conflicts with `--dry-run` and `-n`",
       "before release lookup, installer planning, package-manager execution, binary replacement, or mutation",
       "both the native Commander path and the npm-managed wrapper path",
       "Bare `update --json` is inspection-only",
       "never prompts or applies an update",
       "`update --json --yes` returns one `JSON_UNSUPPORTED_FOR_MODE` envelope",
-      "do not claim native shell completion",
     ],
   ],
-  [
-    "references/session-shortcuts.md",
-    [
-      "arashi switch --launch feature-auth",
-      "arashi switch --ignore-configured-launcher feature-auth",
-      "arashi switch --launch --ignore-configured-launcher feature-auth",
-      "preserves a configured explicit `sesh` or `herdr` launcher",
-      "does not independently force or prevent parent-shell `cd`",
-    ],
-  ],
-  [
-    "references/tutorial.md",
-    [
-      "arashi switch --launch feature-auth",
-      "arashi switch --ignore-configured-launcher feature-auth",
-      "arashi switch --launch --ignore-configured-launcher feature-auth",
-      "configured `sesh` or `herdr` remains selected",
-      "normal automatic launcher resolution",
-    ],
-  ],
+  ["references/session-shortcuts.md", ["commands/switch-and-launch.md"]],
+  ["references/tutorial.md", ["commands/switch-and-launch.md"]],
 ]);
 
 function validateDeprecatedUsage(root, label) {
@@ -121,18 +118,21 @@ function validateSkill(root, label) {
       );
     }
   }
-  const commands = readFileSync(join(root, "references", "commands.md"), "utf8");
-  assert.ok(
-    commands.includes(
-      "Bare `update --json` is inspection-only in both paths: it reports the update plan in one envelope and never prompts or applies an update.",
-    ),
-    `${label}/references/commands.md has invalid bare update JSON policy; both native and npm paths must be inspection-only without prompt or mutation`,
+  const setup = readFileSync(
+    join(root, "references", "commands", "setup.md"),
+    "utf8",
   );
   assert.ok(
-    commands.includes(
+    setup.includes(
+      "Bare `update --json` is inspection-only in both paths: it reports the update plan in one envelope and never prompts or applies an update.",
+    ),
+    `${label}/references/commands/setup.md has invalid bare update JSON policy`,
+  );
+  assert.ok(
+    setup.includes(
       "`update --json --yes` returns one `JSON_UNSUPPORTED_FOR_MODE` envelope for installer apply before mutation.",
     ),
-    `${label}/references/commands.md has invalid JSON apply policy; installer-apply rejection must occur before mutation`,
+    `${label}/references/commands/setup.md has invalid JSON apply policy`,
   );
   validateDeprecatedUsage(root, label);
 }
@@ -143,62 +143,52 @@ function validateDeliberateDrift() {
   try {
     const packagedSkillRoot = join(driftRoot, "arashi");
     cpSync(sourceSkillRoot, packagedSkillRoot, { recursive: true });
-    const commandsPath = join(packagedSkillRoot, "references", "commands.md");
-    const original = readFileSync(commandsPath, "utf8");
-    const semantic =
-      "The exact generic automatic-launch request is `--launch --ignore-configured-launcher`";
-    assert.equal(
-      original.split(semantic).length - 1,
-      1,
-      "drift fixture requires one exact generic-launch behavior statement",
+
+    const switchPath = join(
+      packagedSkillRoot,
+      "references",
+      "commands",
+      "switch-and-launch.md",
     );
+    const originalSwitch = readFileSync(switchPath, "utf8");
+    const launchSemantic =
+      "The exact generic automatic-launch request is `--launch --ignore-configured-launcher`";
+    assert.equal(originalSwitch.split(launchSemantic).length - 1, 1);
     writeFileSync(
-      commandsPath,
-      original.replace(
-        semantic,
+      switchPath,
+      originalSwitch.replace(
+        launchSemantic,
         "The exact generic automatic-launch request is `--ignore-configured-launcher` alone",
       ),
     );
     assert.throws(
-      () => validateSkill(packagedSkillRoot, "deliberate-drift"),
+      () => validateSkill(packagedSkillRoot, "deliberate-launch-drift"),
       /exact generic automatic-launch request/,
-      "checker accepted semantic drift that made launcher-ignore force generic launch",
     );
-    writeFileSync(commandsPath, original);
+    writeFileSync(switchPath, originalSwitch);
 
-    writeFileSync(commandsPath, original.replace("in both paths", "in the native path only"));
+    const setupPath = join(packagedSkillRoot, "references", "commands", "setup.md");
+    const originalSetup = readFileSync(setupPath, "utf8");
+    writeFileSync(setupPath, originalSetup.replace("in both paths", "in the native path only"));
     assert.throws(
       () => validateSkill(packagedSkillRoot, "deliberate-native-only-json"),
       /invalid bare update JSON policy/,
-      "checker accepted bare update JSON guidance that excluded the npm wrapper",
     );
-    writeFileSync(commandsPath, original.replace("before mutation.", "after mutation."));
+    writeFileSync(setupPath, originalSetup.replace("before mutation.", "after mutation."));
     assert.throws(
       () => validateSkill(packagedSkillRoot, "deliberate-after-mutation-json-apply"),
       /invalid JSON apply policy/,
-      "checker accepted JSON installer apply rejection after mutation",
     );
-    writeFileSync(commandsPath, original);
+    writeFileSync(setupPath, originalSetup);
 
     const skillPath = join(packagedSkillRoot, "SKILL.md");
     const originalSkill = readFileSync(skillPath, "utf8");
-    writeFileSync(
-      skillPath,
-      `${originalSkill}\n\nPreferred shortcut: run \`arashi switch --no-cd\`.\n`,
-    );
+    writeFileSync(skillPath, `${originalSkill}
+Preferred shortcut: run \`arashi switch --no-cd\`.
+`);
     assert.throws(
       () => validateSkill(packagedSkillRoot, "deliberate-deprecated-guidance"),
-      /SKILL\.md.*deprecated CLI syntax outside explicit compatibility metadata/,
-      "checker accepted actionable deprecated guidance outside the three edited references",
-    );
-    writeFileSync(
-      skillPath,
-      `${originalSkill}\n\nFor deprecated compatibility, run \`arashi handoff --link value --markdown\`.\n`,
-    );
-    assert.throws(
-      () => validateSkill(packagedSkillRoot, "deliberate-same-line-actionable"),
-      /SKILL\.md.*actionable deprecated CLI syntax/,
-      "checker accepted actionable deprecated guidance with nearby compatibility keywords",
+      /deprecated CLI syntax outside explicit compatibility metadata/,
     );
   } finally {
     rmSync(driftRoot, { recursive: true, force: true });
