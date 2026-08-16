@@ -34,6 +34,8 @@ const aliasGuidance = [
 const actionableAwCommandPatterns = [
   /`aw\s+[^`\s]+(?:\s+[^`]*)?`/im,
   /`aw`\s+-{1,2}\S+/im,
+  /\b(?:run|execute|invoke|use|try)\s+`aw`(?=[\s.,;:!?]|$)/im,
+  /^\s*aw\s*$/im,
   /(?<![`\w])aw\s+(?:-{1,2}\S+|[A-Za-z0-9][\w:-]*)/im,
 ];
 
@@ -44,7 +46,7 @@ function normalizeProse(content) {
 function definesExecutableAlias(content) {
   const prose = normalizeProse(content);
   return [
-    /\baw\b[^.!?]{0,80}\b(?:is|remains|serves as)\b[^.!?]{0,50}\b(?:supported\s+)?(?:executable\s+)?(?:shorthand|entrypoint|alias)\b/i,
+    /\baw\b[^.!?]{0,80}\b(?:is|remains|serves as)\b[^.!?]{0,50}\b(?:(?:a|an|another|the)\s+)?(?:supported\s+)?(?:executable\s+)?(?:shorthand|entrypoint|alias|name)\b/i,
     /\baw\b[^.!?]{0,100}\b(?:supported|available|provided|equivalent)\b[^.!?]{0,100}\b(?:executable|entrypoint|shorthand|alias|name)\b/i,
     /\b(?:supported|available|provided|equivalent)\b[^.!?]{0,100}\baw\b[^.!?]{0,100}\b(?:executable|entrypoint|shorthand|alias|name)\b/i,
   ].some((pattern) => pattern.test(prose));
@@ -55,7 +57,9 @@ function claimsCommanderAssociation(content) {
   const contextualReference = /\b(?:it|this|that|the shorthand|the alias)\b/i;
   return content.split(/\n\s*\n/).some((rawParagraph) => {
     const paragraph = normalizeProse(rawParagraph);
-    const statements = paragraph.split(/(?:(?<=[.!?;])\s+|\s+(?:but|however|yet)\s+)/i);
+    const statements = paragraph.split(
+      /(?:(?<=[.!?;])\s+|\s*,?\s+(?:but|however|yet|although|though)\s+)/i,
+    );
     let awContext = false;
     return statements.some((statement) => {
       const mentionsAw = /\baw\b/i.test(statement);
@@ -67,7 +71,9 @@ function claimsCommanderAssociation(content) {
 }
 
 function containsActionableAwInvocation(content) {
-  const logicalCommands = content.replace(/\\\r?\n\s*/g, " ");
+  const logicalCommands = content
+    .replace(/\\\r?\n\s*/g, " ")
+    .replace(/(["'])aw\1/g, "aw");
   return actionableAwCommandPatterns.some((pattern) => pattern.test(logicalCommands));
 }
 
