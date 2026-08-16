@@ -52,20 +52,23 @@ function definesExecutableAlias(content) {
 
 function claimsCommanderAssociation(content) {
   const approvedNegation = /\bnot\s+(?:a\s+|an\s+)?Commander command alias\b/i;
+  const contextualReference = /\b(?:it|this|that|the shorthand|the alias)\b/i;
   return content.split(/\n\s*\n/).some((rawParagraph) => {
     const paragraph = normalizeProse(rawParagraph);
     const statements = paragraph.split(/(?:(?<=[.!?;])\s+|\s+(?:but|however|yet)\s+)/i);
-    return statements.some(
-      (statement) =>
-        /\baw\b/i.test(statement) &&
-        /\bCommander\b/i.test(statement) &&
-        !approvedNegation.test(statement),
-    );
+    let awContext = false;
+    return statements.some((statement) => {
+      const mentionsAw = /\baw\b/i.test(statement);
+      const refersToAw = mentionsAw || (awContext && contextualReference.test(statement));
+      if (mentionsAw) awContext = true;
+      return refersToAw && /\bCommander\b/i.test(statement) && !approvedNegation.test(statement);
+    });
   });
 }
 
 function containsActionableAwInvocation(content) {
-  return actionableAwCommandPatterns.some((pattern) => pattern.test(content));
+  const logicalCommands = content.replace(/\\\r?\n\s*/g, " ");
+  return actionableAwCommandPatterns.some((pattern) => pattern.test(logicalCommands));
 }
 
 function walkMarkdown(root, directory = root) {
@@ -280,6 +283,7 @@ function validateDeliberateDrift() {
         );
       }
 
+      writeFileSync(workflowsPath, originalWorkflows);
       writeFileSync(
         tutorialPath,
         originalTutorial.replace(
