@@ -31,6 +31,57 @@ const aliasGuidance = [
   "installation-channel details about collision handling, shell integration, completion, updates, and manual installation",
 ];
 
+const arashiCommandNames = [
+  "add",
+  "clone",
+  "completion",
+  "config",
+  "create",
+  "doctor",
+  "exec",
+  "handoff",
+  "init",
+  "install",
+  "list",
+  "move",
+  "prune",
+  "pull",
+  "push",
+  "remove",
+  "setup",
+  "shell",
+  "status",
+  "switch",
+  "sync",
+  "update",
+];
+const actionableAwCommandPattern = new RegExp(
+  `(?:^|[\\s\`])aw(?:\`)?\\s+(?:--(?:help|version)\\b|(?:${arashiCommandNames.join("|")})\\b)`,
+  "im",
+);
+
+function normalizeProse(content) {
+  return content.replace(/[`*_]/g, "").replace(/\s+/g, " ");
+}
+
+function definesExecutableAlias(content) {
+  const prose = normalizeProse(content);
+  return [
+    /\baw\b[^.!?]{0,80}\b(?:is|remains|serves as)\b[^.!?]{0,50}\b(?:supported\s+)?(?:executable\s+)?(?:shorthand|entrypoint|alias)\b/i,
+    /\baw\b[^.!?]{0,100}\b(?:supported|available|provided|equivalent)\b[^.!?]{0,100}\b(?:executable|entrypoint|shorthand|alias|name)\b/i,
+    /\b(?:supported|available|provided|equivalent)\b[^.!?]{0,100}\baw\b[^.!?]{0,100}\b(?:executable|entrypoint|shorthand|alias|name)\b/i,
+  ].some((pattern) => pattern.test(prose));
+}
+
+function claimsCommanderAssociation(content) {
+  const prose = normalizeProse(content);
+  return [
+    /(?:\baw\b|\b(?:executable|command) alias\b|\bshorthand\b)[^.!?]{0,80}\b(?:registered|defined|provided|created|implemented|handled|parsed)\s+by\s+Commander\b/i,
+    /\bCommander\b[^.!?]{0,80}\b(?:registers|defines|provides|creates|implements|handles|parses)\b[^.!?]{0,80}(?:\baw\b|\b(?:executable|command) alias\b|\bshorthand\b)/i,
+    /(?<!not (?:a |an ))\bCommander command alias\b/i,
+  ].some((pattern) => pattern.test(prose));
+}
+
 function walkMarkdown(root, directory = root) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const absolutePath = join(directory, entry.name);
@@ -59,6 +110,14 @@ function validateSkill(root, label) {
       `${label}/references/tutorial.md is missing executable-alias guidance ${JSON.stringify(expected)}`,
     );
   }
+  const tutorialDefinitionParagraphs = tutorial
+    .split(/\n\s*\n/)
+    .filter((paragraph) => definesExecutableAlias(paragraph));
+  assert.equal(
+    tutorialDefinitionParagraphs.length,
+    1,
+    `${label}/references/tutorial.md must contain exactly one executable-alias identity and availability definition`,
+  );
 
   assert.doesNotMatch(
     manifest,
@@ -73,7 +132,6 @@ function validateSkill(root, label) {
       [/\baw\b[^\n]{0,40}\b(?:is|becomes) (?:a|the) (?:separate|second|alternative) (?:product|command vocabulary)/i, "separate product or command vocabulary"],
       [/\baw\b[^\n]{0,40}\b(?:provides|uses) (?:a|the) (?:separate|second) command vocabulary/i, "separate command vocabulary"],
       [/(?:prefer|replace[^\n]*with) `?aw`?/i, "preferred replacement"],
-      [/(?<!not (?:a |an ))Commander command alias/i, "Commander command alias"],
     ]) {
       assert.doesNotMatch(
         content,
@@ -81,10 +139,21 @@ function validateSkill(root, label) {
         `${label}/${relativePath} incorrectly presents aw as a ${description}`,
       );
     }
-    if (path === tutorialPath) continue;
+    assert.equal(
+      claimsCommanderAssociation(content),
+      false,
+      `${label}/${relativePath} incorrectly claims an affirmative Commander association for aw`,
+    );
+    if (path !== tutorialPath) {
+      assert.equal(
+        definesExecutableAlias(content),
+        false,
+        `${label}/${relativePath} contains an executable-alias definition that must be owned only by references/tutorial.md`,
+      );
+    }
     assert.doesNotMatch(
       content,
-      /(?:^|[\s`])aw(?:\s+[-\w]|\s+--|\s*$)/m,
+      actionableAwCommandPattern,
       `${label}/${relativePath} duplicates workflows with aw command spellings`,
     );
   }
@@ -92,47 +161,116 @@ function validateSkill(root, label) {
 
 function validateDeliberateDrift() {
   const fixtureRoot = mkdtempSync(join(tmpdir(), "arashi-executable-alias-guidance-"));
+  const acceptedDrifts = [];
+  const requireRejection = (validate, diagnostic, description) => {
+    try {
+      validate();
+      acceptedDrifts.push(description);
+    } catch (error) {
+      assert.match(error.message, diagnostic, `wrong diagnostic for ${description}`);
+    }
+  };
   try {
-    const fixtureSkillRoot = join(fixtureRoot, "arashi");
-    cpSync(sourceSkillRoot, fixtureSkillRoot, { recursive: true });
-    const tutorialPath = join(fixtureSkillRoot, "references", "tutorial.md");
-    const original = readFileSync(tutorialPath, "utf8");
+    const fixtureRoots = [
+      ["source-drift", join(fixtureRoot, "source", "arashi")],
+      ["extracted-package-drift", join(fixtureRoot, "extracted", "skills", "arashi")],
+    ];
 
-    writeFileSync(
-      tutorialPath,
-      `${original}\n\`aw\` is a separate product with an alternative command vocabulary.\n`,
-    );
-    assert.throws(
-      () => validateSkill(fixtureSkillRoot, "deliberate-identity-drift"),
-      /separate product or command vocabulary/,
-      "checker accepted an incorrect separate-product claim while preferred alias guidance remained present",
-    );
+    for (const [fixtureLabel, fixtureSkillRoot] of fixtureRoots) {
+      cpSync(sourceSkillRoot, fixtureSkillRoot, { recursive: true });
+      const tutorialPath = join(fixtureSkillRoot, "references", "tutorial.md");
+      const originalTutorial = readFileSync(tutorialPath, "utf8");
+      const aliasDefinitionParagraph = originalTutorial
+        .split(/\n\s*\n/)
+        .find((paragraph) => aliasGuidance.every((expected) => paragraph.includes(expected)));
+      assert.ok(aliasDefinitionParagraph, "fixture could not locate the owning alias-definition paragraph");
 
-    writeFileSync(tutorialPath, original);
-    const manifestPath = join(fixtureSkillRoot, "SKILL.md");
-    writeFileSync(
-      manifestPath,
-      readFileSync(manifestPath, "utf8").replace(
-        "discover_commands: arashi --help",
-        "discover_commands: aw --help",
-      ),
-    );
-    assert.throws(
-      () => validateSkill(fixtureSkillRoot, "deliberate-discovery-drift"),
-      /canonical discovery command|minimal canonical routing surface/,
-      "checker accepted non-canonical entry-command discovery",
-    );
+      writeFileSync(
+        tutorialPath,
+        `${originalTutorial}\n\`aw\` is a separate product with an alternative command vocabulary.\n`,
+      );
+      requireRejection(
+        () => validateSkill(fixtureSkillRoot, `${fixtureLabel}-identity`),
+        /separate product or command vocabulary/,
+        `incorrect separate-product claim in ${fixtureLabel}`,
+      );
 
-    writeFileSync(manifestPath, readFileSync(join(sourceSkillRoot, "SKILL.md"), "utf8"));
-    const workflowsPath = join(fixtureSkillRoot, "references", "workflows.md");
-    writeFileSync(
-      workflowsPath,
-      `${readFileSync(workflowsPath, "utf8")}\nRun aw status for the shorthand workflow.\n`,
-    );
-    assert.throws(
-      () => validateSkill(fixtureSkillRoot, "deliberate-vocabulary-drift"),
-      /duplicates workflows with aw command spellings/,
-      "checker accepted a duplicate aw workflow vocabulary outside the installation reference",
+      writeFileSync(tutorialPath, originalTutorial);
+      const manifestPath = join(fixtureSkillRoot, "SKILL.md");
+      const originalManifest = readFileSync(manifestPath, "utf8");
+      writeFileSync(
+        manifestPath,
+        originalManifest.replace(
+          "discover_commands: arashi --help",
+          "discover_commands: aw --help",
+        ),
+      );
+      requireRejection(
+        () => validateSkill(fixtureSkillRoot, `${fixtureLabel}-discovery`),
+        /canonical discovery command|minimal canonical routing surface/,
+        `non-canonical entry-command discovery in ${fixtureLabel}`,
+      );
+
+      writeFileSync(manifestPath, originalManifest);
+      const workflowsPath = join(fixtureSkillRoot, "references", "workflows.md");
+      const originalWorkflows = readFileSync(workflowsPath, "utf8");
+      writeFileSync(
+        workflowsPath,
+        `${originalWorkflows}\nRun aw status for the shorthand workflow.\n`,
+      );
+      requireRejection(
+        () => validateSkill(fixtureSkillRoot, `${fixtureLabel}-vocabulary`),
+        /duplicates workflows with aw command spellings/,
+        `duplicate aw workflow vocabulary in ${fixtureLabel}`,
+      );
+
+      writeFileSync(workflowsPath, originalWorkflows);
+      writeFileSync(
+        workflowsPath,
+        `${originalWorkflows}\n${aliasDefinitionParagraph}\n`,
+      );
+      requireRejection(
+        () => validateSkill(fixtureSkillRoot, `${fixtureLabel}-duplicate-definition`),
+        /executable-alias definition.*owned only by references\/tutorial\.md/,
+        `duplicate executable-alias definition guidance in ${fixtureLabel}`,
+      );
+
+      writeFileSync(workflowsPath, originalWorkflows);
+      writeFileSync(
+        tutorialPath,
+        `${originalTutorial}\nRun \`aw status\` to inspect the shorthand workflow.\n`,
+      );
+      requireRejection(
+        () => validateSkill(fixtureSkillRoot, `${fixtureLabel}-tutorial-workflow`),
+        /duplicates workflows with aw command spellings/,
+        `actionable aw workflow in the owning tutorial for ${fixtureLabel}`,
+      );
+
+      writeFileSync(tutorialPath, originalTutorial);
+      writeFileSync(
+        workflowsPath,
+        `${originalWorkflows}\nThe \`aw\` executable alias is registered by Commander.\n`,
+      );
+      requireRejection(
+        () => validateSkill(fixtureSkillRoot, `${fixtureLabel}-commander-registration`),
+        /Commander association/,
+        `semantic Commander registration claim in ${fixtureLabel}`,
+      );
+
+      writeFileSync(
+        workflowsPath,
+        `${originalWorkflows}\nCommander defines \`aw\` as an executable alias.\n`,
+      );
+      requireRejection(
+        () => validateSkill(fixtureSkillRoot, `${fixtureLabel}-commander-definition`),
+        /Commander association/,
+        `semantic Commander definition claim in ${fixtureLabel}`,
+      );
+    }
+    assert.deepEqual(
+      acceptedDrifts,
+      [],
+      `checker accepted deliberate drift:\n- ${acceptedDrifts.join("\n- ")}`,
     );
   } finally {
     rmSync(fixtureRoot, { recursive: true, force: true });
