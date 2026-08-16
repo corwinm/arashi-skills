@@ -270,6 +270,7 @@ function validateDeliberateDrift() {
       for (const [invocation, driftName] of [
         ["Run `aw -h` to discover the shorthand command workflow.", "tutorial-aw-short-help"],
         ["Run aw -V to inspect the shorthand version.", "tutorial-aw-short-version"],
+        ["Run:\n```bash\naw \\\n  status\n```", "tutorial-aw-line-continuation"],
       ]) {
         writeFileSync(tutorialPath, `${originalTutorial}\n${invocation}\n`);
         requireRejection(
@@ -278,6 +279,19 @@ function validateDeliberateDrift() {
           `${driftName} invocation in ${fixtureLabel}`,
         );
       }
+
+      writeFileSync(
+        tutorialPath,
+        originalTutorial.replace(
+          "not a Commander command alias or a second command vocabulary",
+          "not a Commander command alias or a second command vocabulary; Commander nevertheless registers it there",
+        ),
+      );
+      requireRejection(
+        () => validateSkill(fixtureSkillRoot, `${fixtureLabel}-commander-pronoun-contradiction`),
+        /Commander association/,
+        `Commander pronoun contradiction in ${fixtureLabel}`,
+      );
 
       writeFileSync(workflowsPath, originalWorkflows);
       writeFileSync(
