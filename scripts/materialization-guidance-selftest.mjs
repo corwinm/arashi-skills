@@ -80,9 +80,15 @@ function semanticStatements(content) {
 
 function isNegatedBefore(statement, index) {
   const beforeAction = statement.slice(0, index);
-  const contrast = /(?:\b(?:yet|but|however|while|although|though|whereas|and|or)\b|;)/gi;
+  const contrast = /(?:\b(?:yet|but|however|while|although|though|whereas)\b|;)/gi;
   let clauseStart = 0;
   for (const match of beforeAction.matchAll(contrast)) clauseStart = (match.index ?? 0) + match[0].length;
+  const actionWord = statement.slice(index).match(/^\w+/)?.[0] ?? "";
+  if (/s$/i.test(actionWord)) {
+    for (const match of beforeAction.matchAll(/\b(?:and|or)\b/gi)) {
+      clauseStart = Math.max(clauseStart, (match.index ?? 0) + match[0].length);
+    }
+  }
   const prefix = statement.slice(Math.max(clauseStart, index - 80), index).toLowerCase();
   return /\b(?:does?|do|is|are|must|should|can|may|will)\s+not(?:\s+\w+){0,5}\s*$/.test(prefix) ||
     /\b(?:cannot|can[’']t)(?:\s+\w+){0,4}\s*$/.test(prefix) ||
@@ -311,7 +317,7 @@ function validateControlledFixtures() {
       writeCompleteFixture(negationRoot);
       writeFileSync(
         join(negationRoot, "references", "safety-negation.md"),
-        "A materialization destination cannot escape the new worktree. A symlink cannot fall back to a copy, hard link, or junction.\n",
+        "A materialization destination cannot escape the new worktree. A materialization destination does not overwrite files or escape the new worktree. A symlink cannot fall back to a copy, hard link, or junction.\n",
       );
       requireValid(negationRoot, `${mode}-cannot-control`);
 
