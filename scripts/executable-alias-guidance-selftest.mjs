@@ -224,6 +224,16 @@ function validateDeliberateDrift() {
         `duplicate executable-alias definition guidance in ${fixtureLabel}`,
       );
 
+      writeFileSync(
+        workflowsPath,
+        `${originalWorkflows}\n\`aw\` is another executable name for Arashi.\n`,
+      );
+      requireRejection(
+        () => validateSkill(fixtureSkillRoot, `${fixtureLabel}-duplicate-executable-name-definition`),
+        /executable-alias definition.*owned only by references\/tutorial\.md/,
+        `duplicate executable-name definition guidance in ${fixtureLabel}`,
+      );
+
       writeFileSync(workflowsPath, originalWorkflows);
       writeFileSync(
         tutorialPath,
@@ -270,9 +280,13 @@ function validateDeliberateDrift() {
         );
       }
 
+      writeFileSync(workflowsPath, originalWorkflows);
       for (const [invocation, driftName] of [
         ["Run `aw -h` to discover the shorthand command workflow.", "tutorial-aw-short-help"],
         ["Run aw -V to inspect the shorthand version.", "tutorial-aw-short-version"],
+        ["Run `aw`.", "tutorial-aw-bare-inline"],
+        ["Run:\n```bash\naw\n```", "tutorial-aw-bare-fence"],
+        ["Run:\n```bash\n\"aw\" status\n'aw' --help\n```", "tutorial-aw-quoted-command"],
         ["Run:\n```bash\naw \\\n  status\n```", "tutorial-aw-line-continuation"],
       ]) {
         writeFileSync(tutorialPath, `${originalTutorial}\n${invocation}\n`);
@@ -295,6 +309,19 @@ function validateDeliberateDrift() {
         () => validateSkill(fixtureSkillRoot, `${fixtureLabel}-commander-pronoun-contradiction`),
         /Commander association/,
         `Commander pronoun contradiction in ${fixtureLabel}`,
+      );
+
+      writeFileSync(
+        tutorialPath,
+        originalTutorial.replace(
+          "not a Commander command alias or a second command vocabulary",
+          "not a Commander command alias or a second command vocabulary, although Commander registers aw there",
+        ),
+      );
+      requireRejection(
+        () => validateSkill(fixtureSkillRoot, `${fixtureLabel}-commander-concessive-contradiction`),
+        /Commander association/,
+        `Commander concessive contradiction in ${fixtureLabel}`,
       );
 
       writeFileSync(workflowsPath, originalWorkflows);
