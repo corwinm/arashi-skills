@@ -2,6 +2,8 @@
 
 Use lifecycle hooks to automate trusted setup and cleanup around `arashi create` and `arashi remove`. For the canonical workflow guide, see https://arashi.haphazard.dev/workflows/hooks/.
 
+For configured same-path copy or symlink setup, prefer declarative [Repository Worktree File Materialization](commands.md#repository-worktree-file-materialization). It runs even with `--no-hooks`; keep lifecycle hooks as the escape hatch for globs, remapping, external sources, interpolation, required entries, or conditional behavior.
+
 Hooks are executable code. Review each script and its provenance before activation, keep it scoped to the lifecycle that needs it, and do not place secrets in hook output. Never enter secrets through lifecycle-hook prompts; hook input is visible to the hook process and may be exposed by the script or its tools.
 
 ## Activate One Example

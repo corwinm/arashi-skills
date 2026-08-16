@@ -594,6 +594,22 @@ Configured and implicit-standalone `switch --tab` and `create --tab` use the sam
 
 Default Herdr launch continues to use `herdr worktree open` and requires a non-bare source checkout. `--tab --herdr` instead runs `herdr tab create` in the active workspace identified by `HERDR_WORKSPACE_ID` and does not require a non-bare source checkout.
 
+## Repository Worktree File Materialization
+
+Configured mode accepts direct `repos.<name>.copy` and `repos.<name>.symlink` arrays. Each declared repository-relative path uses the same relative path in the canonical Git primary source checkout and the new worktree destination. This configuration is configured-only and is not available in zero-config standalone mode.
+
+For each repository, Arashi runs repository pre-create, then every copy entry in declaration order, then every symlink entry in declaration order, and then repository post-create. `--no-hooks` disables hooks only and does not disable declarative materialization.
+
+A missing source is skipped visibly. Destinations never overwrite an existing object and never escape the new worktree. A symlink is a native symbolic link to the exact canonical source target; platform or policy capability failures are actionable and never fall back to a copy, hard link, or junction.
+
+`arashi create --dry-run` previews the ordered materialization plan in declaration order without mutation. `arashi doctor` non-mutatively diagnoses configured source availability and managed destination safety without repair or capability probes.
+
+Use `copy` for `.env` or local configuration that must be independently mutable in each worktree; the supported same-path case does not require a shell hook. Use `symlink` only for intentionally shared state, because mutation is shared with the canonical checkout and native symbolic-link capability varies by platform.
+
+For normal dependency setup, prefer package-manager content-addressed stores plus per-worktree installs. Treat symlinked `node_modules` or equivalent shared dependency trees as advanced and risky: branches, lockfiles, runtimes, native modules, and install scripts can diverge or mutate shared state.
+
+Use lifecycle hooks when you need globs, remapping, external sources, interpolation, required entries, or conditional behavior. Do not invent unsupported materialization fields. See [Hooks](hooks.md) for the custom-setup escape hatch.
+
 ## Create from a Coordinated Base Branch
 
 Use the workspace-generic `defaults.create.baseBranch` setting when follow-up branches should start from the same long-running branch in the parent and managed repositories. It is not editor-scoped or per-repository configuration:
