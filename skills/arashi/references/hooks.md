@@ -40,6 +40,43 @@ cmd.exe /d /e:on /v:off /s /c call <encoded-absolute-script-path>
 
 Arashi passes the script path as protected interpreter input and preflights the required system interpreter before mutation.
 
+## Configured Inline Hooks
+
+Use inline configuration for short reviewable commands and native hook files for substantial, reusable scripts or automation that needs independent tooling. `hooks.scripts.<lifecycle>` is workspace ownership, while `repos.<name>.hooks.<lifecycle>` is repository ownership. `<lifecycle>` is exactly one of `pre-create`, `post-create`, `pre-remove`, and `post-remove`; repository ownership comes only from nesting under `repos.<name>.hooks`, never from an encoded repository lifecycle key. Choose one source for one logical location: an inline value and its corresponding native file are ambiguous, so create, remove, remove dry-run, and doctor fail before mutation and execute neither. Hooks at different scopes still compose in their established order. Do not use external script paths as inline values.
+
+A string is Bash shorthand. For portable host-specific commands, use a non-empty map with one or more of `bash`, `powershell`, and `cmd`:
+
+```json
+{
+  "hooks": {
+    "scripts": {
+      "pre-create": {
+        "bash": "set -eu; printf '%s\\n' \"$ARASHI_BRANCH_NAME\"",
+        "powershell": "$ErrorActionPreference = 'Stop'; Write-Output $env:ARASHI_BRANCH_NAME",
+        "cmd": "echo Inline pre-create hook running || exit /b 1"
+      }
+    }
+  },
+  "repos": {
+    "api": {
+      "hooks": {
+        "post-create": "set -eu; CI=true corepack pnpm --ignore-workspace install --frozen-lockfile"
+      }
+    }
+  }
+}
+```
+
+POSIX scans non-empty `PATH` entries in order for executable `bash` and uses the first absolute real path; it does not select a Windows variant. Windows selects `powershell`, then `cmd`, then `bash`; an unavailable higher-priority entry falls through to the next configured entry, and no compatible available variant fails as `interpreter_unavailable` before mutation. PowerShell and cmd resolve only from fixed executable paths beneath `%SystemRoot%`; Windows Bash scans non-empty `PATH` entries in order for `bash.exe`. Terminal applications, `pwsh`, shell aliases, empty path entries, and unconfigured interpreters are not fallbacks.
+
+Inline sources preserve the native-file lifecycle timing, cwd, target multiplicity, configured remove order, timeout, input, failure, create rollback, remove finalization, and ordered outcomes. `--no-hooks` is create-only and remove does not accept it. `--no-hook-input` is shared by create and remove: eligible TTY runs may read after source-aware attribution, while disabled, unavailable, and JSON input receive immediate EOF. JSON owns quiet behavior, captures hook streams, and keeps stdout to one document.
+
+Remove dry-run keeps source-aware previews; Configured-create dry-run performs no hook discovery, returns an empty hook ledger, and has no hook preview surface. Inline outcomes expose `sourceKind: "inline-config"`, `sourceOwnerKind`, and `sourceOwnerName`; `sourceScriptPath` is `null` or omitted. Outcomes, previews, diagnostics, and logs never disclose snippet text. Failure ledgers remain ordered and complete, so later success cannot mask an earlier failure.
+
+Write environment access in shell-native form: `$ARASHI_*` for Bash, `$env:ARASHI_*` for PowerShell, and `%ARASHI_*%` for cmd. Compose multi-step snippets with the shell's fail-fast syntax rather than relying on the last command alone. Inline configuration is executable code: review provenance and do not embed or enter secrets. Standalone and user-global hooks remain native-file only.
+
+Before editing configuration, verify the installed `arashi create --help` and `arashi remove --help` plus the installed configuration schema; they are authoritative for the installed release.
+
 ## Terminal Input Contract
 
 `ARASHI_HOOK_INPUT` is executor-owned and is always `tty`, `disabled`, or `unavailable`. Arashi resolves one mode for the complete command invocation:
@@ -116,7 +153,7 @@ In zero-config mode, repository-local or workspace-root `.arashi/hooks` content 
 
 ## Environment Contract
 
-Every executed hook receives authoritative executor metadata: `ARASHI_HOOK_NAME`, `ARASHI_HOOK_SCOPE`, `ARASHI_HOOK_SOURCE_PATH`, `ARASHI_HOOK_EXECUTION_PATH`, `ARASHI_HOOK_WORKSPACE_MODE`, and `ARASHI_MAIN_REPO_PATH`.
+File hooks receive `ARASHI_HOOK_SOURCE_PATH` as their absolute source path. Inline hooks omit `ARASHI_HOOK_SOURCE_PATH`, and no path-like replacement is invented. Every executed hook receives authoritative executor metadata through `ARASHI_HOOK_NAME`, `ARASHI_HOOK_SCOPE`, `ARASHI_HOOK_EXECUTION_PATH`, `ARASHI_HOOK_WORKSPACE_MODE`, and `ARASHI_MAIN_REPO_PATH`.
 
 - `ARASHI_BRANCH_NAME` is the requested create branch. During remove, it is present only when the current repository invocation has exactly one branch target.
 - Targeted invocations use `ARASHI_HOOK_TARGET_REPOSITORY`, `ARASHI_HOOK_TARGET_REPO_PATH`, and `ARASHI_HOOK_TARGET_WORKTREE_PATH`; an ambiguous worktree scalar is omitted.
@@ -133,7 +170,7 @@ The default lifecycle-hook timeout is `300000` milliseconds. Configured `hooks.t
 - Create-hook validation, timeout, or nonzero failure fails create and enters the owned Git rollback boundary. A workspace pre-create failure occurs before any branch/worktree mutation; later failures report both the hook outcome and any rollback warning.
 - A failing `pre-remove` aborts removal before destructive mutation.
 - `post-remove` still runs after removal attempts, including partial failures, and a post-remove failure makes the command result nonzero without erasing earlier removal or hook outcomes.
-- Human and JSON output derive from the complete ordered outcome ledger. Hook stdout/stderr never contaminates JSON stdout. Dry-run previews discovery but does not spawn hooks or fabricate execution outcomes.
+- Human and JSON output derive from the complete ordered outcome ledger. Hook stdout/stderr never contaminates JSON stdout. Remove dry-run previews discovery but does not spawn hooks or fabricate execution outcomes.
 
 ## Package-Manager Setup
 
