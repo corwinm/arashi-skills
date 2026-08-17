@@ -166,6 +166,24 @@ function validateSkill(root, label, { requireRepositoryPolicy = false } = {}) {
     }
   }
 
+  const tutorialContent = readFileSync(join(root, "references", "tutorial.md"), "utf8");
+  const tutorialInit = tutorialContent.search(/^arashi init$/m);
+  const tutorialDoctor = tutorialContent.search(/^arashi doctor --json$/m);
+  if (tutorialInit < 0 || tutorialDoctor < 0 || tutorialInit > tutorialDoctor) {
+    problems.push("references/tutorial.md must initialize an absent configured workspace before doctor");
+  }
+  if (/arashi exec --only docs\b/.test(tutorialContent)) {
+    problems.push("references/tutorial.md validates an unconfigured example repository");
+  }
+
+  const shortcuts = readFileSync(join(root, "references", "session-shortcuts.md"), "utf8");
+  if (!shortcuts.includes("arashi list | fzf")) {
+    problems.push("references/session-shortcuts.md must compose the fuzzy picker from pipe-friendly list output");
+  }
+  if (/\bjq\b/.test(shortcuts)) {
+    problems.push("references/session-shortcuts.md introduces an undeclared jq prerequisite");
+  }
+
   validateLinks(root, files, problems);
 
   if (requireRepositoryPolicy && !existsSync(join(repositoryRoot, "docs", "publication.md"))) {
@@ -191,8 +209,9 @@ function writeFixture(root) {
         .join("\n"),
     ],
     ["references/prerequisites.md", "# Prerequisites\n\n## Conditional Prerequisites\n\nNode and network access apply only to tasks that need them.\n"],
-    ["references/tutorial.md", "# End-to-End Tutorial\n\nComplete one configured workflow.\n"],
+    ["references/tutorial.md", "# End-to-End Tutorial\n\narashi init\narashi doctor --json\nComplete one configured workflow.\n"],
     ["references/workflows.md", "# Workflow Catalog\n\nChoose configured or standalone mode.\n"],
+    ["references/session-shortcuts.md", "# Session shortcuts\n\narashi list | fzf\n"],
     ["references/troubleshooting.md", "# Troubleshooting\n\nDiagnose the symptom before recovery.\n"],
   ]);
   for (const [path, title] of commandRoutes) {

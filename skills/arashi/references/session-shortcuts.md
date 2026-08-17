@@ -64,12 +64,14 @@ arashi switch --sesh
 Keep the picker and execution separate so the selected path remains data:
 
 ```bash
-selected="$(arashi list --json | jq -r '.worktrees[]?.path' | fzf)"
-test -n "$selected" || exit 0
-arashi switch --path "$selected"
+# Step 1: select and review the printed path; do not execute it as shell text.
+arashi list | fzf
+
+# Step 2: copy the reviewed exact path into a separate quoted command.
+arashi switch --path "/exact/reviewed/worktree/path"
 ```
 
-Validate the actual `arashi list --json` shape for the installed release before relying on this example in automation. Quote the selected path and never evaluate it as shell code.
+Default `arashi list` output is the pipe-friendly path surface, so this composition requires only the conditional `fzf` integration. Keep selection and execution separate, quote the reviewed path, and never evaluate it as shell code.
 
 ## Completion criteria
 

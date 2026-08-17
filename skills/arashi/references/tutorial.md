@@ -19,9 +19,13 @@ arashi --help
 
 If verification fails, use [Prerequisites](prerequisites.md) and the current installation instructions at https://arashi.haphazard.dev. Node.js and network access are conditional on the chosen installation/update path; they are not requirements for every local invocation.
 
-Diagnose the current workspace before mutation:
+From the intended configured workspace root, initialize before diagnostics only when `.arashi/config.json` is absent:
 
 ```bash
+# run only when configuration is absent
+arashi init
+
+# diagnose the initialized workspace before mutation
 arashi doctor --json
 ```
 
@@ -29,12 +33,9 @@ Resolve reported configuration or Git-state failures before continuing.
 
 ## Configured happy path
 
-From the intended workspace root:
+Continue from the initialized workspace root:
 
 ```bash
-# initialize only if .arashi/config.json is absent
-arashi init
-
 # inspect before broad work
 arashi status
 
@@ -47,11 +48,7 @@ arashi status
 
 If the workspace contains many repositories, apply the same `--group` or `--only` selector during inspection, creation, and validation. Do not let a final mutating command widen beyond the set that was reviewed.
 
-Run the project-specific validation in the created worktrees. For repeated non-interactive validation across managed repositories, use `arashi exec` with the same selector:
-
-```bash
-arashi exec --only docs -- git status --short
-```
+Use the paths reported by `arashi status` to enter the created worktrees and run each project's existing validation there. Use `arashi exec` only when child repositories are already configured, and reuse the same real `--group` or `--only` selector that was inspected earlier; do not invent an example repository name.
 
 Exact init/create semantics are in [Workspace and repositories](commands/workspace.md) and [Create worktrees](commands/create.md). Installed `arashi <command> --help` is the option authority.
 
