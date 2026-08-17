@@ -19,9 +19,9 @@ const requirements = new Map([
   [
     "references/session-shortcuts.md",
     [
-      "arashi switch --tmux feature-auth",
-      "arashi create feature-auth --tmux",
-      "arashi switch --sesh",
+      "aw switch --tmux feature-auth",
+      "aw create feature-auth --tmux",
+      "aw switch --sesh",
       "active tmux",
       "non-empty after trimming",
       "does not fall back"
@@ -46,8 +46,8 @@ const requirements = new Map([
   [
     "references/commands/switch-and-launch.md",
     [
-      "arashi switch --tmux feature-auth",
-      "arashi create feature-auth --tmux",
+      "aw switch --tmux feature-auth",
+      "aw create feature-auth --tmux",
       "`--tmux` is a per-invocation-only override",
       "`--tmux --launch`",
       "`--tmux --ignore-configured-launcher`",

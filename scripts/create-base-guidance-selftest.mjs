@@ -296,7 +296,7 @@ function validateSkill(root, label) {
     '"baseBranch": "feature/FEAT-1234"',
     "workspace-generic",
     "not editor-scoped or per-repository",
-    "arashi create <target> --base <branch>",
+    "aw create <target> --base <branch>",
     "CLI > configuration > legacy behavior",
     "every effective selected repository",
     "including repositories whose target will be reused",

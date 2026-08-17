@@ -1,6 +1,6 @@
 # Command Reference
 
-Choose only the command family needed for the task. The installed `arashi --help` and `arashi <command> --help` are the parameter authority.
+Choose only the command family needed for the task. The installed `aw --help` and `aw <command> --help` are the parameter authority.
 
 ## Command families
 
@@ -13,7 +13,7 @@ Choose only the command family needed for the task. The installed `arashi --help
 
 ## Global CLI conventions
 
-- The installed `arashi --help` and `arashi <command> --help` are the parameter authority.
+- The installed `aw --help` and `aw <command> --help` are the parameter authority.
 - Global short aliases are `-v/--verbose`, `-f/--force`, `-j/--json`, `-o/--only`, `-g/--group`, and `-n/--dry-run`. `add -n/--name` remains command-local name syntax, and `exec --jobs` remains long-only.
 - Deprecated compatibility syntax remains accepted throughout Arashi 1.x, but use canonical forms in actionable commands: `--no-cd` maps to `--launch`, `--no-default-launch` maps to `--ignore-configured-launcher`, and Markdown is the default so omit the deprecated compatibility spelling `--markdown`. Its removal is no earlier than 2.0 and requires a separately approved breaking-change issue.
 - Arashi generates shell-specific completion scripts for Bash, Zsh, and Fish and provides shell-wrapper setup. This is Arashi-generated programmable completion, not shell-builtin completion.
@@ -21,7 +21,7 @@ Choose only the command family needed for the task. The installed `arashi --help
 ## Safe defaults
 
 - Prefer configured mode for persisted defaults, groups, hooks, custom paths, or coordinated repositories. Use zero-config standalone mode only for ad hoc work in an unconfigured non-bare Git project; select and initialize the intended mode before workspace diagnostics when the workspace is fresh.
-- Once the workspace is initialized or otherwise discoverable, diagnose first with `arashi doctor --json`; use `arashi status` when human-readable state is enough.
+- Once the workspace is initialized or otherwise discoverable, diagnose first with `aw doctor --json`; use `aw status` when human-readable state is enough.
 - Before mutating, expensive, network-heavy, or long-running multi-repository work, apply `--group` or `--only` unless the user explicitly wants every managed repository.
 - Use `--json` only for non-interactive modes. Handle `JSON_UNSUPPORTED_FOR_MODE` as a structured refusal rather than scraping human output.
-- Preview broad removal with `arashi remove --dry-run`; preserve existing worktrees and branches unless removal is explicitly requested.
+- Preview broad removal with `aw remove --dry-run`; preserve existing worktrees and branches unless removal is explicitly requested.

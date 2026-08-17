@@ -56,10 +56,10 @@ function validateSkill(root, label) {
   const aliasGuidance = section(commands, "SSH Remote Aliases for Add and Clone");
 
   for (const command of [
-    "arashi add git@work-github:acme/api.git",
-    "arashi add work-github:acme/api.git",
-    "arashi add ssh://git@work-github/acme/api.git",
-    "arashi add ssh://work-github/acme/api.git"
+    "aw add git@work-github:acme/api.git",
+    "aw add work-github:acme/api.git",
+    "aw add ssh://git@work-github/acme/api.git",
+    "aw add ssh://work-github/acme/api.git"
   ]) {
     assert.ok(aliasGuidance.includes(command), `${label}/commands.md is missing ${command}`);
   }
