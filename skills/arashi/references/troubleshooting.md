@@ -40,6 +40,9 @@ If completion generation works but profile activation is missing, run `arashi sh
 **First diagnostic:** preview `arashi init --zero-config --dry-run`, then verify the exact planned destination:
 
 ```bash
+common_dir=$(git rev-parse --git-common-dir)
+main_root=$(cd "$common_dir/.." && pwd -P)
+cd "$main_root"
 branch=feature/auth
 destination=".worktrees/$branch"
 git check-ignore --no-index -q -- "$destination"

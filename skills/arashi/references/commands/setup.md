@@ -36,7 +36,7 @@ Targets without setup scripts are skipped. Failed or timed-out scripts produce a
 
 ## Shell Completion
 
-Arashi generates native completion for each supported shell through one public command:
+Arashi generates shell-specific completion scripts for Bash, Zsh, and Fish through one public command:
 
 ```bash
 arashi completion bash

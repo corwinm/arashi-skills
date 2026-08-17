@@ -26,8 +26,16 @@ if (skillRootArgumentIndex >= 0 && !suppliedSkillRoot) {
 
 const requirements = new Map([
   [
+    "references/commands.md",
+    [
+      "Arashi generates shell-specific completion scripts for Bash, Zsh, and Fish",
+      "shell-builtin completion",
+    ],
+  ],
+  [
     "references/commands/setup.md",
     [
+      "Arashi generates shell-specific completion scripts for Bash, Zsh, and Fish",
       "arashi completion bash",
       "arashi completion zsh",
       "arashi completion fish",
@@ -85,6 +93,7 @@ function validateNoStaleClaims(root, label) {
     /shell init[^\n]*(?:includes|enables|installs|emits) (?:shell )?completion/i,
     /completion[^\n]*(?:requires|only works in)[^\n]*(?:configured )?workspace/i,
     /completion[^\n]*activation[^\n]*(?:run|use) `arashi install`/i,
+    /generates native completion|do not claim native shell completion/i,
   ];
   for (const relativePath of walkFiles(root)) {
     const content = readFileSync(join(root, relativePath), "utf8");

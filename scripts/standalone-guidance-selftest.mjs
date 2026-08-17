@@ -71,6 +71,9 @@ const requirements = new Map([
     [
       "exact `.worktrees/<branch>` destination is not ignored",
       "arashi init --zero-config",
+      'common_dir=$(git rev-parse --git-common-dir)',
+      'main_root=$(cd "$common_dir/.." && pwd -P)',
+      'cd "$main_root"',
       'git check-ignore --no-index -q -- "$destination"',
       "literal `.worktrees/` rule",
       "repository-local exclude",

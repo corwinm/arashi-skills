@@ -16,7 +16,7 @@ Choose only the command family needed for the task. The installed `arashi --help
 - The installed `arashi --help` and `arashi <command> --help` are the parameter authority.
 - Global short aliases are `-v/--verbose`, `-f/--force`, `-j/--json`, `-o/--only`, `-g/--group`, and `-n/--dry-run`. `add -n/--name` remains command-local name syntax, and `exec --jobs` remains long-only.
 - Deprecated compatibility syntax remains accepted throughout Arashi 1.x, but use canonical forms in actionable commands: `--no-cd` maps to `--launch`, `--no-default-launch` maps to `--ignore-configured-launcher`, and Markdown is the default so omit the deprecated compatibility spelling `--markdown`. Its removal is no earlier than 2.0 and requires a separately approved breaking-change issue.
-- Arashi provides generated completion and shell-wrapper setup; do not claim native shell completion.
+- Arashi generates shell-specific completion scripts for Bash, Zsh, and Fish and provides shell-wrapper setup. This is Arashi-generated programmable completion, not shell-builtin completion.
 
 ## Safe defaults
 

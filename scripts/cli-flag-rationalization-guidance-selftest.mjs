@@ -38,7 +38,7 @@ const requirements = new Map([
       "`--no-default-launch` maps to `--ignore-configured-launcher`",
       "Markdown is the default",
       "omit the deprecated compatibility spelling `--markdown`",
-      "do not claim native shell completion",
+      "Arashi-generated programmable completion, not shell-builtin completion",
     ],
   ],
   [
