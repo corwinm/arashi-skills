@@ -20,14 +20,18 @@ Ordinary `arashi init` generates inert `.example` hook files but does not activa
 
 Configured create does not discover repository-local or user-global hooks. Native file ownership is explicit:
 
-| Lifecycle scope | Native file location |
-| --- | --- |
-| Configured create, workspace | `<workspace>/.arashi/hooks/pre-create<ext>` and `post-create<ext>` |
-| Configured create, repository-specific | `<workspace>/.arashi/hooks/pre-create.<repo><ext>` and `post-create.<repo><ext>`; execution still occurs in the new child worktree |
-| Configured remove, repository | `<repo>/.arashi/hooks/pre-remove<ext>` and `post-remove<ext>`; the default configured path is `repos/<repo>/.arashi/hooks/` |
-| Configured remove, workspace | `<workspace>/.arashi/hooks/pre-remove<ext>` and `post-remove<ext>` |
-| Configured remove, global targeted | `~/.arashi/hooks/<repo>/pre-remove<ext>` and `post-remove<ext>` |
-| Configured remove, global shared | `~/.arashi/hooks/pre-remove<ext>` and `post-remove<ext>` |
+| Lifecycle scope | Native file location | Execution cwd |
+| --- | --- | --- |
+| Configured create, workspace | `<workspace>/.arashi/hooks/pre-create<ext>` and `post-create<ext>` | Configured workspace root |
+| Configured create, repository-specific | `<workspace>/.arashi/hooks/pre-create.<repo><ext>` and `post-create.<repo><ext>` | New child worktree |
+| Configured remove, repository | `<repo>/.arashi/hooks/pre-remove<ext>` and `post-remove<ext>`; the default configured path is `repos/<repo>/.arashi/hooks/` | Target child source checkout |
+| Configured remove, workspace | `<workspace>/.arashi/hooks/pre-remove<ext>` and `post-remove<ext>` | Configured workspace root |
+| Configured remove, global targeted | `~/.arashi/hooks/<repo>/pre-remove<ext>` and `post-remove<ext>` | Target child source checkout |
+| Configured remove, global shared | `~/.arashi/hooks/pre-remove<ext>` and `post-remove<ext>` | Target child source checkout |
+| Standalone create/remove, targeted | `~/.arashi/hooks/<main-root-basename>/<lifecycle><ext>` | Resolved main root |
+| Standalone create/remove, shared | `~/.arashi/hooks/<lifecycle><ext>` | Resolved main root |
+
+Configured remove repository, global-targeted, and global-shared hooks run from the target child source checkout. Configured remove workspace hooks run from the configured workspace root.
 
 Standalone mode discovers only user-global targeted and shared hooks: `~/.arashi/hooks/<main-root-basename>/<lifecycle><ext>` before `~/.arashi/hooks/<lifecycle><ext>`. The main-root basename identifies the main repository; repository-local or workspace-root `.arashi/hooks` content is inactive without configured workspace state.
 
@@ -121,10 +125,12 @@ Compose inline steps with the shell's native fail-fast syntax. Never enter secre
 
 All hooks receive `ARASHI_HOOK_NAME`, `ARASHI_HOOK_SCOPE`, `ARASHI_HOOK_EXECUTION_PATH`, `ARASHI_HOOK_WORKSPACE_MODE`, and `ARASHI_MAIN_REPO_PATH`.
 
-- `ARASHI_BRANCH_NAME` is the requested create branch.
-- Repository-specific create hooks receive `ARASHI_HOOK_TARGET_REPOSITORY`, `ARASHI_HOOK_TARGET_REPO_PATH`, and `ARASHI_HOOK_TARGET_WORKTREE_PATH`.
+- `ARASHI_BRANCH_NAME` is the requested create branch; remove sets it only for an unambiguous current target branch.
+- Targeted create and remove invocations receive `ARASHI_HOOK_TARGET_REPOSITORY`, `ARASHI_HOOK_TARGET_REPO_PATH`, and, when unambiguous, `ARASHI_HOOK_TARGET_WORKTREE_PATH`.
+- Configured workspace create is untargeted and omits target variables; remove hooks run once per current target even when the source is workspace or global.
 - `ARASHI_PARENT_REPO_PATH` is set only for configured repository-specific create hooks.
-- `ARASHI_REMOVE_TARGETS_JSON` is the canonical command-wide remove aggregate.
+- `ARASHI_REMOVE_TARGETS_JSON` is the canonical command-wide remove aggregate; it does not replace the current-target variables.
+- Historical `ARASHI_REPO_PATH` is the current child source checkout for configured remove and the resolved main root for standalone.
 - `ARASHI_HOOK_INPUT` is executor-owned and is always `tty`, `disabled`, or `unavailable`.
 
 Reference variables according to the selected interpreter: `$ARASHI_*`, `$env:ARASHI_*`, or `%ARASHI_*%`. Do not invent undocumented variables.
