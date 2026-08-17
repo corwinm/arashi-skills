@@ -26,6 +26,8 @@ Prefer configured mode whenever the project needs persisted defaults, custom pat
    arashi create feature/skill-integration --no-launch --no-switch
    ```
 
+   Configured repositories may copy independent local files or symlink intentionally shared state from their canonical Git primary checkout before repository post-create; see [Repository Worktree File Materialization](commands/create.md#repository-worktree-file-materialization).
+
 5. Verify the resulting worktrees with `arashi status`, then use the paths reported by `arashi status` to run project-local validation. When configured child repositories exist, `arashi exec` may run repeated non-interactive validation with the same selector scope.
 
 Completion means the expected configured worktree exists in each selected repository, the original worktree changes were preserved or deliberately moved, and status/validation succeeds. See [Workspace commands](commands/workspace.md), [Create commands](commands/create.md), and [Automation commands](commands/automation.md).

@@ -2,6 +2,8 @@
 
 Hooks execute user-controlled code. Prefer configured mode for repository-local or workspace policy; use standalone mode only for ad hoc use with already-established user-global hooks. The installed `arashi create --help` and `arashi remove --help`, plus the installed configuration schema, are authoritative.
 
+For configured same-path copy or symlink setup, prefer declarative [Repository Worktree File Materialization](commands/create.md#repository-worktree-file-materialization). It runs even with `--no-hooks`; keep lifecycle hooks as the escape hatch for globs, remapping, external sources, interpolation, required entries, or conditional behavior.
+
 ## Activate One Example
 
 Review an example before making it executable. Activate exactly one platform-native candidate per logical location:
