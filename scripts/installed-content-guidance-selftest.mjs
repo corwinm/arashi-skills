@@ -123,6 +123,12 @@ function validateSkill(root, label, { requireRepositoryPolicy = false } = {}) {
   if (!troubleshooting.includes("When the CLI is installed and the workspace is initialized or otherwise discoverable")) {
     problems.push("references/troubleshooting.md must condition doctor on an installed CLI and discoverable workspace");
   }
+  if (readme.includes("arashi doctor --json") && !readme.includes("initialized or otherwise discoverable")) {
+    problems.push("README.md must condition doctor on an initialized or discoverable workspace");
+  }
+  if (troubleshooting.includes("**First diagnostic:** use `arashi doctor --json`")) {
+    problems.push("references/troubleshooting.md has an unconditional symptom-specific doctor diagnostic");
+  }
   if (/\| tmux session shortcut \| tmux and sesh \|/i.test(prerequisites) || !prerequisites.includes("plain tmux launch") || !prerequisites.includes("sesh integration")) {
     problems.push("references/prerequisites.md must keep plain tmux independent from the optional sesh integration");
   }

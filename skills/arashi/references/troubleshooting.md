@@ -27,7 +27,7 @@ If completion generation works but profile activation is missing, run `arashi sh
 
 ## Workspace configuration or status is unhealthy
 
-**First diagnostic:** use `arashi doctor --json`; then inspect `arashi status` and `.arashi/config.json` only as directed by the diagnostic.
+**First diagnostic:** if the workspace is discoverable, use `arashi doctor --json`, then inspect `arashi status` and `.arashi/config.json` only as directed. If configuration is absent in a fresh workspace, verify `arashi --version`, choose the intended mode, and initialize it first.
 
 **Recovery:** run ordinary `arashi init` for a project adopting configured mode. Preserve an existing configured worktree directory and ignore scope unless the user deliberately changes it. For child repositories or custom paths, follow [Workspace and repositories](commands/workspace.md).
 
@@ -106,7 +106,7 @@ Verify the selected tool's current command contract and genuine managed context.
 ## Recovery playbook
 
 1. Stop after the first unexplained mutation or partial failure.
-2. Record `arashi doctor --json`, `arashi status`, the exact command/selectors, and Git worktree state.
+2. When workspace discovery is available, record `arashi doctor --json` and `arashi status`; always record the exact command/selectors and Git worktree state.
 3. Preserve successful creations and dirty worktrees.
 4. Fix the owner-specific prerequisite or policy.
 5. Retry with the same narrow scope; verify before widening.

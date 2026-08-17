@@ -28,4 +28,4 @@ Other optional references:
 - `references/session-shortcuts.md`: fzf, tmux, and sesh navigation composition
 - `assets/cheatsheet.md`: lightweight command index
 
-Installed `arashi <command> --help` is the parameter authority. Start diagnosis with `arashi doctor --json`.
+Installed `arashi <command> --help` is the parameter authority. When the workspace is initialized or otherwise discoverable, start diagnosis with `arashi doctor --json`. Otherwise verify `arashi --version`, select the intended mode, and initialize it first.
