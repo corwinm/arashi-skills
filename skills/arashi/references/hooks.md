@@ -86,7 +86,11 @@ Interactive input applies only to eligible human `create` and `remove` invocatio
 Examples must fail closed on EOF:
 
 ```bash
-read -r answer
+read -r answer || exit 1
+case "$answer" in
+  y|Y|yes|YES) ;;
+  *) exit 1 ;;
+esac
 ```
 
 ```powershell
