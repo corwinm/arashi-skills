@@ -134,6 +134,9 @@ All hooks receive `ARASHI_HOOK_NAME`, `ARASHI_HOOK_SCOPE`, `ARASHI_HOOK_EXECUTIO
 - Configured workspace create is untargeted and omits target variables; remove hooks run once per current target even when the source is workspace or global.
 - `ARASHI_PARENT_REPO_PATH` is set only for configured repository-specific create hooks.
 - `ARASHI_REMOVE_TARGETS_JSON` is the canonical command-wide remove aggregate; it does not replace the current-target variables. `ARASHI_REMOVE_TARGETS_JSON` is a JSON array of records with `repository`, `branchName`, and `worktreePath`; absent branch/path values are JSON `null`.
+- Canonical remove records are sorted and deduplicated; paths are absolute, lexically normalized, and use `/` separators.
+- `ARASHI_REMOVE_TARGET_BRANCHES`, `ARASHI_REMOVE_TARGET_WORKTREES`, and `ARASHI_REMOVE_TARGET_REPOSITORIES` plus `ARASHI_REMOVE_TOTAL_BRANCHES`, `ARASHI_REMOVE_TOTAL_WORKTREES`, and `ARASHI_REMOVE_TOTAL_REPOSITORIES` are lossy compatibility fields; commas in names or paths are not reversible, so new scripts must parse the canonical JSON.
+- Historical `ARASHI_REPO_NAME`, `ARASHI_REPO_PATH`, `ARASHI_WORKTREE_PATH`, and comma-separated remove fields remain supported throughout 1.x and may be removed no earlier than 2.0 through a separately approved breaking change.
 - Historical `ARASHI_REPO_PATH` is the current child source checkout for configured remove and the resolved main root for standalone.
 - `ARASHI_HOOK_INPUT` is executor-owned and is always `tty`, `disabled`, or `unavailable`.
 
