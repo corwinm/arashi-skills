@@ -37,7 +37,13 @@ If completion generation works but profile activation is missing, run `arashi sh
 
 **Symptom:** the exact `.worktrees/<branch>` destination is not ignored.
 
-**First diagnostic:** preview `arashi init --zero-config --dry-run` and verify the exact planned destination with `git check-ignore --no-index`.
+**First diagnostic:** preview `arashi init --zero-config --dry-run`, then verify the exact planned destination:
+
+```bash
+branch=feature/auth
+destination=".worktrees/$branch"
+git check-ignore --no-index -q -- "$destination"
+```
 
 **Recovery:** run `arashi init --zero-config` to append the literal `.worktrees/` rule to the repository-local exclude when safe. Passive discovery does not repair ignore coverage. Do not edit tracked `.gitignore` or global Git configuration automatically.
 

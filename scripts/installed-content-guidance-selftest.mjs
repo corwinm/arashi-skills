@@ -111,6 +111,10 @@ function validateSkill(root, label, { requireRepositoryPolicy = false } = {}) {
   if (!workflows.includes("When configured child repositories exist") || !workflows.includes("paths reported by `arashi status`")) {
     problems.push("references/workflows.md must keep parent-only validation local and make exec conditional on configured children");
   }
+  const handoff = workflows.slice(workflows.indexOf("## Completion handoff"));
+  if (/Run the relevant selected validation through `arashi exec`/i.test(handoff)) {
+    problems.push("references/workflows.md completion handoff makes exec unconditional");
+  }
   for (const forbiddenHeading of ["## Common Requests", "## Canonical Docs"]) {
     if (skill.includes(forbiddenHeading)) {
       problems.push(`SKILL.md still contains routed detail section ${forbiddenHeading}`);

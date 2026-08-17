@@ -112,7 +112,7 @@ Use [Remove and maintenance](commands/remove-and-maintenance.md) for remove/prun
 Before handing work to another user or agent:
 
 1. Run `arashi status` or `arashi doctor --json`.
-2. Run the relevant selected validation through `arashi exec`.
+2. Use paths reported by `arashi status` for project-local validation. When configured child repositories exist, `arashi exec` may run repeated validation with the same inspected selector.
 3. Record created/reused/skipped/failed repositories and any preserved worktrees.
 4. Use `arashi handoff` when a structured workspace report is useful.
 
