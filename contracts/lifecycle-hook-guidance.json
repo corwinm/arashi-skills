@@ -39,6 +39,7 @@
       "Targeted create and remove invocations receive `ARASHI_HOOK_TARGET_REPOSITORY`, `ARASHI_HOOK_TARGET_REPO_PATH`, and, when unambiguous, `ARASHI_HOOK_TARGET_WORKTREE_PATH`",
       "`ARASHI_PARENT_REPO_PATH` is set only for configured repository-specific create hooks",
       "`ARASHI_REMOVE_TARGETS_JSON` is the canonical command-wide remove aggregate",
+      "`ARASHI_REMOVE_TARGETS_JSON` is a JSON array of records with `repository`, `branchName`, and `worktreePath`; absent branch/path values are JSON `null`",
       "`ARASHI_HOOK_INPUT` is executor-owned and is always `tty`, `disabled`, or `unavailable`",
       "`--no-hook-input` disables terminal input for that invocation without skipping hooks",
       "`--no-hooks` skips execution, while create's unrelated `--interactive` option controls repository selection",
