@@ -19,7 +19,8 @@ If `arashi --version` fails, follow the current installation instructions at htt
 | curl installation, update checks, clone, pull, push, or other remote Git operations | Network access to the selected installer, package registry, or Git remote | Test the actual destination only when the operation needs it |
 | repository maintainer validation | Node.js | Required by this repository's validation scripts, not by installed local CLI use |
 | fuzzy session shortcuts | fzf | `fzf --version` |
-| tmux session shortcut | tmux and sesh | `tmux -V` and `sesh --help` |
+| plain tmux launch | tmux plus an active tmux client or session | `tmux -V` and a non-empty `TMUX` value |
+| sesh integration | tmux context and sesh | `tmux -V`, a non-empty `TMUX` value, and `sesh --help` |
 | Herdr launch | Herdr and a reachable Herdr session/server | `herdr --version`; default workspace launch also needs a non-bare main checkout |
 | managed Kitty launch | Kitty 0.43+ with remote control permitted by the user's policy | `kitten --version` and existing Kitty `allow_remote_control` and password policy |
 | editor-specific launch | The selected editor CLI | Verify the dynamically selected editor; do not assume another editor is interchangeable |

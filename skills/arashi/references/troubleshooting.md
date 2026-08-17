@@ -1,13 +1,13 @@
 # Troubleshooting
 
-Start with the narrowest diagnostic:
+When the CLI is installed and the workspace is initialized or otherwise discoverable, start with the narrowest diagnostic:
 
 ```bash
 arashi doctor --json
 arashi <command> --help
 ```
 
-Preserve the failing command, exit status, structured error code, selected repository scope, and any worktrees already created. Do not retry a mutating command with broader selectors or a different launcher until the failure is understood.
+Otherwise, verify `arashi --version`, choose and initialize the intended mode, then run workspace diagnostics. Preserve the failing command, exit status, structured error code, selected repository scope, and any worktrees already created. Do not retry a mutating command with broader selectors or a different launcher until the failure is understood.
 
 ## CLI is missing or exits immediately
 

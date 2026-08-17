@@ -115,6 +115,12 @@ function validateSkill(root, label, { requireRepositoryPolicy = false } = {}) {
   if (/Run the relevant selected validation through `arashi exec`/i.test(handoff)) {
     problems.push("references/workflows.md completion handoff makes exec unconditional");
   }
+  if (!troubleshooting.includes("When the CLI is installed and the workspace is initialized or otherwise discoverable")) {
+    problems.push("references/troubleshooting.md must condition doctor on an installed CLI and discoverable workspace");
+  }
+  if (/\| tmux session shortcut \| tmux and sesh \|/i.test(prerequisites) || !prerequisites.includes("plain tmux launch") || !prerequisites.includes("sesh integration")) {
+    problems.push("references/prerequisites.md must keep plain tmux independent from the optional sesh integration");
+  }
   for (const forbiddenHeading of ["## Common Requests", "## Canonical Docs"]) {
     if (skill.includes(forbiddenHeading)) {
       problems.push(`SKILL.md still contains routed detail section ${forbiddenHeading}`);
@@ -220,11 +226,11 @@ function writeFixture(root) {
         .map(([path, title]) => `- [${title}](${path.replace(/^references\//, "")})`)
         .join("\n"),
     ],
-    ["references/prerequisites.md", "# Prerequisites\n\n## Conditional Prerequisites\n\nNode and network access apply only to tasks that need them.\n"],
+    ["references/prerequisites.md", "# Prerequisites\n\n## Conditional Prerequisites\n\nNode and network access apply only to tasks that need them. plain tmux launch is independent; sesh integration is optional.\n"],
     ["references/tutorial.md", "# End-to-End Tutorial\n\narashi init\narashi doctor --json\nComplete one configured workflow.\n"],
     ["references/workflows.md", "# Workflow Catalog\n\nChoose configured or standalone mode. Use paths reported by `arashi status`. When configured child repositories exist, use exec.\n"],
     ["references/session-shortcuts.md", "# Session shortcuts\n\narashi list | fzf\n"],
-    ["references/troubleshooting.md", "# Troubleshooting\n\nDiagnose the symptom before recovery.\n"],
+    ["references/troubleshooting.md", "# Troubleshooting\n\nWhen the CLI is installed and the workspace is initialized or otherwise discoverable, diagnose the symptom before recovery.\n"],
   ]);
   for (const [path, title] of commandRoutes) {
     const ownedHeading = [...ownedHeadings].find(([, owner]) => owner === path)?.[0];
