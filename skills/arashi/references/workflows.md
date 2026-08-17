@@ -65,7 +65,7 @@ Configured-only repository coordination such as child `add`, `clone`, `pull`, `p
 Use [Automation commands](commands/automation.md) for selector normalization, groups, JSON envelopes, handoffs, and coordinated push behavior.
 
 ```bash
-arashi status --only docs,api
+arashi status --group docs
 arashi exec --group docs -- git status --short
 arashi pull --group docs
 arashi push --group docs --dry-run

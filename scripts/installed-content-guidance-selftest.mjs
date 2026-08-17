@@ -61,6 +61,20 @@ function read(root, path, problems) {
   return readFileSync(absolutePath, "utf8");
 }
 
+function section(content, heading) {
+  const marker = `## ${heading}`;
+  const start = content.indexOf(marker);
+  if (start < 0) return "";
+  const end = content.indexOf("\n## ", start + marker.length);
+  return content.slice(start, end < 0 ? content.length : end);
+}
+
+function selectorSignature(command) {
+  return [...command.matchAll(/--(only|group)\s+(\S+)/g)]
+    .map((match) => `${match[1]}=${match[2]}`)
+    .join("|");
+}
+
 function validateLinks(root, files, problems) {
   for (const absolutePath of files) {
     const content = readFileSync(absolutePath, "utf8");
@@ -120,6 +134,21 @@ function validateSkill(root, label, { requireRepositoryPolicy = false } = {}) {
   const handoff = workflows.slice(workflows.indexOf("## Completion handoff"));
   if (/Run the relevant selected validation through `arashi exec`/i.test(handoff)) {
     problems.push("references/workflows.md completion handoff makes exec unconditional");
+  }
+  const selectionWorkflow = section(workflows, "Inspect or update selected repositories");
+  const selectionCommands = selectionWorkflow
+    .split(/\r?\n/)
+    .filter((line) => /^arashi (?:status|exec|pull|push)\b/.test(line.trim()))
+    .map((line) => line.trim());
+  const selectionVerbs = selectionCommands.map((line) => line.match(/^arashi (\w+)/)?.[1]);
+  const selectionSignatures = selectionCommands.map(selectorSignature);
+  if (
+    selectionCommands.length !== 4 ||
+    !["status", "exec", "pull", "push"].every((verb) => selectionVerbs.includes(verb)) ||
+    selectionSignatures.some((signature) => signature.length === 0) ||
+    new Set(selectionSignatures).size !== 1
+  ) {
+    problems.push("references/workflows.md must preserve one identical non-empty selector across inspection, execution, pull, and push");
   }
   if (!troubleshooting.includes("When the CLI is installed and the workspace is initialized or otherwise discoverable")) {
     problems.push("references/troubleshooting.md must condition doctor on an installed CLI and discoverable workspace");
@@ -248,7 +277,7 @@ function writeFixture(root) {
     ],
     ["references/prerequisites.md", "# Prerequisites\n\n## Conditional Prerequisites\n\nNode and network access apply only to tasks that need them. plain tmux launch is independent; sesh integration is optional.\n"],
     ["references/tutorial.md", "# End-to-End Tutorial\n\narashi init\narashi doctor --json\nComplete one configured workflow.\n"],
-    ["references/workflows.md", "# Workflow Catalog\n\nChoose configured or standalone mode. Use paths reported by `arashi status`. When configured child repositories exist, use exec.\n"],
+    ["references/workflows.md", "# Workflow Catalog\n\nChoose configured or standalone mode. Use paths reported by `arashi status`. When configured child repositories exist, use exec.\n\n## Inspect or update selected repositories\n\n```bash\narashi status --group docs\narashi exec --group docs -- git status --short\narashi pull --group docs\narashi push --group docs --dry-run\n```\n"],
     ["references/session-shortcuts.md", "# Session shortcuts\n\narashi list | fzf\n"],
     ["references/troubleshooting.md", "# Troubleshooting\n\nWhen the CLI is installed and the workspace is initialized or otherwise discoverable, diagnose the symptom before recovery.\n"],
   ]);
@@ -285,6 +314,15 @@ function selfTest() {
         writeFileSync(path, readFileSync(path, "utf8").replace("commands/create.md", "commands/missing.md"));
       },
       /missing command route commands\/create\.md|broken local link/,
+    );
+    requireRejection(
+      temporaryRoot,
+      "selector-scope-drift",
+      (root) => {
+        const path = join(root, "references", "workflows.md");
+        writeFileSync(path, readFileSync(path, "utf8").replace("arashi status --group docs", "arashi status --only docs,api"));
+      },
+      /must preserve one identical non-empty selector/,
     );
     requireRejection(
       temporaryRoot,
