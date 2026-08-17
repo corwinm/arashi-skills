@@ -34,10 +34,13 @@ Use JSON mode for automation-relevant commands including `add`, `clone`, `create
 Use `arashi handoff` when an agent needs to pause, switch with another worker, request review, or leave dirty coordinated work with explicit context.
 
 ```bash
+RELATED_URL="https://example.com/review"
+NEXT_CHECK_COMMAND="arashi status"
+
 # Markdown report for chat, issues, or PR comments
 arashi handoff \
   --link "$RELATED_URL" \
-  --validation "bun run test — passed" \
+  --validation "project validation — passed" \
   --todo "watch CI" \
   --risk "Windows matrix pending" \
   --next-command "$NEXT_CHECK_COMMAND"

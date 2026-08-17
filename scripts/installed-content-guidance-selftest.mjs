@@ -85,6 +85,7 @@ function validateSkill(root, label, { requireRepositoryPolicy = false } = {}) {
   const tutorial = read(root, "references/tutorial.md", problems);
   const workflows = read(root, "references/workflows.md", problems);
   const troubleshooting = read(root, "references/troubleshooting.md", problems);
+  const automation = read(root, "references/commands/automation.md", problems);
 
   for (const [path, title] of commandRoutes) {
     const leaf = read(root, path, problems);
@@ -131,6 +132,13 @@ function validateSkill(root, label, { requireRepositoryPolicy = false } = {}) {
   }
   if (/\| tmux session shortcut \| tmux and sesh \|/i.test(prerequisites) || !prerequisites.includes("plain tmux launch") || !prerequisites.includes("sesh integration")) {
     problems.push("references/prerequisites.md must keep plain tmux independent from the optional sesh integration");
+  }
+  for (const variable of ["RELATED_URL", "NEXT_CHECK_COMMAND"]) {
+    const definition = automation.indexOf(`${variable}="`);
+    const firstUse = automation.indexOf(`"$${variable}"`);
+    if (firstUse >= 0 && (definition < 0 || definition > firstUse)) {
+      problems.push(`references/commands/automation.md must define ${variable} before use`);
+    }
   }
   for (const forbiddenHeading of ["## Common Requests", "## Canonical Docs"]) {
     if (skill.includes(forbiddenHeading)) {
