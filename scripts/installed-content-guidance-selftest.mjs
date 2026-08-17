@@ -103,6 +103,14 @@ function validateSkill(root, label, { requireRepositoryPolicy = false } = {}) {
   if (skill.length > 5_000) {
     problems.push(`SKILL.md must remain a compact router (found ${skill.length} characters)`);
   }
+  const startMode = skill.indexOf("Choose one mode");
+  const startDoctor = skill.indexOf("arashi doctor --json");
+  if (startMode < 0 || startDoctor < 0 || startMode > startDoctor) {
+    problems.push("SKILL.md must choose and initialize a mode before workspace diagnostics");
+  }
+  if (!workflows.includes("When configured child repositories exist") || !workflows.includes("paths reported by `arashi status`")) {
+    problems.push("references/workflows.md must keep parent-only validation local and make exec conditional on configured children");
+  }
   for (const forbiddenHeading of ["## Common Requests", "## Canonical Docs"]) {
     if (skill.includes(forbiddenHeading)) {
       problems.push(`SKILL.md still contains routed detail section ${forbiddenHeading}`);
@@ -200,7 +208,7 @@ function writeFixture(root) {
     ["README.md", "# Arashi Skill Package\n\nInstalled runtime guidance.\n"],
     [
       "SKILL.md",
-      "# Arashi Skill\n\nUse [Commands](references/commands.md) and [Troubleshooting](references/troubleshooting.md) for operational security and failures.\n",
+      "# Arashi Skill\n\nChoose one mode, initialize it, then run arashi doctor --json.\n\nUse [Commands](references/commands.md) and [Troubleshooting](references/troubleshooting.md) for operational security and failures.\n",
     ],
     [
       "references/commands.md",
@@ -210,7 +218,7 @@ function writeFixture(root) {
     ],
     ["references/prerequisites.md", "# Prerequisites\n\n## Conditional Prerequisites\n\nNode and network access apply only to tasks that need them.\n"],
     ["references/tutorial.md", "# End-to-End Tutorial\n\narashi init\narashi doctor --json\nComplete one configured workflow.\n"],
-    ["references/workflows.md", "# Workflow Catalog\n\nChoose configured or standalone mode.\n"],
+    ["references/workflows.md", "# Workflow Catalog\n\nChoose configured or standalone mode. Use paths reported by `arashi status`. When configured child repositories exist, use exec.\n"],
     ["references/session-shortcuts.md", "# Session shortcuts\n\narashi list | fzf\n"],
     ["references/troubleshooting.md", "# Troubleshooting\n\nDiagnose the symptom before recovery.\n"],
   ]);

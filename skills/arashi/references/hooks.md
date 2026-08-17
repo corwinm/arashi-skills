@@ -95,11 +95,13 @@ esac
 
 ```powershell
 $answer = Read-Host
+if ($answer -notin @("y", "Y", "yes", "YES")) { exit 1 }
 ```
 
 ```bat
 set "answer="
 set /p "answer=Continue setup? [y/N] " || exit /b 1
+if /i not "%answer%"=="y" if /i not "%answer%"=="yes" exit /b 1
 ```
 
 Compose inline steps with the shell's native fail-fast syntax. Never enter secrets through lifecycle-hook prompts; passwords, tokens, signing material, and other secrets also do not belong in snippets. Legacy terminal-input behavior is supported throughout 1.x but non-canonical and may be removed no earlier than 2.0 through a separately approved breaking change.

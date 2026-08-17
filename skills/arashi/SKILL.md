@@ -34,8 +34,9 @@ Coordinate Git worktrees across configured Arashi workspaces, or use Arashi ad h
 
 1. Assume the CLI is installed unless installation was requested or `arashi --version` fails.
 2. Use installed `arashi --help` and `arashi <command> --help` as parameter authority.
-3. Diagnose workspace health with `arashi doctor --json` before lower-level recovery.
-4. Choose one mode, then load only the reference for the task.
+3. Choose one mode using the section below, and initialize it when the workspace is fresh.
+4. After the chosen workspace is initialized or otherwise discoverable, diagnose health with `arashi doctor --json` before lower-level recovery.
+5. Load only the reference for the task.
 
 ## Choose a mode
 

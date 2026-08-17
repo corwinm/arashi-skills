@@ -39,6 +39,8 @@ const requiredHookGuidance = [
   "`--no-hook-input` disables terminal input for that invocation without skipping hooks",
   "read -r answer || exit 1",
   'case "$answer" in',
+  'if ($answer -notin @("y", "Y", "yes", "YES")) { exit 1 }',
+  'if /i not "%answer%"=="y" if /i not "%answer%"=="yes" exit /b 1',
   "Remove dry-run keeps source-aware previews",
   "Configured-create dry-run performs no hook discovery, returns an empty hook ledger, and has no hook preview surface",
   "`sourceKind: \"inline-config\"`",
