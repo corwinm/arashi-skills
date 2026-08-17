@@ -53,8 +53,8 @@
       "There is no persistent `hooks.input` configuration",
       "read -r answer",
       "$answer = Read-Host",
-      "set \"answer=\"",
-      "set /p \"answer=Continue setup? [y/N] \" || exit /b 1",
+      "choice /c yn /n /m \"Continue setup? [y/N] \" || exit /b 1",
+      "if errorlevel 2 exit /b 1",
       "Never enter secrets through lifecycle-hook prompts",
       "supported throughout 1.x but non-canonical",
       "may be removed no earlier than 2.0 through a separately approved breaking change",
@@ -76,7 +76,8 @@
     "\\bARASHI_BRANCH\\b",
     "cp \\.arashi/hooks/[^\\n]+ \\.arashi/hooks/[^\\n]+\\n(?:cp \\.arashi/hooks/)",
     "Windows lifecycle hooks require Git Bash",
-    "-NonInteractive"
+    "-NonInteractive",
+    "%answer%"
   ],
   "unsupportedEnvironmentVariables": [
     "ARASHI_BASE_BRANCH"
