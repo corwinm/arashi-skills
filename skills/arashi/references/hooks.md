@@ -51,6 +51,8 @@ Configured workspaces define `hooks.scripts.<lifecycle>` for workspace ownership
   "hooks": {
     "scripts": {
       "pre-create": {
+        "bash": "set -eu; printf '%s\\n' 'Inline pre-create hook running'",
+        "powershell": "$ErrorActionPreference = \"Stop\"; Write-Output \"Inline pre-create hook running\"",
         "cmd": "echo Inline pre-create hook running || exit /b 1"
       }
     }

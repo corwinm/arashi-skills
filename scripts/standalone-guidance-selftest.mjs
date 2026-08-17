@@ -73,7 +73,7 @@ const requirements = new Map([
       "arashi init --zero-config",
       'current_root=$(git rev-parse --show-toplevel)',
       'git_dir=$(git rev-parse --path-format=absolute --git-dir)',
-      'main_root=${current_root%%/.worktrees/*}',
+      'main_root=${current_root%/.worktrees/*}',
       'cd "$main_root"',
       'git check-ignore --no-index -q -- "$destination"',
       "literal `.worktrees/` rule",
@@ -133,6 +133,11 @@ function validateSkill(root, label) {
     `${label} contains an automatic global or tracked ignore edit`
   );
   const troubleshooting = readFileSync(join(root, "references", "troubleshooting.md"), "utf8");
+  assert.doesNotMatch(
+    troubleshooting,
+    /\$\{current_root%%\/\.worktrees\/\*\}/,
+    `${label} strips an outer .worktrees ancestor instead of the innermost Arashi segment`,
+  );
   assert.doesNotMatch(
     troubleshooting,
     /add only the missing exact destination/i,

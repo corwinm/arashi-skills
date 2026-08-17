@@ -127,6 +127,14 @@ function validateCopyableHookGuidance(hooks, label) {
   if (unknownInterpreterKeys.length > 0) {
     problems.push(`inline-hook example contains unsupported interpreter keys: ${unknownInterpreterKeys.join(", ")}`);
   }
+  const bash = inlineHook?.bash;
+  if (bash !== "set -eu; printf '%s\\n' 'Inline pre-create hook running'") {
+    problems.push("inline-hook example must include a fail-fast Bash candidate");
+  }
+  const powershell = inlineHook?.powershell;
+  if (powershell !== '$ErrorActionPreference = "Stop"; Write-Output "Inline pre-create hook running"') {
+    problems.push("inline-hook example must include a fail-fast PowerShell candidate");
+  }
   const cmd = inlineHook?.cmd;
   if (cmd !== "echo Inline pre-create hook running || exit /b 1") {
     problems.push("cmd example must avoid reflecting ARASHI_BRANCH_NAME or other unconstrained values into command text");
@@ -243,7 +251,15 @@ function createCompleteFixture(root) {
     "## Configured Inline Hooks",
     "```json",
     JSON.stringify({
-      hooks: { scripts: { "pre-create": { cmd: "echo Inline pre-create hook running || exit /b 1" } } },
+      hooks: {
+        scripts: {
+          "pre-create": {
+            bash: "set -eu; printf '%s\\n' 'Inline pre-create hook running'",
+            powershell: '$ErrorActionPreference = "Stop"; Write-Output "Inline pre-create hook running"',
+            cmd: "echo Inline pre-create hook running || exit /b 1",
+          },
+        },
+      },
       repos: { api: { hooks: { "post-create": "set -eu; CI=true corepack pnpm --ignore-workspace install --frozen-lockfile" } } },
     }, null, 2),
     "```",

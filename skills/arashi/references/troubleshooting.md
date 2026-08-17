@@ -47,7 +47,7 @@ if [ "$git_dir" = "$common_dir" ]; then
   main_root=$current_root
 else
   case "$current_root" in
-    */.worktrees/*) main_root=${current_root%%/.worktrees/*} ;;
+    */.worktrees/*) main_root=${current_root%/.worktrees/*} ;;
     *) printf '%s\n' "Cannot resolve the Arashi main root from $current_root" >&2; exit 1 ;;
   esac
 fi
