@@ -66,7 +66,7 @@ const requirements = new Map([
       "Static completion remains available outside configured workspaces",
       "Dynamic completion is intentionally empty",
       "200 ms whole-query budget expires",
-      "npm-managed install, run `arashi install` once",
+      "run `arashi shell install`",
       "standalone binary from the same release",
     ],
   ],
@@ -84,6 +84,7 @@ function validateNoStaleClaims(root, label) {
   const staleClaims = [
     /shell init[^\n]*(?:includes|enables|installs|emits) (?:shell )?completion/i,
     /completion[^\n]*(?:requires|only works in)[^\n]*(?:configured )?workspace/i,
+    /completion[^\n]*activation[^\n]*(?:run|use) `arashi install`/i,
   ];
   for (const relativePath of walkFiles(root)) {
     const content = readFileSync(join(root, relativePath), "utf8");

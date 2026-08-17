@@ -22,6 +22,7 @@ const suppliedSkillRoot = skillRootIndex >= 0 ? process.argv[skillRootIndex + 1]
 if (skillRootIndex >= 0 && !suppliedSkillRoot) throw new Error("--skill-root requires a path");
 
 const requiredHookGuidance = [
+  "Ordinary `arashi init` generates inert `.example` hook files",
   "`hooks.scripts.<lifecycle>`",
   "`repos.<name>.hooks.<lifecycle>`",
   "`pre-create`, `post-create`, `pre-remove`, and `post-remove`",

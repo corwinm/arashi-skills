@@ -23,7 +23,7 @@ Preserve the failing command, exit status, structured error code, selected repos
 
 **Recovery:** `arashi completion bash` (or zsh/fish) should produce static completion. Static completion remains available outside configured workspaces. Dynamic completion is intentionally empty when discovery fails or the 200 ms whole-query budget expires; it performs no network requests, hooks, prompts, mutation, or child-repository operations.
 
-If completion exists but activation is missing on an npm-managed install, run `arashi install` once. A standalone binary from the same release exposes the same generated completion behavior. See [Setup, update, and completion](commands/setup.md).
+If completion generation works but profile activation is missing, run `arashi shell install`. A standalone binary from the same release exposes the same generated completion behavior. See [Setup, update, and completion](commands/setup.md).
 
 ## Workspace configuration or status is unhealthy
 

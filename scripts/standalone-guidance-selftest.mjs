@@ -33,6 +33,8 @@ const requirements = new Map([
     "references/workflows.md",
     [
       "Configured workflow",
+      "1. Initialize only when configuration is absent",
+      "2. Diagnose the initialized workspace before changing state",
       "ordinary `arashi init`",
       "Standalone Repository Workflow",
       "arashi init --zero-config",
@@ -87,7 +89,7 @@ const requirements = new Map([
       "main repository",
       "repository-local",
       "workspace-root",
-      "does not create or activate",
+      "does not activate them",
     ],
   ],
 ]);

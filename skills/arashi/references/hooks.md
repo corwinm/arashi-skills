@@ -14,7 +14,7 @@ install -m 755 .arashi/hooks/pre-create.sh.example .arashi/hooks/pre-create.sh
 Copy-Item .arashi/hooks/pre-create.ps1.example .arashi/hooks/pre-create.ps1
 ```
 
-Arashi does not create or activate hook files. Keep examples inert until reviewed; do not embed or enter secrets in hook files, inline configuration, or prompts.
+Ordinary `arashi init` generates inert `.example` hook files but does not activate them. Keep examples inert until reviewed; do not embed or enter secrets in hook files, inline configuration, or prompts.
 
 ## Discovery and ownership
 

@@ -6,17 +6,17 @@ Choose the goal first, then open the linked command family for syntax and preced
 
 Prefer configured mode whenever the project needs persisted defaults, custom paths, child repositories, groups, hooks, or coordinated commands. Use ordinary `arashi init`; a single-repository project may still benefit from configuration.
 
-1. Diagnose before changing state:
+1. Initialize only when configuration is absent:
+
+   ```bash
+   arashi init
+   ```
+
+2. Diagnose the initialized workspace before changing state:
 
    ```bash
    arashi doctor --json
    arashi status
-   ```
-
-2. Initialize only when configuration is absent:
-
-   ```bash
-   arashi init
    ```
 
 3. Inspect the effective repository set. Apply `--group` or `--only` before a mutating, expensive, network-heavy, or long-running command unless every managed repository was explicitly requested.
