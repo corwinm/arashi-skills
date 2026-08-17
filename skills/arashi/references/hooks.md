@@ -18,7 +18,18 @@ Ordinary `arashi init` generates inert `.example` hook files but does not activa
 
 ## Discovery and ownership
 
-Configured create does not discover repository-local or user-global hooks. Configured file hooks come from the workspace/repository paths defined by the lifecycle. Standalone mode discovers only user-global targeted and shared hooks: `~/.arashi/hooks/<main-root-basename>/<lifecycle><ext>` before `~/.arashi/hooks/<lifecycle><ext>`. The main-root basename identifies the main repository; repository-local or workspace-root `.arashi/hooks` content is inactive without configured workspace state.
+Configured create does not discover repository-local or user-global hooks. Native file ownership is explicit:
+
+| Lifecycle scope | Native file location |
+| --- | --- |
+| Configured create, workspace | `<workspace>/.arashi/hooks/pre-create<ext>` and `post-create<ext>` |
+| Configured create, repository-specific | `<workspace>/.arashi/hooks/pre-create.<repo><ext>` and `post-create.<repo><ext>`; execution still occurs in the new child worktree |
+| Configured remove, repository | `<repo>/.arashi/hooks/pre-remove<ext>` and `post-remove<ext>`; the default configured path is `repos/<repo>/.arashi/hooks/` |
+| Configured remove, workspace | `<workspace>/.arashi/hooks/pre-remove<ext>` and `post-remove<ext>` |
+| Configured remove, global targeted | `~/.arashi/hooks/<repo>/pre-remove<ext>` and `post-remove<ext>` |
+| Configured remove, global shared | `~/.arashi/hooks/pre-remove<ext>` and `post-remove<ext>` |
+
+Standalone mode discovers only user-global targeted and shared hooks: `~/.arashi/hooks/<main-root-basename>/<lifecycle><ext>` before `~/.arashi/hooks/<lifecycle><ext>`. The main-root basename identifies the main repository; repository-local or workspace-root `.arashi/hooks` content is inactive without configured workspace state.
 
 POSIX discovers only `.sh`; Windows discovers `.ps1`, `.cmd`, and `.bat` case-insensitively. Multiple supported candidates for one logical location fail before lifecycle mutation. Windows does not run `.sh` lifecycle hooks through implicit Git Bash.
 
