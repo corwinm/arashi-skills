@@ -36,7 +36,6 @@ Configured workspaces define `hooks.scripts.<lifecycle>` for workspace ownership
   "hooks": {
     "scripts": {
       "pre-create": {
-        "shell": "cmd",
         "cmd": "echo Inline pre-create hook running || exit /b 1"
       }
     }

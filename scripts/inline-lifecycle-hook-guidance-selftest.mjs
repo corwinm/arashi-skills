@@ -115,7 +115,14 @@ function validateCopyableHookGuidance(hooks, label) {
   const jsonMatch = configured.match(/```json\s*\n([\s\S]*?)\n```/);
   assert.ok(jsonMatch, `${label} is missing the configured inline-hook JSON example`);
   const example = JSON.parse(jsonMatch[1]);
-  const cmd = example?.hooks?.scripts?.["pre-create"]?.cmd;
+  const inlineHook = example?.hooks?.scripts?.["pre-create"];
+  const unknownInterpreterKeys = Object.keys(inlineHook ?? {}).filter(
+    (key) => !["bash", "cmd", "powershell"].includes(key),
+  );
+  if (unknownInterpreterKeys.length > 0) {
+    problems.push(`inline-hook example contains unsupported interpreter keys: ${unknownInterpreterKeys.join(", ")}`);
+  }
+  const cmd = inlineHook?.cmd;
   if (cmd !== "echo Inline pre-create hook running || exit /b 1") {
     problems.push("cmd example must avoid reflecting ARASHI_BRANCH_NAME or other unconstrained values into command text");
   }

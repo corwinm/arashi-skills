@@ -36,6 +36,7 @@ const requirements = new Map([
       "ordinary `arashi init`",
       "Standalone Repository Workflow",
       "arashi init --zero-config",
+      "literal `.worktrees/` rule",
       "commands/workspace.md",
       "main worktree",
       "linked worktree",
@@ -129,6 +130,11 @@ function validateSkill(root, label) {
     troubleshooting,
     /add only the missing exact destination/i,
     `${label} incorrectly claims zero-config init adds an exact destination exclude`
+  );
+  assert.doesNotMatch(
+    workflow,
+    /(?:bootstrap|init)[^\n.]{0,160}(?:add|append)[^\n.]{0,80}exact (?:planned )?destination/i,
+    `${label} workflow incorrectly narrows zero-config bootstrap to an exact destination exclude`,
   );
 }
 

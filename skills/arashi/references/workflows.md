@@ -54,7 +54,7 @@ Use standalone mode only for ad hoc work in an unconfigured non-bare Git project
    arashi status
    ```
 
-Standalone worktrees use the discovered `.worktrees/<branch>` layout. Passive discovery does not repair ignore coverage. Bootstrap may add only the exact planned destination to the repository-local exclude when needed; it must not edit tracked `.gitignore` or global Git configuration automatically.
+Standalone worktrees use the discovered `.worktrees/<branch>` layout. Passive discovery does not repair ignore coverage. When the convention is not already ignored, bootstrap appends the literal `.worktrees/` rule to the repository-local exclude, covering the whole directory rather than one planned branch destination; it must not edit tracked `.gitignore` or global Git configuration automatically.
 
 Configured-only repository coordination such as child `add`, `clone`, `pull`, `push`, `sync`, and `exec` remains unavailable. Adopt ordinary `arashi init` when those capabilities, groups, custom paths, or local hooks are required. Full boundaries and recovery are owned by [Workspace commands](commands/workspace.md).
 
