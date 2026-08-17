@@ -121,6 +121,7 @@ Expected outcomes:
 - Ignore reconciliation completes before missing configured repositories or worktrees are materialized.
 - Missing configured repositories are materialized locally.
 - New worktrees exist for `feature/skill-integration`.
+- Configured repositories may copy independent local files or symlink intentionally shared state from their canonical Git primary checkout before repository post-create; see [Repository Worktree File Materialization](commands.md#repository-worktree-file-materialization).
 - `arashi switch` opens the selected worktree in a new terminal context.
 - Use `arashi switch --help` to confirm current editor launch flags before choosing an IDE-specific switch option.
 
