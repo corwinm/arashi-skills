@@ -89,14 +89,14 @@ function walkMarkdown(root, directory = root) {
 
 function validateSkill(root, label) {
   const manifestPath = join(root, "SKILL.md");
-  const tutorialPath = join(root, "references", "tutorial.md");
+  const tutorialPath = join(root, "references", "commands", "setup.md");
   const manifest = readFileSync(manifestPath, "utf8");
   const tutorial = readFileSync(tutorialPath, "utf8");
 
   for (const expected of [
     "verify_arashi: arashi --version",
     "discover_commands: arashi --help",
-    "inspect current help output when needed: `arashi <command> --help`",
+    "Use installed `arashi --help` and `arashi <command> --help` as parameter authority",
   ]) {
     assert.ok(manifest.includes(expected), `${label}/SKILL.md is missing canonical discovery command ${JSON.stringify(expected)}`);
   }
@@ -104,7 +104,7 @@ function validateSkill(root, label) {
   for (const expected of aliasGuidance) {
     assert.ok(
       tutorial.includes(expected),
-      `${label}/references/tutorial.md is missing executable-alias guidance ${JSON.stringify(expected)}`,
+      `${label}/references/commands/setup.md is missing executable-alias guidance ${JSON.stringify(expected)}`,
     );
   }
   const tutorialDefinitionParagraphs = tutorial
@@ -113,7 +113,7 @@ function validateSkill(root, label) {
   assert.equal(
     tutorialDefinitionParagraphs.length,
     1,
-    `${label}/references/tutorial.md must contain exactly one executable-alias identity and availability definition`,
+    `${label}/references/commands/setup.md must contain exactly one executable-alias identity and availability definition`,
   );
 
   assert.doesNotMatch(
@@ -145,7 +145,7 @@ function validateSkill(root, label) {
       assert.equal(
         definesExecutableAlias(content),
         false,
-        `${label}/${relativePath} contains an executable-alias definition that must be owned only by references/tutorial.md`,
+        `${label}/${relativePath} contains an executable-alias definition that must be owned only by references/commands/setup.md`,
       );
     }
     assert.equal(
@@ -175,7 +175,7 @@ function validateDeliberateDrift() {
 
     for (const [fixtureLabel, fixtureSkillRoot] of fixtureRoots) {
       cpSync(sourceSkillRoot, fixtureSkillRoot, { recursive: true });
-      const tutorialPath = join(fixtureSkillRoot, "references", "tutorial.md");
+      const tutorialPath = join(fixtureSkillRoot, "references", "commands", "setup.md");
       const originalTutorial = readFileSync(tutorialPath, "utf8");
       const aliasDefinitionParagraph = originalTutorial
         .split(/\n\s*\n/)
@@ -228,7 +228,7 @@ function validateDeliberateDrift() {
       );
       requireRejection(
         () => validateSkill(fixtureSkillRoot, `${fixtureLabel}-duplicate-definition`),
-        /executable-alias definition.*owned only by references\/tutorial\.md/,
+        /executable-alias definition.*owned only by references\/commands\/setup\.md/,
         `duplicate executable-alias definition guidance in ${fixtureLabel}`,
       );
 
@@ -238,7 +238,7 @@ function validateDeliberateDrift() {
       );
       requireRejection(
         () => validateSkill(fixtureSkillRoot, `${fixtureLabel}-duplicate-executable-name-definition`),
-        /executable-alias definition.*owned only by references\/tutorial\.md/,
+        /executable-alias definition.*owned only by references\/commands\/setup\.md/,
         `duplicate executable-name definition guidance in ${fixtureLabel}`,
       );
 
@@ -248,7 +248,7 @@ function validateDeliberateDrift() {
       );
       requireRejection(
         () => validateSkill(fixtureSkillRoot, `${fixtureLabel}-plural-executable-names-definition`),
-        /executable-alias definition.*owned only by references\/tutorial\.md/,
+        /executable-alias definition.*owned only by references\/commands\/setup\.md/,
         `plural executable-names definition guidance in ${fixtureLabel}`,
       );
 

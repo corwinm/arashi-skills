@@ -19,7 +19,7 @@ if (skillRootArgumentIndex >= 0 && !suppliedSkillRoot) {
 
 const requirements = new Map([
   [
-    "references/commands.md",
+    "references/commands/switch-and-launch.md",
     [
       '"mode": "auto"',
       "`auto`, `cd`, `launch`, `sesh`, and `herdr`",
@@ -27,29 +27,10 @@ const requirements = new Map([
       "arashi switch --launch feature-auth",
       "arashi switch --ignore-configured-launcher feature-auth",
       "`--ignore-configured-launcher` bypasses only configured `sesh` or `herdr`",
-      "`launchMode` and `launch_mode`",
-      "`cd` plus `sesh` or `herdr`",
-      "actionable migration error",
-      "one migration warning",
     ],
   ],
-  [
-    "references/workflows.md",
-    [
-      '`defaults.switch.mode: "herdr"`',
-      "tmux → Herdr → cmux → integrated IDE → Kitty",
-      "parent-shell `cd`",
-      "terminal/platform fallback",
-    ],
-  ],
-  [
-    "references/session-shortcuts.md",
-    [
-      "arashi switch --launch feature-auth",
-      "tmux → Herdr → cmux → integrated IDE → Kitty → parent-shell `cd` → terminal/platform fallback",
-      "configured explicit `sesh` or `herdr` launcher",
-    ],
-  ],
+  ["references/workflows.md", ["commands/switch-and-launch.md"]],
+  ["references/session-shortcuts.md", ["commands/switch-and-launch.md"]],
 ]);
 
 function validateSkill(root, label) {
@@ -64,28 +45,13 @@ function validateSkill(root, label) {
   }
 
   const commands = readFileSync(
-    join(root, "references", "commands.md"),
+    join(root, "references", "commands", "switch-and-launch.md"),
     "utf8",
   );
   assert.doesNotMatch(
     commands,
-    /"switch"\s*:\s*\{[^}]*"launchMode"/s,
-    `${label} still advertises defaults.switch.launchMode in a canonical example`,
-  );
-  assert.doesNotMatch(
-    commands,
-    /Configured `launchMode: "herdr"` is supported for switch/,
-    `${label} still gives canonical switch launchMode advice`,
-  );
-  assert.doesNotMatch(
-    commands,
-    /"create"\s*:\s*\{[^}]*"launch"\s*:\s*(?:true|false)[^}]*"launchMode"/s,
-    `${label} still advertises the legacy two-field create model`,
-  );
-  assert.match(
-    commands,
-    /"create"\s*:\s*\{[^}]*"launch"\s*:\s*"herdr"/s,
-    `${label} must use the canonical create launch field`,
+    /launchMode|launch_mode|Legacy switch-default migration/,
+    `${label} still exposes legacy switch-default migration sediment`,
   );
 }
 

@@ -22,6 +22,7 @@ const suppliedSkillRoot = skillRootIndex >= 0 ? process.argv[skillRootIndex + 1]
 if (skillRootIndex >= 0 && !suppliedSkillRoot) throw new Error("--skill-root requires a path");
 
 const requiredHookGuidance = [
+  "Ordinary `arashi init` generates inert `.example` hook files",
   "`hooks.scripts.<lifecycle>`",
   "`repos.<name>.hooks.<lifecycle>`",
   "`pre-create`, `post-create`, `pre-remove`, and `post-remove`",
@@ -35,7 +36,12 @@ const requiredHookGuidance = [
   "short reviewable commands",
   "substantial, reusable scripts",
   "`--no-hooks` is create-only and remove does not accept it",
-  "`--no-hook-input` is shared by create and remove",
+  "`--no-hook-input` disables terminal input for that invocation without skipping hooks",
+  "read -r answer || exit 1",
+  'case "$answer" in',
+  'if ($answer -notin @("y", "Y", "yes", "YES")) { exit 1 }',
+  'choice /c yn /n /m "Continue setup? [y/N] " || exit /b 1',
+  "if errorlevel 2 exit /b 1",
   "Remove dry-run keeps source-aware previews",
   "Configured-create dry-run performs no hook discovery, returns an empty hook ledger, and has no hook preview surface",
   "`sourceKind: \"inline-config\"`",
@@ -115,7 +121,22 @@ function validateCopyableHookGuidance(hooks, label) {
   const jsonMatch = configured.match(/```json\s*\n([\s\S]*?)\n```/);
   assert.ok(jsonMatch, `${label} is missing the configured inline-hook JSON example`);
   const example = JSON.parse(jsonMatch[1]);
-  const cmd = example?.hooks?.scripts?.["pre-create"]?.cmd;
+  const inlineHook = example?.hooks?.scripts?.["pre-create"];
+  const unknownInterpreterKeys = Object.keys(inlineHook ?? {}).filter(
+    (key) => !["bash", "cmd", "powershell"].includes(key),
+  );
+  if (unknownInterpreterKeys.length > 0) {
+    problems.push(`inline-hook example contains unsupported interpreter keys: ${unknownInterpreterKeys.join(", ")}`);
+  }
+  const bash = inlineHook?.bash;
+  if (bash !== "set -eu; printf '%s\\n' 'Inline pre-create hook running'") {
+    problems.push("inline-hook example must include a fail-fast Bash candidate");
+  }
+  const powershell = inlineHook?.powershell;
+  if (powershell !== '$ErrorActionPreference = "Stop"; Write-Output "Inline pre-create hook running"') {
+    problems.push("inline-hook example must include a fail-fast PowerShell candidate");
+  }
+  const cmd = inlineHook?.cmd;
   if (cmd !== "echo Inline pre-create hook running || exit /b 1") {
     problems.push("cmd example must avoid reflecting ARASHI_BRANCH_NAME or other unconstrained values into command text");
   }
@@ -231,7 +252,15 @@ function createCompleteFixture(root) {
     "## Configured Inline Hooks",
     "```json",
     JSON.stringify({
-      hooks: { scripts: { "pre-create": { cmd: "echo Inline pre-create hook running || exit /b 1" } } },
+      hooks: {
+        scripts: {
+          "pre-create": {
+            bash: "set -eu; printf '%s\\n' 'Inline pre-create hook running'",
+            powershell: '$ErrorActionPreference = "Stop"; Write-Output "Inline pre-create hook running"',
+            cmd: "echo Inline pre-create hook running || exit /b 1",
+          },
+        },
+      },
       repos: { api: { hooks: { "post-create": "set -eu; CI=true corepack pnpm --ignore-workspace install --frozen-lockfile" } } },
     }, null, 2),
     "```",

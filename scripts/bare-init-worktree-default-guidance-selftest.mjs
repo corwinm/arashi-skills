@@ -20,22 +20,12 @@ const requirements = new Map([
   [
     "SKILL.md",
     [
-      "In bare configured repositories",
-      "non-worktree managed-path reporting",
-      "does not inspect or write ignore files",
+      "references/commands/workspace.md",
+      "bare repositories report administrative paths without editing ignore files",
     ],
   ],
   [
-    "references/tutorial.md",
-    [
-      "non-bare repositories default to `.arashi/worktrees`",
-      "canonical bare repositories default to `..`",
-      "An explicit `--worktrees-dir` overrides either default",
-      "persisted value remains authoritative",
-    ],
-  ],
-  [
-    "references/commands.md",
+    "references/commands/workspace.md",
     [
       "canonical bare repository",
       "defaults to `..`",
@@ -51,19 +41,6 @@ const requirements = new Map([
       "clone-local scope preference",
       "In non-bare repositories, `local` writes only",
       "Bare repositories are the exception",
-    ],
-  ],
-  [
-    "references/workflows.md",
-    [
-      "non-bare configured init defaults to `.arashi/worktrees`",
-      "canonical bare configured init defaults to `..`",
-      "explicit `--worktrees-dir` overrides either default",
-      "Later commands use the persisted config value",
-      "parent default as external and unsafe",
-      "bare-root subdirectories as non-applicable",
-      "local, tracked, or none",
-      "without `git check-ignore` or ignore-file writes",
     ],
   ],
 ]);

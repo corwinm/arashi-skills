@@ -49,7 +49,7 @@ function section(content, heading) {
 }
 
 function validateSkill(root, label) {
-  const commandsPath = join(root, "references", "commands.md");
+  const commandsPath = join(root, "references", "commands", "workspace.md");
   const troubleshootingPath = join(root, "references", "troubleshooting.md");
   const commands = readFileSync(commandsPath, "utf8");
   const troubleshooting = readFileSync(troubleshootingPath, "utf8");
@@ -97,11 +97,19 @@ function validateSkill(root, label) {
     `${label}/commands.md does not bind shared portability to canonical remotes and machine-global Git rewriting`
   );
 
-  assert.match(
-    troubleshooting,
-    /\| SSH alias clone fails to resolve or authenticate \|[^\n]*Git\/OpenSSH[^\n]*\|[^\n]*normal add rollback[^\n]*clone continues[^\n]*partial success[^\n]*Arashi does not read or probe SSH configuration[^\n]*\|/,
-    `${label}/troubleshooting.md is missing the Git-owned failure and retained safety row`
-  );
+  for (const required of [
+    "SSH alias clone fails to resolve or authenticate",
+    "Git/OpenSSH",
+    "normal add rollback",
+    "clone continues",
+    "partial success",
+    "Arashi does not read or probe SSH configuration",
+  ]) {
+    assert.ok(
+      troubleshooting.includes(required),
+      `${label}/troubleshooting.md is missing ${JSON.stringify(required)}`,
+    );
+  }
 
   const allGuidance = markdownFiles(root)
     .map((path) => ({ path: relative(root, path), content: readFileSync(path, "utf8") }));
@@ -125,7 +133,7 @@ function validateDeliberateDrift() {
   try {
     const preservationRoot = join(driftRoot, "preservation", "arashi");
     cpSync(sourceSkillRoot, preservationRoot, { recursive: true });
-    const preservationPath = join(preservationRoot, "references", "commands.md");
+    const preservationPath = join(preservationRoot, "references", "commands", "workspace.md");
     const preservation = readFileSync(preservationPath, "utf8");
     assert.equal(
       preservation.split("preserves every configured SSH URL byte-for-byte").length - 1,
@@ -147,7 +155,7 @@ function validateDeliberateDrift() {
 
     const portabilityRoot = join(driftRoot, "portability", "arashi");
     cpSync(sourceSkillRoot, portabilityRoot, { recursive: true });
-    const portabilityPath = join(portabilityRoot, "references", "commands.md");
+    const portabilityPath = join(portabilityRoot, "references", "commands", "workspace.md");
     const portability = readFileSync(portabilityPath, "utf8");
     assert.equal(
       portability.split("canonical committed remote").length - 1,

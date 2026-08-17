@@ -9,12 +9,20 @@
       "install -m 755 .arashi/hooks/pre-create.sh.example .arashi/hooks/pre-create.sh",
       "Copy-Item .arashi/hooks/pre-create.ps1.example .arashi/hooks/pre-create.ps1",
       "Configured create does not discover repository-local or user-global hooks.",
+      "`<workspace>/.arashi/hooks/pre-create<ext>` and `post-create<ext>`",
+      "`<workspace>/.arashi/hooks/pre-create.<repo><ext>` and `post-create.<repo><ext>`",
+      "`<repo>/.arashi/hooks/pre-remove<ext>` and `post-remove<ext>`",
+      "`<workspace>/.arashi/hooks/pre-remove<ext>` and `post-remove<ext>`",
+      "`~/.arashi/hooks/<repo>/pre-remove<ext>` and `post-remove<ext>`",
+      "`~/.arashi/hooks/pre-remove<ext>` and `post-remove<ext>`",
       "| Workspace `pre-create` | Once per command, before branch or worktree mutation | Configured workspace root |",
       "| Repository `pre-create.<repo>` | After that child worktree is materialized, before its repository setup | New child worktree |",
       "| Repository `post-create.<repo>` | After that repository pre-create hook | New child worktree |",
       "| Workspace `post-create` | Once after coordinated Git creation, before move-changes or switch/launch handling | Configured workspace root |",
-      "repository → workspace → global-targeted → global-shared",
+      "repository \u2192 workspace \u2192 global-targeted \u2192 global-shared",
       "Workspace and shared remove hooks therefore run once per target repository",
+      "Configured remove repository, global-targeted, and global-shared hooks run from the target child source checkout",
+      "Configured remove workspace hooks run from the configured workspace root",
       "Standalone mode discovers only user-global targeted and shared hooks",
       "`~/.arashi/hooks/<main-root-basename>/<lifecycle><ext>` before `~/.arashi/hooks/<lifecycle><ext>`",
       "repository-local or workspace-root `.arashi/hooks` content is inactive without configured workspace state",
@@ -27,10 +35,16 @@
       "Inline hooks omit `ARASHI_HOOK_SOURCE_PATH`",
       "no path-like replacement is invented",
       "`ARASHI_HOOK_NAME`, `ARASHI_HOOK_SCOPE`, `ARASHI_HOOK_EXECUTION_PATH`, `ARASHI_HOOK_WORKSPACE_MODE`, and `ARASHI_MAIN_REPO_PATH`",
-      "`ARASHI_BRANCH_NAME` is the requested create branch",
-      "`ARASHI_HOOK_TARGET_REPOSITORY`, `ARASHI_HOOK_TARGET_REPO_PATH`, and `ARASHI_HOOK_TARGET_WORKTREE_PATH`",
+      "`ARASHI_BRANCH_NAME` is the requested create branch; remove sets it only for an unambiguous current target branch",
+      "Targeted create and remove invocations receive `ARASHI_HOOK_TARGET_REPOSITORY`, `ARASHI_HOOK_TARGET_REPO_PATH`, and, when unambiguous, `ARASHI_HOOK_TARGET_WORKTREE_PATH`",
       "`ARASHI_PARENT_REPO_PATH` is set only for configured repository-specific create hooks",
       "`ARASHI_REMOVE_TARGETS_JSON` is the canonical command-wide remove aggregate",
+      "`ARASHI_REMOVE_TARGETS_JSON` is a JSON array of records with `repository`, `branchName`, and `worktreePath`; absent branch/path values are JSON `null`",
+      "Canonical remove records are sorted and deduplicated; paths are absolute, lexically normalized, and use `/` separators",
+      "`ARASHI_REMOVE_TARGET_BRANCHES`, `ARASHI_REMOVE_TARGET_WORKTREES`, and `ARASHI_REMOVE_TARGET_REPOSITORIES`",
+      "`ARASHI_REMOVE_TOTAL_BRANCHES`, `ARASHI_REMOVE_TOTAL_WORKTREES`, and `ARASHI_REMOVE_TOTAL_REPOSITORIES`",
+      "lossy compatibility fields; commas in names or paths are not reversible, so new scripts must parse the canonical JSON",
+      "Historical `ARASHI_REPO_NAME`, `ARASHI_REPO_PATH`, `ARASHI_WORKTREE_PATH`, and comma-separated remove fields remain supported throughout 1.x and may be removed no earlier than 2.0 through a separately approved breaking change",
       "`ARASHI_HOOK_INPUT` is executor-owned and is always `tty`, `disabled`, or `unavailable`",
       "`--no-hook-input` disables terminal input for that invocation without skipping hooks",
       "`--no-hooks` skips execution, while create's unrelated `--interactive` option controls repository selection",
@@ -39,8 +53,8 @@
       "There is no persistent `hooks.input` configuration",
       "read -r answer",
       "$answer = Read-Host",
-      "set \"answer=\"",
-      "set /p \"answer=Continue setup? [y/N] \" || exit /b 1",
+      "choice /c yn /n /m \"Continue setup? [y/N] \" || exit /b 1",
+      "if errorlevel 2 exit /b 1",
       "Never enter secrets through lifecycle-hook prompts",
       "supported throughout 1.x but non-canonical",
       "may be removed no earlier than 2.0 through a separately approved breaking change",
@@ -55,19 +69,17 @@
       "set \"CI=true\""
     ],
     "references/tutorial.md": [
-      "install -m 755 .arashi/hooks/pre-remove.sh.example .arashi/hooks/pre-remove.sh",
-      "Activate exactly one reviewed example at a time",
-      "On Windows, copy exactly one native `.ps1`, `.cmd`, or `.bat` example",
-      "For zero-config operation, do not activate configless local `.arashi/hooks`; standalone mode uses only targeted/shared user-global hooks.",
-      "Interactive lifecycle-hook input is available only for eligible human `create` and `remove` invocations",
-      "Use `--no-hook-input` when a human invocation must execute hooks without allowing prompts"
+      "[Hooks](hooks.md)"
     ]
   },
   "forbiddenPatterns": [
     "\\bARASHI_BRANCH\\b",
     "cp \\.arashi/hooks/[^\\n]+ \\.arashi/hooks/[^\\n]+\\n(?:cp \\.arashi/hooks/)",
     "Windows lifecycle hooks require Git Bash",
-    "-NonInteractive"
+    "-NonInteractive",
+    "%answer%"
   ],
-  "unsupportedEnvironmentVariables": ["ARASHI_BASE_BRANCH"]
+  "unsupportedEnvironmentVariables": [
+    "ARASHI_BASE_BRANCH"
+  ]
 }

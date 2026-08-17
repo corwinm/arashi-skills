@@ -143,7 +143,7 @@ async function main() {
     const source = spawnSync(process.execPath, [runnerPath], { cwd: repositoryRoot, encoding: "utf8" });
     assert.equal(source.status, 0, output(source));
     const skillManifest = join(extracted, "SKILL.md");
-    writeFileSync(skillManifest, readFileSync(skillManifest, "utf8").replace("zero-config standalone", "standalone mode"));
+    writeFileSync(skillManifest, readFileSync(skillManifest, "utf8").replace("Zero-config standalone mode", "Standalone mode"));
     const drifted = spawnSync(process.execPath, [runnerPath, "--skill-root", extracted], {
       cwd: repositoryRoot,
       encoding: "utf8",

@@ -40,7 +40,7 @@ For normal dependency setup, prefer package-manager content-addressed stores plu
 
 Use lifecycle hooks when you need globs, remapping, external sources, interpolation, required entries, or conditional behavior. Do not invent unsupported materialization fields.
 
-\`arashi create --dry-run\` previews the ordered materialization plan in declaration order without mutation. \`arashi doctor\` non-mutatively diagnoses configured source availability and managed destination safety without repair or capability probes.
+\`arashi create --dry-run\` previews the ordered materialization plan in declaration order without mutation. \`arashi doctor\` non-mutatively diagnoses configured source availability and managed destination safety without repair and without capability probes.
 `;
 
 function section(content, heading) {
@@ -119,6 +119,12 @@ function contradiction(statement) {
     }
   }
 
+  if (/doctor/i.test(statement) && /capability probes?/i.test(statement)) {
+    if (hasAffirmativeAction(statement, /\b(?:perform|run|execute)s?\b[^.]{0,80}\bcapability probes?\b/gi)) {
+      return "claims doctor performs capability probes";
+    }
+  }
+
   if (/materialization|configured source/i.test(statement)) {
     if (hasAffirmativeAction(
       statement,
@@ -166,62 +172,85 @@ function requirePattern(defects, content, pattern, diagnostic) {
 
 function validateSkill(root, label) {
   const defects = [];
-  const commandsPath = join(root, "references", "commands.md");
+  const commandsPath = join(root, "references", "commands", "create.md");
   let commands;
   try {
     commands = readFileSync(commandsPath, "utf8");
   } catch (error) {
-    return [`${label}/references/commands.md could not be read (${error.code ?? error.message})`];
+    return [`${label}/references/commands/create.md could not be read (${error.code ?? error.message})`];
+  }
+
+  const routerPath = join(root, "references", "commands.md");
+  const hooksPath = join(root, "references", "hooks.md");
+  const workflowsPath = join(root, "references", "workflows.md");
+  for (const [path, relativePath] of [
+    [routerPath, "references/commands.md"],
+    [hooksPath, "references/hooks.md"],
+    [workflowsPath, "references/workflows.md"],
+  ]) {
+    try {
+      const content = readFileSync(path, "utf8");
+      if (relativePath === "references/commands.md" &&
+          (section(content, "Repository Worktree File Materialization") || /repos\.<name>\.(?:copy|symlink)/.test(content))) {
+        defects.push(`${label}/${relativePath} must route to commands/create.md instead of duplicating materialization guidance`);
+      }
+      if (relativePath !== "references/commands.md" &&
+          !/\(commands\/create\.md#repository-worktree-file-materialization\)/.test(content)) {
+        defects.push(`${label}/${relativePath} must link to the materialization section in commands/create.md`);
+      }
+    } catch (error) {
+      defects.push(`${label}/${relativePath} could not be read (${error.code ?? error.message})`);
+    }
   }
 
   const guidance = section(commands, "Repository Worktree File Materialization");
   if (!guidance) {
-    defects.push(`${label}/references/commands.md is missing the Repository Worktree File Materialization section`);
+    defects.push(`${label}/references/commands/create.md is missing the Repository Worktree File Materialization section`);
   } else {
     requirePattern(defects, guidance, /direct[^.\n]*`repos\.<name>\.copy`[^.\n]*`repos\.<name>\.symlink`[^.\n]*arrays/i,
-      `${label}/references/commands.md must teach direct repos.<name>.copy and repos.<name>.symlink arrays`);
+      `${label}/references/commands/create.md must teach direct repos.<name>.copy and repos.<name>.symlink arrays`);
     requirePattern(defects, guidance, /same relative path[^.\n]*(?:canonical )?Git primary source checkout[^.\n]*(?:new )?worktree destination/i,
-      `${label}/references/commands.md must bind same-relative-path destinations to the canonical Git-primary source checkout`);
+      `${label}/references/commands/create.md must bind same-relative-path destinations to the canonical Git-primary source checkout`);
     requirePattern(defects, guidance, /configured-only[^.\n]*(?:not available|unsupported)[^.\n]*(?:zero-config )?standalone|(?:zero-config )?standalone[^.\n]*(?:not available|unsupported)[^.\n]*configured-only/i,
-      `${label}/references/commands.md must state configured-only scope without standalone availability`);
+      `${label}/references/commands/create.md must state configured-only scope without standalone availability`);
     requirePattern(defects, guidance, /repository pre-create[\s\S]{0,180}copy entr(?:y|ies)[\s\S]{0,180}symlink entr(?:y|ies)[\s\S]{0,180}repository post-create/i,
-      `${label}/references/commands.md must bind repository pre-create -> copy -> symlink -> repository post-create order`);
+      `${label}/references/commands/create.md must bind repository pre-create -> copy -> symlink -> repository post-create order`);
     requirePattern(defects, guidance, /`--no-hooks`[^.\n]*(?:does not|never)[^.\n]*disable[^.\n]*materialization/i,
-      `${label}/references/commands.md must keep materialization independent of --no-hooks`);
+      `${label}/references/commands/create.md must keep materialization independent of --no-hooks`);
     requirePattern(defects, guidance, /missing source[^.\n]*(?:skipped|skip)[^.\n]*visib/i,
-      `${label}/references/commands.md must make missing-source skips visible`);
+      `${label}/references/commands/create.md must make missing-source skips visible`);
     requirePattern(defects, guidance, /destinations?[^.\n]*never[^.\n]*overwrite[^.\n]*(?:existing|pre-existing)/i,
-      `${label}/references/commands.md must prohibit destination overwrite`);
+      `${label}/references/commands/create.md must prohibit destination overwrite`);
     requirePattern(defects, guidance, /destinations?[^.\n]*never[^.\n]*escape[^.\n]*(?:worktree|root)/i,
-      `${label}/references/commands.md must prohibit destination escape`);
+      `${label}/references/commands/create.md must prohibit destination escape`);
     requirePattern(defects, guidance, /symlink[^.\n]*native symbolic link[^.\n]*exact canonical source target/i,
-      `${label}/references/commands.md must explain native exact-target symlink behavior`);
+      `${label}/references/commands/create.md must explain native exact-target symlink behavior`);
     requirePattern(defects, guidance, /(?:platform|policy)[^.\n]*capability fail(?:ure|ures)[^.\n]*actionable/i,
-      `${label}/references/commands.md must explain actionable platform capability failures`);
+      `${label}/references/commands/create.md must explain actionable platform capability failures`);
     requirePattern(defects, guidance, /never[^.\n]*fall back[^.\n]*copy[^.\n]*hard link[^.\n]*junction/i,
-      `${label}/references/commands.md must prohibit copy, hard-link, and junction fallback`);
+      `${label}/references/commands/create.md must prohibit copy, hard-link, and junction fallback`);
     requirePattern(defects, guidance, /use `copy`[^.\n]*`\.env`[^.\n]*local configuration[^.\n]*independently mutable/i,
-      `${label}/references/commands.md must recommend copy for independently mutable .env/local configuration`);
+      `${label}/references/commands/create.md must recommend copy for independently mutable .env/local configuration`);
     requirePattern(defects, guidance, /same-path case[^.\n]*(?:does not|need not)[^.\n]*(?:require|use)[^.\n]*(?:shell )?hook/i,
-      `${label}/references/commands.md must state that supported same-path copies do not require hooks`);
+      `${label}/references/commands/create.md must state that supported same-path copies do not require hooks`);
     requirePattern(defects, guidance, /use `symlink`[^.\n]*intentionally shared state[^.\n]*mutation[^.\n]*shared[^.\n]*canonical checkout/i,
-      `${label}/references/commands.md must reserve symlink for intentionally shared mutable state`);
+      `${label}/references/commands/create.md must reserve symlink for intentionally shared mutable state`);
     requirePattern(defects, guidance, /package-manager content-addressed stores?[^.\n]*per-worktree installs?/i,
-      `${label}/references/commands.md must prefer package-manager stores and per-worktree installs`);
+      `${label}/references/commands/create.md must prefer package-manager stores and per-worktree installs`);
     requirePattern(defects, guidance, /symlinked `node_modules`[^.\n]*shared dependency trees?[^.\n]*advanced[^.\n]*risky/i,
-      `${label}/references/commands.md must label shared dependency trees advanced and risky`);
+      `${label}/references/commands/create.md must label shared dependency trees advanced and risky`);
     for (const risk of ["branches", "lockfiles", "runtimes", "native modules", "install scripts"]) {
       requirePattern(defects, guidance, new RegExp(`\\b${risk.replace(" ", "\\s+")}\\b`, "i"),
-        `${label}/references/commands.md must name shared-dependency risk: ${risk}`);
+        `${label}/references/commands/create.md must name shared-dependency risk: ${risk}`);
     }
     requirePattern(defects, guidance, /lifecycle hooks?[^.\n]*(?:globs|remapping)[^.\n]*external sources[^.\n]*interpolation[^.\n]*required entries[^.\n]*conditional behavior/i,
-      `${label}/references/commands.md must route unsupported mapping and conditional behavior to lifecycle hooks`);
+      `${label}/references/commands/create.md must route unsupported mapping and conditional behavior to lifecycle hooks`);
     requirePattern(defects, guidance, /do not invent[^.\n]*unsupported materialization fields/i,
-      `${label}/references/commands.md must prohibit invented materialization fields`);
+      `${label}/references/commands/create.md must prohibit invented materialization fields`);
     requirePattern(defects, guidance, /create --dry-run[^.\n]*(?:preview|plan)[^.\n]*(?:ordered|declaration order)[^.\n]*(?:without mutation|non-mutating)/i,
-      `${label}/references/commands.md must teach ordered non-mutating materialization dry-run preview`);
-    requirePattern(defects, guidance, /doctor[^.\n]*(?:non-mutatively|non-mutating)[^.\n]*(?:diagnos|inspect)[^.\n]*(?:without repair|without mutation)/i,
-      `${label}/references/commands.md must teach non-mutating materialization doctor diagnostics`);
+      `${label}/references/commands/create.md must teach ordered non-mutating materialization dry-run preview`);
+    requirePattern(defects, guidance, /doctor[^.\n]*(?:non-mutatively|non-mutating)[^.\n]*(?:diagnos|inspect)[^.\n]*(?:without repair|without mutation)[^.\n]*without capability probes/i,
+      `${label}/references/commands/create.md must teach non-mutating materialization doctor diagnostics without capability probes`);
   }
 
   try {
@@ -239,9 +268,12 @@ function validateSkill(root, label) {
 }
 
 function writeCompleteFixture(root) {
-  mkdirSync(join(root, "references"), { recursive: true });
+  mkdirSync(join(root, "references", "commands"), { recursive: true });
   writeFileSync(join(root, "SKILL.md"), "# Fixture router\n");
-  writeFileSync(join(root, "references", "commands.md"), validGuidance);
+  writeFileSync(join(root, "references", "commands.md"), "# Command Reference\n\n[Create](commands/create.md)\n");
+  writeFileSync(join(root, "references", "commands", "create.md"), validGuidance);
+  writeFileSync(join(root, "references", "hooks.md"), "[Materialization](commands/create.md#repository-worktree-file-materialization)\n");
+  writeFileSync(join(root, "references", "workflows.md"), "[Materialization](commands/create.md#repository-worktree-file-materialization)\n");
 }
 
 function requireValid(root, label) {
@@ -301,6 +333,12 @@ function validateControlledFixtures() {
       to: "Add custom materialization fields for globs and remapping",
       diagnostic: "route unsupported mapping and conditional behavior to lifecycle hooks",
     },
+    {
+      name: "doctor-capability-probes",
+      from: "without repair and without capability probes",
+      to: "without repair and performs capability probes",
+      diagnostic: "without capability probes",
+    },
   ];
 
   try {
@@ -336,7 +374,7 @@ function validateControlledFixtures() {
         roots.push(fixture);
         const skillRoot = mode === "authored-source" ? fixture : join(fixture, "skills", "arashi");
         writeCompleteFixture(skillRoot);
-        const commandsPath = join(skillRoot, "references", "commands.md");
+        const commandsPath = join(skillRoot, "references", "commands", "create.md");
         const original = readFileSync(commandsPath, "utf8");
         assert.ok(original.includes(drift.from), `${drift.name} fixture mutation source is stale`);
         writeFileSync(commandsPath, original.replace(drift.from, drift.to));
@@ -344,6 +382,35 @@ function validateControlledFixtures() {
         if (!defects.some((defect) => defect.includes(drift.diagnostic))) {
           falseAccepts.push(`${mode}:${drift.name} expected ${drift.diagnostic}; got ${defects.join(" | ") || "no defects"}`);
         }
+      }
+
+      for (const structuralDrift of [
+        {
+          name: "monolithic-duplication",
+          path: join("references", "commands.md"),
+          mutate: (content) => `${content}\n${validGuidance.replace("## Repository Worktree File Materialization", "## Declarative setup")}`,
+          diagnostic: "instead of duplicating materialization guidance",
+        },
+        {
+          name: "hooks-link",
+          path: join("references", "hooks.md"),
+          mutate: (content) => content.replace("commands/create.md", "commands.md"),
+          diagnostic: "hooks.md must link",
+        },
+        {
+          name: "workflows-link",
+          path: join("references", "workflows.md"),
+          mutate: (content) => content.replace("commands/create.md", "commands.md"),
+          diagnostic: "workflows.md must link",
+        },
+      ]) {
+        const fixture = mkdtempSync(join(tmpdir(), `arashi-materialization-${mode}-${structuralDrift.name}-`));
+        roots.push(fixture);
+        const skillRoot = mode === "authored-source" ? fixture : join(fixture, "skills", "arashi");
+        writeCompleteFixture(skillRoot);
+        const path = join(skillRoot, structuralDrift.path);
+        writeFileSync(path, structuralDrift.mutate(readFileSync(path, "utf8")));
+        requireRejection(skillRoot, `${mode}-${structuralDrift.name}`, structuralDrift.diagnostic);
       }
 
       for (const contradictionCase of [
@@ -391,6 +458,11 @@ function validateControlledFixtures() {
           name: "contrast-escape",
           claim: "A materialization destination cannot preserve metadata but escapes the worktree.",
           diagnostic: "destination may escape the worktree",
+        },
+        {
+          name: "doctor-capability-probes-contradiction",
+          claim: "Arashi doctor performs capability probes.",
+          diagnostic: "doctor performs capability probes",
         },
         {
           name: "source-ownership-contradiction",

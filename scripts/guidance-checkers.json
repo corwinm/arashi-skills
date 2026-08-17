@@ -5,6 +5,7 @@
   "scripts/create-launch-guidance-selftest.mjs",
   "scripts/executable-alias-guidance-selftest.mjs",
   "scripts/inline-lifecycle-hook-guidance-selftest.mjs",
+  "scripts/installed-content-guidance-selftest.mjs",
   "scripts/kitty-session-guidance-selftest.mjs",
   "scripts/lifecycle-hook-guidance-selftest.mjs",
   "scripts/materialization-guidance-selftest.mjs",

@@ -28,68 +28,49 @@ status: draft
 
 # Arashi Skill
 
-Guidance for coordinating feature branches and worktrees across configured meta-repositories with the `arashi` CLI, while allowing ad hoc use in projects that have not adopted Arashi.
+Coordinate Git worktrees across configured Arashi workspaces, or use Arashi ad hoc in an unconfigured non-bare Git project.
 
-## Common Requests
+## Start
 
-Users may ask for help with:
+1. Assume the CLI is installed unless installation was requested or `arashi --version` fails.
+2. Use installed `arashi --help` and `arashi <command> --help` as parameter authority.
+3. Choose one mode using the section below, and initialize it when the workspace is fresh.
+4. After the chosen workspace is initialized or otherwise discoverable, diagnose health with `arashi doctor --json` before lower-level recovery.
+5. Load only the reference for the task.
 
-- installing, verifying, or troubleshooting the Arashi CLI
-- initializing, inspecting, or diagnosing Arashi workspace health
-- cloning repositories, creating branches, switching worktrees, pulling, syncing, or removing worktrees
-- repeated multi-repo inspection or validation with `arashi exec`
-- shell integration, editor launch behavior, tmux/sesh shortcuts, or remove lifecycle hooks
-- agent workflows for Arashi-managed meta-repositories
+## Choose a mode
 
-## Start Here
+- **Configured mode**: Prefer configured mode; use ordinary `arashi init` for persisted defaults, custom paths, repository groups, workspace or repository hooks, child repositories, or coordinated commands. This is also the preferred mode for a single repository that needs those features.
+- **Zero-config standalone mode**: use `arashi init --zero-config` only for ad hoc work in an unconfigured non-bare Git project. It does not create or persist `.arashi` configuration. Passive discovery does not repair ignore coverage, and bootstrap must not edit tracked `.gitignore` or global Git configuration automatically.
 
-Assume Arashi is already installed unless the user is installing it or a command is not working as expected.
+## Universal operating rules
 
-1. Choose the relevant guide: [Workflows](references/workflows.md), [Commands](references/commands.md), or [Session Shortcuts](references/session-shortcuts.md)
-2. For command parameters, inspect current help output when needed: `arashi <command> --help`
-3. For CLI setup or command failures, use [Prerequisites](references/prerequisites.md) and [Troubleshooting](references/troubleshooting.md)
+- Filter before broad mutation. For mutating, expensive, network-heavy, or long-running multi-repository commands, use `--group` or `--only` unless the user explicitly requested every managed repository.
+- Preserve existing Git state. Preview broad removal with `arashi remove --dry-run`; do not delete worktrees, branches, or uncommitted changes without explicit scope.
+- Never create or modify global Git ignore configuration for Arashi. In configured workspaces, choose repository-local, tracked, or no-write ignore policy deliberately; bare repositories report administrative paths without editing ignore files.
+- Use `--json` for parsed non-interactive output. Treat `JSON_UNSUPPORTED_FOR_MODE` as a structured refusal for interactive, shell-code, or launch behavior.
+- Treat launcher and hook failures as real failures. Do not synthesize terminal/session identifiers, bypass user security policy, interpolate user paths into shell source, or silently fall back to a different launcher.
+- Prefer linked references over repeating command-specific rules here.
 
-## Operating Rules
+## Task routing
 
-- Check the docs site for the latest install instructions: https://arashi.haphazard.dev.
-- For compact agent context, prefer the curated LLM entrypoint: https://arashi.haphazard.dev/llms.txt.
-- For broad Markdown context, use the full export: https://arashi.haphazard.dev/llms-full.txt.
-- Use `arashi --help` and `arashi <command> --help` when current command parameters are needed.
-- Prefer `arashi doctor --json` for structured workspace health diagnostics before lower-level `status`, `prune`, or `clone` troubleshooting.
-- Prefer configured mode whenever a project can adopt Arashi, including single-repository projects that need repository/workspace hooks, persisted defaults, or custom paths.
-- Choose ordinary `arashi init` for child repositories, groups, local/workspace hooks, persisted defaults, custom managed paths, or coordinated commands; follow the configured guidance in [Commands](references/commands.md).
-- Use zero-config standalone mode for ad hoc work in a non-bare Git project that has not adopted Arashi configuration; follow the [Standalone Repository Workflow](references/workflows.md). Passive discovery does not repair ignore coverage, and bootstrap must not automatically edit tracked `.gitignore` or global Git configuration.
-- In non-bare configured workspaces, expect `init`, `pull`, `clone`, `add`, and `create` to reconcile safe repository and worktree directory ignore rules through Git. The default scope is repository-local; preserve any existing effective tracked, local, or global rule.
-- In bare configured repositories, expect non-worktree managed-path reporting: Arashi classifies administrative paths and the external parent default, but does not inspect or write ignore files for `local`, `tracked`, or `none`.
-- Use `arashi init --ignore-scope tracked` only when an intentional team-visible `.gitignore` rule is applicable in a non-bare workspace, or `--ignore-scope none` for explicit non-mutation. Never create or modify global Git ignore configuration for Arashi.
-- Prefer `--json` for parsed command output, and handle `JSON_UNSUPPORTED_FOR_MODE` as a structured refusal for launch, shell-code, or interactive modes.
-- Use `arashi exec` for repeated non-interactive multi-repo inspection or validation; prefer `--group <group>` for known semantic sets and use explicit `--only` filters for one-off repository lists.
-- For mutating, expensive, network-heavy, or long-running multi-repo commands, apply an explicit `--group` or `--only` filter unless the user asked for every managed repository.
-- Prefer linked references over duplicating detailed workflow instructions here.
-- Use the [Hooks](references/hooks.md) reference for remove lifecycle hook guidance.
+- **Install, update, or shell completion**: [Setup commands](references/commands/setup.md) and [Prerequisites](references/prerequisites.md)
+- **Initialize, add, clone, or repair managed paths**: [Workspace commands](references/commands/workspace.md)
+- **Run across repositories, parse JSON, hand off, or push**: [Automation commands](references/commands/automation.md)
+- **Create coordinated worktrees or move changes**: [Create commands](references/commands/create.md)
+- **Switch, launch, or select a session context**: [Switch and launch](references/commands/switch-and-launch.md) and [Session shortcuts](references/session-shortcuts.md)
+- **Remove or prune**: [Remove and maintenance](references/commands/remove-and-maintenance.md) and [Hooks](references/hooks.md)
+- **Choose an end-to-end goal**: [Workflows](references/workflows.md) or the [Tutorial](references/tutorial.md)
+- **Diagnose a failure or operational security boundary**: [Troubleshooting](references/troubleshooting.md) and [Prerequisites](references/prerequisites.md)
 
 ## References
 
-- [Prerequisites](references/prerequisites.md)
-- [Commands](references/commands.md)
+- [Command family index](references/commands.md)
 - [Workflows](references/workflows.md)
 - [Hooks](references/hooks.md)
-- [Session Shortcuts](references/session-shortcuts.md)
+- [Session shortcuts](references/session-shortcuts.md)
 - [Tutorial](references/tutorial.md)
 - [Troubleshooting](references/troubleshooting.md)
-- [Publication Policy](references/publication.md)
-- [Cheat Sheet](assets/cheatsheet.md)
+- [Cheat sheet](assets/cheatsheet.md)
 
-## Canonical Docs
-
-- Arashi docs: https://arashi.haphazard.dev
-- LLM entrypoint: https://arashi.haphazard.dev/llms.txt
-- Full Markdown export: https://arashi.haphazard.dev/llms-full.txt
-- Workflow guides: https://arashi.haphazard.dev/workflows/
-- Hooks guide: https://arashi.haphazard.dev/workflows/hooks/
-- Config guide: https://arashi.haphazard.dev/workflows/config/
-- VS Code guide: https://arashi.haphazard.dev/workflows/vscode/
-- tmux and sesh guide: https://arashi.haphazard.dev/workflows/tmux-and-sesh/
-- Agents guide: https://arashi.haphazard.dev/workflows/agents-and-specs/
-- Agents guide Markdown: https://arashi.haphazard.dev/workflows/agents-and-specs.md
-- Standalone workflow: https://arashi.haphazard.dev/workflows/standalone/
+Current installation and product documentation: https://arashi.haphazard.dev. Compact upstream context: https://arashi.haphazard.dev/llms.txt.

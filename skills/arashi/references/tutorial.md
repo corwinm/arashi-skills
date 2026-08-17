@@ -1,166 +1,79 @@
 # End-to-End Tutorial
 
-Follow this tutorial to go from zero setup to one successful Arashi workflow.
+Complete one configured Arashi workflow, verify it, then load optional guidance only if the task needs it.
 
-## Step 1: Preflight
+## Choose a mode
 
-```bash
-git --version
-git ls-remote https://github.com/corwinm/arashi.git
-```
+Use **configured mode** for persisted defaults, custom paths, child repositories, groups, hooks, or coordinated commands. This tutorial follows that path.
 
-Success criteria:
+Use **zero-config standalone mode** only for ad hoc work in an unconfigured non-bare Git project. Preview with `arashi init --zero-config --dry-run`, then follow [Workspace and repositories](commands/workspace.md). Standalone mode does not create `.arashi` configuration and supports a smaller command surface.
 
-- commands return exit code `0`
-- network check returns remote refs
+## Preflight
 
-## Step 2: Install Arashi CLI
-
-Use the website install guide and follow the instructions for your platform:
-
-- https://arashi.haphazard.dev
-
-`aw` is the supported **Arashi Workspace** executable shorthand. Supported npm and direct installations provide equivalent `arashi` and `aw` executable names, but `arashi` remains the canonical product and command vocabulary. The shorthand is a distribution-level entrypoint, not a Commander command alias or a second command vocabulary. Keep workflow examples and command discovery canonical: use `arashi --version`, `arashi --help`, and `arashi <command> --help`. Follow the canonical website guide for installation-channel details about collision handling, shell integration, completion, updates, and manual installation.
-
-If you use the official curl installer, it can offer shell integration during install so `arashi switch --cd` works without an extra setup step. For unattended installs, use `ARASHI_SHELL_INTEGRATION=yes` or `ARASHI_SHELL_INTEGRATION=no`.
-
-## Step 3: Verify CLI
+Assume the CLI is installed. Verify only if the command is unavailable or installation was requested:
 
 ```bash
 arashi --version
 arashi --help
 ```
 
-Success criteria:
+If verification fails, use [Prerequisites](prerequisites.md) and the current installation instructions at https://arashi.haphazard.dev. Node.js and network access are conditional on the chosen installation/update path; they are not requirements for every local invocation.
 
-- all commands exit `0`
-- if `arashi --version` exits immediately or returns `137`, stop and reinstall using a pinned version from the website guide
-- help output lists commands
-
-### Optional shell wrapper and completion activation
-
-Enable the wrapper and completion independently when configuring a shell manually. The wrapper enables parent-shell behavior such as `switch --cd`; completion supplies command, option, and safe local-value suggestions.
-
-For Bash:
+From the intended configured workspace root, initialize before diagnostics only when `.arashi/config.json` is absent:
 
 ```bash
-eval "$(command arashi shell init bash)"
-source <(command arashi completion bash)
-```
-
-For Zsh:
-
-```zsh
-eval "$(command arashi shell init zsh)"
-source <(command arashi completion zsh)
-```
-
-For Fish:
-
-```fish
-command arashi shell init fish | source
-command arashi completion fish | source
-```
-
-Keep only the line for the feature you want when enabling one without the other. `arashi shell install` writes and idempotently upgrades both activation lines in its managed block; use it instead of maintaining the manual lines when you want Arashi to own the complete shell setup.
-
-## Step 4: Run First Workflow
-
-Choose where you want the workspace repository to live before running `arashi init`:
-
-- Existing repository flow: `cd` into the repository root and run `arashi init` there.
-- New repository flow: `cd` into a parent directory, run `arashi init`, then enter `.` or a child name when prompted.
-
-Bootstrap the current directory:
-
-```bash
-mkdir my-arashi-workspace
-cd my-arashi-workspace
+# run only when configuration is absent
 arashi init
-# prompt: Repository target ('.' for current directory or a child directory name) -> .
+
+# diagnose the initialized workspace before mutation
+arashi doctor --json
+```
+
+Resolve reported configuration or Git-state failures before continuing.
+
+## Configured happy path
+
+Continue from the initialized workspace root:
+
+```bash
+# inspect before broad work
+arashi status
+
+# create one coordinated target without user-facing launch
+arashi create feature/skill-integration --no-launch --no-switch
+
+# verify selected worktrees
 arashi status
 ```
 
-Bootstrap a child directory from a parent folder:
+If the workspace contains many repositories, apply the same `--group` or `--only` selector during inspection, creation, and validation. Do not let a final mutating command widen beyond the set that was reviewed.
 
-```bash
-mkdir scratch
-cd scratch
-arashi init
-# prompt: Repository target ('.' for current directory or a child directory name) -> my-arashi-repo
-cd my-arashi-repo
-arashi status
-```
+Use the paths reported by `arashi status` to enter the created worktrees and run each project's existing validation there. Use `arashi exec` only when child repositories are already configured, and reuse the same real `--group` or `--only` selector that was inspected earlier; do not invent an example repository name.
 
-If you already have a repository, the shorter flow still works:
+Exact init/create semantics are in [Workspace and repositories](commands/workspace.md) and [Create worktrees](commands/create.md). Installed `arashi <command> --help` is the option authority.
 
-```bash
-arashi init
-arashi status
-```
+## Verify the result
 
-Success criteria:
+The tutorial succeeds when:
 
-- `.arashi/config.json` exists after `arashi init`
-- `.arashi/config.json` includes the selected `worktreesDir`: non-bare repositories default to `.arashi/worktrees`, while canonical bare repositories default to `..` when `--worktrees-dir` is omitted
-- An explicit `--worktrees-dir` overrides either default; after init, the persisted value remains authoritative for later commands instead of being inferred again from repository type
-- the repository target prompt accepts `.` for the current directory and a simple child name for child-directory bootstrap
-- in non-bare repositories, safe configured repository and worktree directories are effectively ignored; missing rules default to the repository-local exclude file rather than tracked `.gitignore`
-- existing effective tracked, repository-local, or global rules are honored without duplication, and Arashi never writes global Git configuration
-- bare init reports its parent worktree base as external/unsafe and bare-root administrative subdirectories as non-applicable to working-tree ignore rules; it does not inspect or write worktree ignore files
-- `arashi status` prints repository/worktree status without errors
+- each selected repository has the expected created or explicitly reused worktree;
+- unselected repositories were untouched;
+- original uncommitted changes remain where they started unless `arashi move` was deliberately used;
+- `arashi status` reports the intended branch/worktree state; and
+- the relevant repository validation exits successfully.
 
-## Step 5: Optional Session Shortcut Flow
+If creation partially succeeded but launch failed, preserve the created worktrees and diagnose the requested launcher rather than retrying with an unrelated fallback.
 
-```bash
-arashi switch
-arashi switch --repos docs
-arashi switch --cursor feature-auth
-arashi switch --tmux feature-auth
-arashi switch --sesh
-arashi switch --launch feature-auth
-arashi switch --ignore-configured-launcher feature-auth
-arashi switch --launch --ignore-configured-launcher feature-auth
-```
+## Optional next steps
 
-Use `--sesh` only when running inside tmux with `sesh` installed.
-Use `--tmux` inside an active tmux client or session for deterministic plain tmux launch. It is a per-invocation override in configured and zero-config standalone repositories; for example, `arashi create feature-auth --tmux` creates and then launches the primary worktree.
-Use `--vscode`, `--cursor`, or `--kiro` when you want a one-off IDE launch without changing workspace defaults.
-Use `--launch` to force launch behavior for one invocation; configured `sesh` or `herdr` remains selected. Use `--ignore-configured-launcher` alone to bypass a configured named launcher without independently changing `auto`, `cd`, or `launch` behavior. Combine them for normal automatic launcher resolution.
+Load only the reference needed:
 
-## Step 6: Optional Lifecycle Hook Setup
+- Shell wrapper or completion: [Setup, update, and completion](commands/setup.md)
+- Coordinated pull, push, groups, JSON, or handoff: [Automation and coordinated execution](commands/automation.md)
+- Interactive selection, tmux, sesh, Herdr, Kitty, editor, or tab launch: [Switch and launch](commands/switch-and-launch.md)
+- Navigation composition: [Session shortcuts](session-shortcuts.md)
+- Lifecycle policy: [Hooks](hooks.md)
+- Removal or stale metadata: [Remove and maintenance](commands/remove-and-maintenance.md)
+- Symptoms and recovery: [Troubleshooting](troubleshooting.md)
 
-Examples generated by `arashi init` are inactive. Activate exactly one reviewed example at a time and establish executable mode on POSIX:
-
-```bash
-# Activate one workspace-root remove hook; do not bulk-copy examples.
-install -m 755 .arashi/hooks/pre-remove.sh.example .arashi/hooks/pre-remove.sh
-```
-
-On Windows, copy exactly one native `.ps1`, `.cmd`, or `.bat` example for the logical lifecycle. Never activate multiple supported extensions at one location; Arashi rejects that ambiguity before mutation.
-
-Use [Lifecycle Hooks](hooks.md) for the configured create timing matrix, configured per-target remove scopes, authoritative environment fields, timeout/failure boundaries, and pinned package-manager examples. Treat every hook as trusted executable code and review its provenance before activation.
-
-Interactive lifecycle-hook input is available only for eligible human `create` and `remove` invocations whose stdin is a terminal. Use `--no-hook-input` when a human invocation must execute hooks without allowing prompts; JSON and non-TTY automation also receive immediate EOF. Hooks can inspect `ARASHI_HOOK_INPUT`, and the detailed guide includes safe native Bash, PowerShell, and cmd patterns. Do not enter secrets into hook prompts.
-
-For zero-config operation, do not activate configless local `.arashi/hooks`; standalone mode uses only targeted/shared user-global hooks. Prefer ordinary `arashi init` if repository-local or workspace-root policy is required.
-
-## Step 7: Simulate and Recover
-
-If `arashi` is not on `PATH`, run:
-
-```bash
-arashi --version
-```
-
-Expected failure: `command not found`.
-
-Recovery path:
-
-1. reinstall Arashi using the website instructions (`https://arashi.haphazard.dev`)
-2. for npm installs, run `arashi install` to preinstall the platform binary
-3. open a new shell
-4. ensure the installed binary location is on `PATH`
-5. rerun `arashi --version`
-
-Tutorial is complete when one workflow succeeds end-to-end and failure recovery works.
+Optional setup is not part of the successful configured journey. Review launcher, shell, and hook security boundaries before enabling those integrations.

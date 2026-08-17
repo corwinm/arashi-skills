@@ -1,103 +1,78 @@
-# Session Shortcuts (fzf, tmux, sesh, Herdr)
+# Session Shortcuts
 
-Use these optional shortcuts to move quickly between Arashi worktrees.
+Compose navigation around Arashi; do not duplicate command semantics here. See [Switch and launch](commands/switch-and-launch.md) for precedence, launch capability, JSON refusal, and failure behavior.
 
 ## Prerequisites
 
-- `arashi` installed and on `PATH`
-- `fzf` installed for interactive selection
-- an active tmux client or session (`TMUX` is non-empty after trimming) for plain `--tmux` launch
-- `sesh` installed for tmux session management (optional)
-- Herdr installed with the verified v0.7.4 command contract and its default session/server reachable (optional)
+Shortcuts are optional:
 
-## Safe Worktree Selection
+- `fzf` for fuzzy selection
+- tmux for `--tmux` or sesh-managed tmux navigation
+- `sesh` for `--sesh`
+- the selected editor, Herdr, or other launcher only when explicitly requested
 
-List available paths and select one explicitly:
+Verify the integration you intend to use rather than requiring every optional tool.
+
+## Safe selection
+
+Inspect before opening a target:
 
 ```bash
 arashi list
-cd -- "<selected-worktree-path>"
+arashi status
 ```
 
-If you want an `fzf` helper, keep selection and execution as separate steps:
+When duplicate branch names exist, prefer an exact path. Do not build a shortcut that converts untrusted labels or paths into shell source.
+
+## Arashi-managed launch
+
+Use one explicit mode per shortcut:
 
 ```bash
-arashi list | fzf > /tmp/arashi-selected-worktree
-read -r selected_worktree < /tmp/arashi-selected-worktree
-cd -- "$selected_worktree"
-```
+# canonical automatic selection
+arashi switch feature-auth
 
-This avoids inline command substitution and keeps quoting explicit.
-
-## Switch with Arashi
-
-Use `arashi shell --help` and `arashi switch --help` to confirm current shell and switch options. Common examples include:
-
-```bash
-arashi shell install
-arashi switch
-arashi switch --cd feature-auth
-arashi switch --repos docs
-arashi switch --all
-arashi switch --cursor feature-auth
-arashi switch --tmux feature-auth
-arashi switch --herdr feature-auth
-arashi switch --tab feature-auth
+# force automatic launch while preserving a configured explicit launcher
 arashi switch --launch feature-auth
+
+# bypass configured sesh/Herdr without independently forcing launch
 arashi switch --ignore-configured-launcher feature-auth
+
+# force generic automatic launch
 arashi switch --launch --ignore-configured-launcher feature-auth
 ```
 
-## Connect with sesh
+The detailed resolver and no-fallback policy live in [Switch and launch](commands/switch-and-launch.md).
+
+## tmux and sesh
 
 ```bash
+# explicit plain tmux for one switch
+arashi switch --tmux feature-auth
+
+# create and launch the primary target in tmux
+arashi create feature-auth --tmux
+
+# use sesh inside tmux
 arashi switch --sesh
 ```
 
-## Open a Plain tmux Window
+`--tmux` is per-invocation. It requires an active tmux client or session: `TMUX` must be non-empty after trimming. Missing context or process failure does not fall back to another launcher. Use `--sesh` only when sesh is installed and the invocation is eligible.
+
+## Fuzzy picker composition
+
+Keep the picker and execution separate so the selected path remains data:
 
 ```bash
-arashi switch --tmux feature-auth
-arashi create feature-auth --tmux
+# Step 1: select and review the printed path; do not execute it as shell text.
+arashi list | fzf
+
+# Step 2: copy the reviewed exact path into a separate quoted command.
+arashi switch --path "/exact/reviewed/worktree/path"
 ```
 
-Use `--tmux` for deterministic plain tmux launch in an active tmux context; use `--sesh` when you want sesh session management. Explicit tmux does not fall back to sesh, Herdr, an IDE, or another terminal when its prerequisite or launch fails.
+Default `arashi list` output is the pipe-friendly path surface, so this composition requires only the conditional `fzf` integration. Keep selection and execution separate, quote the reviewed path, and never evaluate it as shell code.
 
-## Open or Reuse a Herdr Workspace
+## Completion criteria
 
-```bash
-arashi switch --herdr feature-auth
-arashi create feature-auth --herdr
-```
-
-`--herdr` explicitly selects Herdr even outside a Herdr-managed pane. Automatic contextual resolution follows tmux → Herdr → cmux → integrated IDE → Kitty → parent-shell `cd` → terminal/platform fallback. Herdr is selected automatically only when trimmed `HERDR_ENV` is exactly `1` and tmux is not active. Herdr opens the existing Arashi-created worktree with the label `<repo-name>: <branch-name>` and focuses the same workspace when it is already open.
-
-## Request a Tab for One Launch
-
-```bash
-arashi switch --tab feature-auth
-arashi create feature-auth --tab
-```
-
-The default remains a new window or independent managed session. `--tab` is one-shot and follows the innermost managed context: Ghostty in tmux opens a tmux window, Ghostty in Herdr opens a Herdr tab, and cmux opens a cmux workspace (its vertical-tab equivalent). Bare macOS Ghostty 1.3+ opens a Ghostty tab. Unsupported contexts fail without retrying a window.
-
-## Optional Keybinds
-
-If you create shell keybinds, prefer wrappers that validate selected paths before changing directories.
-Avoid command-substitution keybinds that execute unsanitized output directly.
-
-## Expected Outcomes
-
-- selection flow changes shell to the selected worktree path.
-- `arashi switch` opens a terminal context for a selected worktree.
-- `arashi switch --cd` changes the current shell directory when shell integration is active.
-- `arashi switch --vscode|--cursor|--kiro` forces that IDE for one switch invocation.
-- `arashi switch --sesh` creates or switches via sesh in tmux.
-- `arashi switch --tmux <target>` opens the selected configured or standalone worktree in a new plain tmux window.
-- `arashi create <branch> --tmux` creates worktrees and then opens the primary worktree in a new plain tmux window.
-- `arashi switch --herdr` opens or focuses the selected existing worktree in Herdr.
-- `arashi create <branch> --herdr` creates worktrees first, then opens the primary worktree in Herdr.
-- if shell integration is inactive, explicit `arashi switch --cd` warns without launching another context; configured `mode: "cd"` warns and falls back to automatic launch.
-- `arashi switch --launch` forces launch for one run and preserves a configured explicit `sesh` or `herdr` launcher.
-- `arashi switch --ignore-configured-launcher` bypasses a configured explicit `sesh` or `herdr` launcher for one run, but does not independently force or prevent parent-shell `cd` for configured or contextual `auto`, `cd`, or `launch` behavior.
-- `arashi switch --launch --ignore-configured-launcher` requests generic automatic launch; an explicit launcher or `--tab` remains authoritative.
+A shortcut succeeds when it selects the intended exact worktree, invokes one documented Arashi mode, and either opens/focuses that target or returns an actionable failure without trying another launcher. It must not mutate Git state, rewrite user launcher configuration, or persist one-shot launch flags.
