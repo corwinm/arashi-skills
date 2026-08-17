@@ -108,6 +108,11 @@ function validateSkill(root, label, { requireRepositoryPolicy = false } = {}) {
   if (startMode < 0 || startDoctor < 0 || startMode > startDoctor) {
     problems.push("SKILL.md must choose and initialize a mode before workspace diagnostics");
   }
+  const routerMode = router.indexOf("select and initialize the intended mode");
+  const routerDoctor = router.indexOf("arashi doctor --json");
+  if (routerMode < 0 || routerDoctor < 0 || routerMode > routerDoctor) {
+    problems.push("references/commands.md must select and initialize a mode before workspace diagnostics");
+  }
   if (!workflows.includes("When configured child repositories exist") || !workflows.includes("paths reported by `arashi status`")) {
     problems.push("references/workflows.md must keep parent-only validation local and make exec conditional on configured children");
   }
@@ -222,7 +227,8 @@ function writeFixture(root) {
     ],
     [
       "references/commands.md",
-      [...commandRoutes.entries()]
+      "select and initialize the intended mode before arashi doctor --json\n" +
+        [...commandRoutes.entries()]
         .map(([path, title]) => `- [${title}](${path.replace(/^references\//, "")})`)
         .join("\n"),
     ],

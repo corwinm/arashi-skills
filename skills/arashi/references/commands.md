@@ -20,8 +20,8 @@ Choose only the command family needed for the task. The installed `arashi --help
 
 ## Safe defaults
 
-- Diagnose first with `arashi doctor --json`; use `arashi status` when human-readable state is enough.
-- Prefer configured mode for persisted defaults, groups, hooks, custom paths, or coordinated repositories. Use zero-config standalone mode only for ad hoc work in an unconfigured non-bare Git project.
+- Prefer configured mode for persisted defaults, groups, hooks, custom paths, or coordinated repositories. Use zero-config standalone mode only for ad hoc work in an unconfigured non-bare Git project; select and initialize the intended mode before workspace diagnostics when the workspace is fresh.
+- Once the workspace is initialized or otherwise discoverable, diagnose first with `arashi doctor --json`; use `arashi status` when human-readable state is enough.
 - Before mutating, expensive, network-heavy, or long-running multi-repository work, apply `--group` or `--only` unless the user explicitly wants every managed repository.
 - Use `--json` only for non-interactive modes. Handle `JSON_UNSUPPORTED_FOR_MODE` as a structured refusal rather than scraping human output.
 - Preview broad removal with `arashi remove --dry-run`; preserve existing worktrees and branches unless removal is explicitly requested.
