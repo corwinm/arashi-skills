@@ -75,13 +75,15 @@ For broad mutation, preview when supported and preserve the identical selectors 
 
 ## Create from a coordinated base
 
-Use [Create commands](commands/create.md) when a follow-up branch must start from the same base in the effective selected set.
+Use [Create commands](commands/create.md) when a follow-up coordinated target needs an explicit ancestry policy. Each selected repository resolves its independent effective base from root/meta/child configuration or one-off `--base` and `--repo-base` overrides.
 
 ```bash
-aw create feature/docs --base feature/platform --group docs --no-launch --no-switch
+aw create feature/docs --base feature/platform \
+  --repo-base docs=docs/integration \
+  --group docs --no-launch --no-switch
 ```
 
-Resolve the base everywhere before mutation. Reused targets remain unchanged and are not claimed to descend from the requested base. If compatible work began in the wrong workspace, use the documented `aw move` recovery only after the target exists and is clean.
+Resolve every selected repository before mutation. Reused targets remain unchanged and are not claimed to descend from the effective base. A coordinated clone also stays on the coordinated target branch; its effective base only seeds that target when missing. If compatible work began in the wrong workspace, use the documented `aw move` recovery only after the target exists and is clean.
 
 ## Switch or launch interactively
 

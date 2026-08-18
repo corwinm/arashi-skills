@@ -1,18 +1,31 @@
 {
-  "schemaVersion": 7,
-  "command": "create",
-  "option": "--base",
+  "schemaVersion": 8,
+  "commands": [
+    "create",
+    "clone"
+  ],
+  "options": [
+    "--base",
+    "--repo-base"
+  ],
   "semanticPolicy": {
     "ownership": "command",
     "persisted": false,
     "createBase": {
       "scope": {
         "cli": "invocation-only",
-        "workspaceDefault": "defaults.create.baseBranch",
-        "workspaceDefaultScope": "generic-only",
+        "workspaceDefault": "baseBranch",
+        "workspaceDefaultScope": "shared-create-clone",
         "editorScopedDefault": "rejected"
       },
-      "precedence": ["cli", "defaults.create.baseBranch", "legacy-omitted"],
+      "precedence": [
+        "repository-cli",
+        "cli",
+        "repository-config",
+        "workspace-config",
+        "defaults.create.baseBranch",
+        "legacy-omitted"
+      ],
       "normalization": {
         "originPrefix": "remove-at-most-one"
       },
@@ -23,7 +36,10 @@
       },
       "resolution": {
         "repositories": "every-effective-selected-including-reused",
-        "refs": ["refs/heads/<branch>", "refs/remotes/origin/<branch>"]
+        "refs": [
+          "refs/heads/<branch>",
+          "refs/remotes/origin/<branch>"
+        ]
       },
       "mutation": {
         "preflight": "all-before-any",
@@ -40,10 +56,23 @@
         },
         "json": {
           "base": "optional",
-          "baseFields": ["requestedBranch", "source", "repositories"],
+          "baseFields": [
+            "requestedBranch",
+            "source",
+            "repositories"
+          ],
           "requestedBranch": "normalized-logical-branch",
-          "sources": ["cli", "config"],
-          "targetActions": ["created", "reused"],
+          "sources": [
+            "repository-cli",
+            "cli",
+            "repository-config",
+            "workspace-config",
+            "legacy-omitted"
+          ],
+          "targetActions": [
+            "created",
+            "reused"
+          ],
           "success": {
             "ordering": "effective-selected-repository-order",
             "repositories": "complete-selected-set",
@@ -57,12 +86,23 @@
             "repositoryPath": "canonical-absolute"
           },
           "failure": {
-            "attemptedRefs": ["refs/heads/<branch>", "refs/remotes/origin/<branch>"],
+            "attemptedRefs": [
+              "refs/heads/<branch>",
+              "refs/remotes/origin/<branch>"
+            ],
             "code": "CREATE_BASE_RESOLUTION_FAILED",
-            "fields": ["requestedBranch", "source", "repositories"],
+            "fields": [
+              "requestedBranch",
+              "source",
+              "repositories"
+            ],
             "ordering": "effective-selected-repository-order",
             "repositories": "affected-only-selected-set",
-            "repositoryFields": ["repositoryName", "repositoryPath", "attemptedRefs"],
+            "repositoryFields": [
+              "repositoryName",
+              "repositoryPath",
+              "attemptedRefs"
+            ],
             "repositoryPath": "canonical-absolute"
           }
         }
@@ -70,7 +110,57 @@
       "environmentVariables": {
         "ARASHI_BASE_BRANCH": "forbidden"
       }
+    },
+    "repositoryBase": {
+      "configuration": {
+        "child": "repos.<name>.baseBranch",
+        "legacyCreateOnly": "defaults.create.baseBranch",
+        "meta": "meta.baseBranch",
+        "workspace": "baseBranch"
+      },
+      "options": {
+        "global": "--base <branch>",
+        "metaSelector": "@meta",
+        "repository": "--repo-base <repository=branch>"
+      },
+      "output": {
+        "cloneProperty": "base",
+        "createProperty": "base",
+        "fields": [
+          "repositoryIdentity",
+          "repositoryName",
+          "requestedBranch",
+          "source"
+        ],
+        "omitted": "all-legacy-omitted"
+      },
+      "precedence": [
+        "repository-cli",
+        "cli",
+        "repository-config",
+        "workspace-config",
+        "legacy-create-config",
+        "legacy-omitted"
+      ],
+      "sources": [
+        "repository-cli",
+        "cli",
+        "repository-config",
+        "workspace-config",
+        "legacy-omitted"
+      ],
+      "scope": {
+        "clone": "configured-only",
+        "create": "configured-and-standalone-global",
+        "repositoryOverride": "configured-only"
+      },
+      "clone": {
+        "coordinated": "checkout-current-target-from-effective-base",
+        "omitted": "remote-default",
+        "ordinary": "checkout-effective-base"
+      },
+      "validation": "selected-set-before-mutation",
+      "rollback": "invocation-created-destinations-and-target-refs-only"
     }
-  },
-  "compatibilityWorkaround": "precreate-targets-and-reuse-existing"
+  }
 }

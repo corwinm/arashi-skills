@@ -22,27 +22,52 @@ Use lifecycle hooks when you need globs, remapping, external sources, interpolat
 
 ## Create from a Coordinated Base Branch
 
-Use the workspace-generic `defaults.create.baseBranch` setting when follow-up branches should start from the same long-running branch in the parent and managed repositories. It is not editor-scoped or per-repository configuration:
+Configured workspaces use one shared repository base policy for configured `create` and `clone`. Put the fallback at root `baseBranch`; use `meta.baseBranch` only for the meta repository and `repos.<name>.baseBranch` only for a child that differs:
 
 ```json
 {
-  "defaults": {
-    "create": {
-      "baseBranch": "feature/FEAT-1234"
+  "baseBranch": "main",
+  "meta": { "baseBranch": "meta/integration" },
+  "repos": {
+    "api": {
+      "path": "repos/api",
+      "gitUrl": "git@github.com:example/api.git",
+      "baseBranch": "api/integration"
     }
   }
 }
 ```
 
-For one invocation, use `aw create <target> --base <branch>`; for example, `aw create feature/FEAT-1234/docs --base feature/FEAT-1234`. Precedence is CLI > configuration > legacy behavior: `--base` overrides `defaults.create.baseBranch`, and omitting both preserves the established configured and standalone start-point behavior.
+Do not duplicate branch ancestry under create and clone defaults. `defaults.create` continues to own launch and switch behavior, not canonical base policy.
 
-Arashi resolves the requested base in every effective selected repository, including repositories whose target will be reused, using the local branch first and then `origin/<branch>`; it captures the resolved commit OID, and all resolution failures are aggregated before hooks or any workspace mutation. `--only` and `--group` limit that effective set and still compose by intersection. Resolution is read-only and does not fetch another remote. New targets use the captured commit OID even if the selected ref moves after preflight.
+For a one-off invocation-wide override, use `aw create <target> --base <branch>` or `aw clone --base <branch>`. Add the repeatable repository-specific `--repo-base <repository=branch>` option for exceptions. `@meta` selects the meta repository for configured create; clone accepts only exact configured child names:
 
-`--base` applies only to newly created targets. For a target accepted with `--conflict REUSE_EXISTING` (`REUSE_EXISTING`), base resolution remains required, but the target receives no mutation: Arashi keeps its exact existing OID and does not reset, rebase, recreate, or rewrite it. Arashi does not assert or check ancestry and does not represent or claim that the reused target was derived from the requested base.
+```bash
+aw create feature/release --base release \
+  --repo-base @meta=meta/release \
+  --repo-base api=api/release
 
-In implicit standalone mode, explicit `--base` is invocation-only and does not load or persist `defaults.create.baseBranch`; when omitted, standalone create continues to start new targets from the current `HEAD`. Human `--dry-run` output reports the requested base and each repository's resolved ref without mutation. With `--json` or `--dry-run --json`, stdout remains exactly one JSON document. `requestedBranch` is the normalized logical branch after removing at most one leading `origin/`, `source` is exactly `cli` or `config`, and `targetAction` is exactly `created` or `reused`.
+aw clone --all --base release --repo-base api=api/release
+```
 
-Successful JSON output covers the complete selected set in effective repository order. Missing bases return `CREATE_BASE_RESOLUTION_FAILED` with only affected repositories and the attempted local-then-`origin` refs; unaffected selected repositories are excluded. `ARASHI_BRANCH_NAME` remains the target-branch hook context; do not invent `ARASHI_BASE_BRANCH`.
+For each repository, shared precedence is repository CLI > invocation CLI > repository config > workspace config. Configured create then considers deprecated `defaults.create.baseBranch` before legacy omitted behavior; clone skips that create-only key and proceeds directly to legacy omitted behavior. Policy source terms remain `repository-cli`, `cli`, `repository-config`, `workspace-config`, and `legacy-omitted`. A repository override changes only its matching selected repository.
+
+Arashi validates malformed, duplicate, unknown, and unselected selectors and invalid branch names across the complete effective selected set before hooks, managed-ignore reconciliation, Git refs, or filesystem mutation. `@meta` is rejected for clone. `--only`, `--group`, and interactive selection determine the effective set before this preflight; an override for an unselected repository is an error rather than an ignored hint.
+
+When a policy applies, create resolves each selected repository independently using its local branch first and then `origin/<branch>`, after removing at most one leading `origin/`. Resolution does not fetch other remotes. New targets start at the captured resolved OID, so a later ref move does not change the plan.
+
+An existing target remains authoritative. Create and coordinated clone reuse it unchanged. Arashi does not reset, rebase, rewrite, or ancestry-check it against the effective base. For a missing child in a coordinated worktree, clone uses the effective base only as the missing coordinated target's creation point and leaves the child checked out on the coordinated target branch, never on the base branch. See [Repository Cloning and Recovery](workspace.md#repository-cloning-and-recovery).
+
+`defaults.create.baseBranch` remains a deprecated create-only compatibility input; migrate it to root `baseBranch` to make the canonical value apply to configured create and clone. Until migration, the legacy value affects create only and clone keeps remote-default behavior. If the legacy and canonical values conflict, fix the configuration instead of relying on an implicit winner; matching values use the canonical policy and still produce one migration diagnostic.
+
+In implicit standalone mode, `--base` is invocation-only for create. Standalone create ignores configured root/meta/child policy, rejects `--repo-base`, and does not add standalone clone support. Omitting `--base` preserves the existing current-`HEAD` start point and creates no `.arashi` configuration.
+
+Human `--dry-run` output reports every selected repository without mutation. In structured create success output, `data.base.repositories` is the complete effective selected set in selection order: `repositoryIdentity` is the canonical selector identity (`@meta` for the meta repository), `repositoryName` is the repository display name, and `repositoryPath` is its canonical absolute path. For records with an effective requested base, `requestedBranch` is normalized and the record includes its policy source, immutable `resolvedRef` and `resolvedOid`, and `targetAction` is exactly `created` or `reused`; legacy-omitted records do not claim a resolved ref or OID. The enclosing `data.base` also carries `requestedBranch` and `source` when available for compatibility.
+
+Selector validation failures use code `BASE_BRANCH_POLICY_INVALID` and list every issue under `error.details.issues` with its stable issue code, offending value, and message. Create resolution failures use code `CREATE_BASE_RESOLUTION_FAILED`; `error.details.repositories` contains only affected repositories in effective selection order, with `repositoryIdentity` as the canonical selector identity, `repositoryName` as the repository display name, their normalized `requestedBranch`, exact source, canonical path, and `attemptedRefs` in the exact order `refs/heads/<branch>` then `refs/remotes/origin/<branch>`. When an effective base policy applies, clone success reports each selected child's effective identity, name, requested branch, and source under `data.base`; clone preflight failures use `CLONE_BASE_PREFLIGHT_FAILED` and `error.details.repositories` with the affected child's requested branch, source, `gitUrl`, and failure reason.
+
+With `--json` (including create `--dry-run --json` and clone `--all --json`), stdout remains exactly one JSON envelope. Stable sources are `repository-cli`, `cli`, `repository-config`, `workspace-config`, and `legacy-omitted`. Automation should use the JSON envelope, exit status, and stderr rather than parse human output. `ARASHI_BRANCH_NAME` remains the target-branch hook context; do not invent `ARASHI_BASE_BRANCH`.
+
 Use command defaults in `.arashi/config.json` to control post-create behavior and select one canonical switch mode:
 
 ```json
