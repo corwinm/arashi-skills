@@ -150,7 +150,7 @@ const expectedCreateBasePolicy = {
 };
 
 const expectedContract = {
-  schemaVersion: 8,
+  schemaVersion: 9,
   commands: ["create", "clone"],
   options: ["--base", "--repo-base"],
   semanticPolicy: {
@@ -233,6 +233,36 @@ function hasAffirmativeAction(clause, actionPattern) {
 }
 
 function createBaseContradiction(sentence) {
+  if (/defaults\.create\.baseBranch/i.test(sentence)) {
+    const explicitlyRejectsLegacyKey =
+      /\b(?:unsupported|no longer supported|removed|obsolete|invalid|forbidden|rejects?|rejected|replac(?:e|ed|ement)|migrat(?:e|ed|ion)|move(?:d)?|do not|does not|never|cannot|can't|must not)\b/i.test(
+        sentence,
+      );
+    const recommendsLegacyKey =
+      /\b(?:set|use|configure|add|put|place)\b[^.]{0,40}`?defaults\.create\.baseBranch/i.test(
+        sentence,
+      );
+    const negatesRecommendation =
+      /\b(?:do not|never|must not)\b[^.]{0,30}\b(?:set|use|configure|add|put|place)\b[^.]{0,40}`?defaults\.create\.baseBranch/i.test(
+        sentence,
+      );
+    const describesLegacyBehavior =
+      /defaults\.create\.baseBranch[^.]{0,100}\b(?:remains?[^.]{0,30}create-only|applies only)\b/i.test(
+        sentence,
+      );
+    const claimsLegacyAcceptance =
+      /\b(?:arashi|create|configuration|config)\b[^.]{0,40}\b(?:still\s+)?(?:accepts?|supports?|reads?|uses?|honors?)\b/i.test(
+        sentence,
+      );
+    if (
+      describesLegacyBehavior ||
+      claimsLegacyAcceptance ||
+      (recommendsLegacyKey && !negatesRecommendation) ||
+      !explicitlyRejectsLegacyKey
+    ) {
+      return "recommends or describes behavior for the removed defaults.create.baseBranch key";
+    }
+  }
   const clauses = contrastClauses(sentence);
   const reuseScope = /reused? target|target[^.]{0,40}reuse/i.test(sentence);
   const successScope = /success(?:ful)?[^.]{0,80}repositor|repositor[^.]{0,80}success/i.test(
@@ -555,6 +585,33 @@ function validateDeliberateDrift(fixtureSkillRoot = sourceSkillRoot) {
       writeFileSync(path, original.replace(from, to));
       assert.throws(() => validateSkill(root, name), expected);
     }
+
+    const legacyGuidanceRoot = join(temporaryRoot, "removed-create-base-guidance");
+    cpSync(fixtureSkillRoot, legacyGuidanceRoot, { recursive: true });
+    const legacyTutorialPath = join(legacyGuidanceRoot, "references", "tutorial.md");
+    writeFileSync(
+      legacyTutorialPath,
+      `${readFileSync(legacyTutorialPath, "utf8")}
+\`defaults.create.baseBranch\` remains a deprecated create-only compatibility input.
+Set \`defaults.create.baseBranch\` to choose the create base.
+Although \`defaults.create.baseBranch\` was removed from the schema, create still accepts it.
+`,
+    );
+    assert.throws(
+      () => validateSkill(legacyGuidanceRoot, "removed-create-base-guidance"),
+      /removed defaults\.create\.baseBranch|recommends/i,
+    );
+
+    const negatedGuidanceRoot = join(temporaryRoot, "negated-create-base-guidance");
+    cpSync(fixtureSkillRoot, negatedGuidanceRoot, { recursive: true });
+    const negatedTutorialPath = join(negatedGuidanceRoot, "references", "tutorial.md");
+    writeFileSync(
+      negatedTutorialPath,
+      `${readFileSync(negatedTutorialPath, "utf8")}
+\`defaults.create.baseBranch\` never applies. Do not set \`defaults.create.baseBranch\`. Replace \`defaults.create.baseBranch\` with root \`baseBranch\`; it is no longer supported.
+`,
+    );
+    validateSkill(negatedGuidanceRoot, "negated-create-base-guidance");
 
     const environmentRoot = join(temporaryRoot, "invented-hook-environment");
     cpSync(fixtureSkillRoot, environmentRoot, { recursive: true });

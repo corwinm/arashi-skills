@@ -143,7 +143,7 @@ Expected outcomes:
 
 - changed repositories with publishable local branch commits are pushed
 - clean or intentionally untouched child repositories are skipped with reasons
-- branches with an upstream compare with and push to that upstream
+- branches with an upstream use it for publishability comparison while preserving Git's existing push destination policy
 - branches without an upstream use the refreshed configured base for publishability when one exists; failure to refresh or compare fails planning without remote-default substitution
 - configured base never becomes the destination; `--set-upstream` publishes the current branch
 - `--dry-run` never updates remote branches, but may refresh a local configured-base tracking ref
