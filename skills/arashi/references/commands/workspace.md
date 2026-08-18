@@ -138,7 +138,7 @@ The host token is opaque: Git/OpenSSH owns host resolution and authentication. A
 
 `add` trims outer whitespace once, then uses that same normalized remote for Git, result output, and persisted configuration. `clone` treats configured remotes as authoritative. If HTTPS is inferred or selected, Arashi preserves every configured SSH URL byte-for-byte and never automatically rewrites an SSH remote to HTTPS; a mixed clone run can therefore remain mixed. HTTPS-to-SSH conversion remains supported for an HTTPS source because that source supplies an explicit network host and path.
 
-An unresolved or unauthenticated alias follows the existing command safety behavior. Failed `add` uses the normal add rollback boundary for configuration, clone, setup, and managed-ignore state. During a multi-repository `clone`, one Git failure is recorded for that repository; clone continues with the remaining repositories and reports partial success through the existing human or JSON envelope.
+An unresolved or unauthenticated alias follows the existing command safety behavior. Failed `add` uses the normal add rollback boundary for configuration, clone, setup, and managed-ignore state. During a multi-repository `clone` with no effective base policy, one Git failure is recorded for that repository; clone continues with the remaining repositories and reports partial success through the existing human or JSON envelope. When a base policy applies, all selected remotes and effective bases preflight together, and one failure prevents every selected clone before mutation.
 
 SSH aliases are machine-local, so every machine using a stored alias needs compatible OpenSSH routing. For shared configuration, prefer a canonical committed remote and use a machine-global Git `url.<base>.insteadOf` rule in `~/.gitconfig`, not repository-local `.git/config`, when a developer needs identity-specific routing:
 
@@ -171,7 +171,7 @@ Materialization and config persistence are one rollback boundary. If linked-work
 
 Before choosing lower-level recovery commands, use `arashi doctor --json` for structured, non-mutating workspace health diagnostics. Follow the reported finding codes, severities, and suggested commands to decide whether to run `status`, `clone`, `prune`, or repository-specific Git commands next.
 
-Use `arashi clone` to clone configured repositories that are missing locally.
+Use `arashi clone` to clone configured repositories that are missing locally:
 
 ```bash
 # interactively choose missing repositories
@@ -181,9 +181,29 @@ arashi clone
 arashi clone --all
 ```
 
+Configured clone shares the repository base policy with configured create. Root `baseBranch` is the fallback; `repos.<name>.baseBranch` overrides it for one child. A one-off `--base <branch>` overrides configuration for every selected missing child, while repeatable `--repo-base <repository=branch>` entries override only their exact configured child:
+
+```bash
+arashi clone --all --base release --repo-base api=api/release
+```
+
+Clone precedence is repository CLI > invocation CLI > repository config > workspace config > legacy omitted behavior; unlike configured create, clone never considers deprecated `defaults.create.baseBranch`. `@meta` is invalid for clone because clone selects configured children only. Malformed, duplicate, unknown, and unselected selectors and unavailable effective bases are aggregated across the selected missing set before managed-ignore reconciliation or destination creation.
+
+From the main configured workspace, a child with an effective base is cloned at that branch and tracks `origin/<base>`. With no effective policy, clone preserves remote-default behavior. Inside a coordinated worktree, the active coordinated target branch remains the checkout: the effective base is only the creation point when that target is missing. If the target already exists, clone reuses it unchanged; it does not reset, rebase, rewrite, or ancestry-check the target against the base.
+
+The deprecated `defaults.create.baseBranch` value remains create-only and does not affect clone. Migrate it to root `baseBranch` when create and clone should share the value. Clone is configured-only; implicit standalone mode supports no clone policy or repository-specific override.
+
+The older per-repository partial-success behavior applies only to a multi-repository clone with no effective base policy: a Git failure may be recorded while unaffected repositories continue. When a base policy applies, selector, remote, and base checks aggregate across the complete selected missing set, and any preflight failure blocks every selected clone before mutation.
+
+For `arashi clone --all --json`, stdout is one envelope. When an effective base policy applies, successful policy evidence appears under `data.base` as ordered records containing each selected child's `repositoryIdentity`, `repositoryName`, normalized `requestedBranch`, and stable source; when every selected child uses legacy-omitted behavior, `data.base` is absent. Selector failures use `BASE_BRANCH_POLICY_INVALID` with all issues under `error.details.issues`; unavailable remote/base preflight uses `CLONE_BASE_PREFLIGHT_FAILED` with every affected child under `error.details.repositories`, including its requested branch, source, `gitUrl`, and reason. Use the envelope, exit status, and stderr rather than parse human output.
+
 Expected outcomes:
 
-- command exits `0` when clone operations succeed
-- managed ignore state is reconciled before a missing repository path is materialized
+- command exits `0` when selected clone operations succeed
+- selected base/remote checks finish before managed-ignore or filesystem mutation
+- a main-workspace clone with policy checks out the effective base; omitted policy keeps the remote default
+- a coordinated clone checks out the coordinated target, using the effective base only to seed a missing target
+- an existing coordinated target is reused without rewrite or ancestry claims
 - already-present repositories are skipped
+- `--json` remains one document with per-repository effective base/source or structured aggregated failures
 - `arashi status` no longer reports missing repository spawn errors

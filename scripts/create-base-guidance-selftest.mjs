@@ -26,14 +26,68 @@ if (skillRootArgumentIndex >= 0 && !suppliedSkillRoot) {
   throw new Error("--skill-root requires a path");
 }
 
+const expectedRepositoryBasePolicy = {
+  configuration: {
+    child: "repos.<name>.baseBranch",
+    legacyCreateOnly: "defaults.create.baseBranch",
+    meta: "meta.baseBranch",
+    workspace: "baseBranch",
+  },
+  options: {
+    global: "--base <branch>",
+    metaSelector: "@meta",
+    repository: "--repo-base <repository=branch>",
+  },
+  precedence: [
+    "repository-cli",
+    "cli",
+    "repository-config",
+    "workspace-config",
+    "legacy-create-config",
+    "legacy-omitted",
+  ],
+  sources: [
+    "repository-cli",
+    "cli",
+    "repository-config",
+    "workspace-config",
+    "legacy-omitted",
+  ],
+  scope: {
+    clone: "configured-only",
+    create: "configured-and-standalone-global",
+    repositoryOverride: "configured-only",
+  },
+  clone: {
+    coordinated: "checkout-current-target-from-effective-base",
+    omitted: "remote-default",
+    ordinary: "checkout-effective-base",
+  },
+  output: {
+    cloneProperty: "base",
+    createProperty: "base",
+    fields: ["repositoryIdentity", "repositoryName", "requestedBranch", "source"],
+    omitted: "all-legacy-omitted",
+  },
+  validation: "selected-set-before-mutation",
+  rollback: "invocation-created-destinations-and-target-refs-only",
+};
+
 const expectedCreateBasePolicy = {
   scope: {
     cli: "invocation-only",
-    workspaceDefault: "defaults.create.baseBranch",
-    workspaceDefaultScope: "generic-only",
+    workspaceDefault: "baseBranch",
+    workspaceDefaultScope: "shared-create-clone",
     editorScopedDefault: "rejected",
   },
-  precedence: ["cli", "defaults.create.baseBranch", "legacy-omitted"],
+  precedence: [
+    "repository-cli",
+    "cli",
+    "repository-config",
+    "workspace-config",
+    "defaults.create.baseBranch",
+    "legacy-omitted",
+  ],
   normalization: { originPrefix: "remove-at-most-one" },
   standalone: {
     cli: "invocation-only",
@@ -59,7 +113,7 @@ const expectedCreateBasePolicy = {
       base: "optional",
       baseFields: ["requestedBranch", "source", "repositories"],
       requestedBranch: "normalized-logical-branch",
-      sources: ["cli", "config"],
+      sources: ["repository-cli", "cli", "repository-config", "workspace-config"],
       targetActions: ["created", "reused"],
       success: {
         ordering: "effective-selected-repository-order",
@@ -88,15 +142,15 @@ const expectedCreateBasePolicy = {
 };
 
 const expectedContract = {
-  schemaVersion: 7,
-  command: "create",
-  option: "--base",
+  schemaVersion: 8,
+  commands: ["create", "clone"],
+  options: ["--base", "--repo-base"],
   semanticPolicy: {
     ownership: "command",
     persisted: false,
     createBase: expectedCreateBasePolicy,
+    repositoryBase: expectedRepositoryBasePolicy,
   },
-  compatibilityWorkaround: "precreate-targets-and-reuse-existing",
 };
 
 function section(content, heading) {
@@ -292,23 +346,46 @@ function validateSkill(root, label) {
   const guidance = section(commands, "Create from a Coordinated Base Branch");
 
   for (const required of [
-    "`defaults.create.baseBranch`",
-    '"baseBranch": "feature/FEAT-1234"',
-    "workspace-generic",
-    "not editor-scoped or per-repository",
+    "root `baseBranch`",
+    "`meta.baseBranch`",
+    "`repos.<name>.baseBranch`",
+    "configured `create` and `clone`",
     "arashi create <target> --base <branch>",
-    "CLI > configuration > legacy behavior",
-    "every effective selected repository",
-    "including repositories whose target will be reused",
+    "arashi clone --base <branch>",
+    "`--repo-base <repository=branch>`",
+    "`@meta`",
+    "shared precedence is repository CLI > invocation CLI > repository config > workspace config",
+    "Configured create then considers deprecated `defaults.create.baseBranch` before legacy omitted behavior",
+    "clone skips that create-only key",
+    "complete effective selected set",
+    "before hooks, managed-ignore reconciliation, Git refs, or filesystem mutation",
     "local branch first and then `origin/<branch>`",
-    "all resolution failures are aggregated before hooks or any workspace mutation",
-    "`--conflict REUSE_EXISTING`",
-    "does not assert or check ancestry",
-    "does not represent or claim that the reused target was derived from the requested base",
+    "coordinated target branch",
+    "creation point",
+    "does not reset, rebase, rewrite, or ancestry-check",
+    "`defaults.create.baseBranch`",
+    "deprecated create-only compatibility input",
+    "migrate it to root `baseBranch`",
     "implicit standalone mode",
     "invocation-only",
-    "does not load or persist `defaults.create.baseBranch`",
+    "rejects `--repo-base`",
+    "does not add standalone clone support",
+    "Human `--dry-run`",
+    "`data.base.repositories`",
+    "`requestedBranch` is normalized",
+    "`repositoryIdentity` is the canonical selector identity",
+    "`repositoryName` is the repository display name",
+    "`repositoryPath` is its canonical absolute path",
+    "`resolvedRef`",
+    "`resolvedOid`",
+    "`targetAction` is exactly `created` or `reused`",
+    "`BASE_BRANCH_POLICY_INVALID`",
+    "`error.details.issues`",
     "`CREATE_BASE_RESOLUTION_FAILED`",
+    "`error.details.repositories`",
+    "`attemptedRefs`",
+    "`refs/heads/<branch>`",
+    "`refs/remotes/origin/<branch>`",
     "`ARASHI_BRANCH_NAME`",
     "do not invent `ARASHI_BASE_BRANCH`",
   ]) {
@@ -320,18 +397,60 @@ function validateSkill(root, label) {
 
   assert.match(
     guidance,
-    /`--conflict REUSE_EXISTING`[^\n]*base resolution remains required[^\n]*no mutation[^\n]*does not assert or check ancestry/,
-    `${label}/references/commands/create.md must preserve reuse without target mutation or ancestry claims`,
+    /shared precedence is repository CLI > invocation CLI > repository config > workspace config[\s\S]*configured create then considers deprecated `defaults\.create\.baseBranch` before legacy omitted behavior[\s\S]*clone skips that create-only key/i,
+    `${label}/references/commands/create.md must state exact per-repository precedence`,
   );
   assert.doesNotMatch(
     guidance,
-    /Each repository entry has exactly|error details contain exactly|Each failure entry has exactly/,
-    `${label}/references/commands/create.md still exposes internal result-schema detail`,
+    /workspace-generic `defaults\.create\.baseBranch` setting/,
+    `${label}/references/commands/create.md still presents the legacy create-only key as canonical`,
   );
+
+  const workspace = readFileSync(
+    join(root, "references", "commands", "workspace.md"),
+    "utf8",
+  );
+  const cloneGuidance = section(workspace, "Repository Cloning and Recovery");
+  for (const required of [
+    "root `baseBranch`",
+    "`repos.<name>.baseBranch`",
+    "`--base <branch>`",
+    "`--repo-base <repository=branch>`",
+    "coordinated target branch",
+    "creation point",
+    "reuses it unchanged",
+    "before managed-ignore reconciliation or destination creation",
+    "with no effective base policy",
+    "When a base policy applies",
+    "`data.base`",
+    "`BASE_BRANCH_POLICY_INVALID`",
+    "`CLONE_BASE_PREFLIGHT_FAILED`",
+    "`error.details.repositories`",
+    "`gitUrl`",
+    "When an effective base policy applies, successful policy evidence appears under `data.base`",
+  ]) {
+    assert.ok(
+      cloneGuidance.includes(required),
+      `${label}/references/commands/workspace.md clone-base guidance is missing ${JSON.stringify(required)}`,
+    );
+  }
+
+  const workflows = readFileSync(join(root, "references", "workflows.md"), "utf8");
+  const workflowGuidance = section(workflows, "Create from a coordinated base");
+  for (const required of [
+    "independent effective base",
+    "`--repo-base`",
+    "coordinated target branch",
+  ]) {
+    assert.ok(
+      workflowGuidance.includes(required),
+      `${label}/references/workflows.md coordinated-base workflow is missing ${JSON.stringify(required)}`,
+    );
+  }
   assert.doesNotMatch(
-    guidance,
-    /Compatibility workaround for older Arashi releases|SELECTORS=\(--group docs\)/,
-    `${label}/references/commands/create.md still carries the retired branch-precreation workaround`,
+    workflowGuidance,
+    /start from the same base/,
+    `${label}/references/workflows.md still claims every repository shares one base`,
   );
 
   validatePackageWideClaims(root, label);
@@ -344,33 +463,35 @@ function validateContracts() {
       "utf8",
     ),
   );
-  assert.deepEqual(contract, expectedContract, "create-base semantic contract is stale");
+  assert.deepEqual(contract, expectedContract, "repository-base semantic contract is stale");
 
-  const errorFieldsDrift = structuredClone(contract);
-  errorFieldsDrift.semanticPolicy.createBase.output.json.failure.fields = [
-    "requestedBranch",
-    "source",
-    "failures",
+  const precedenceDrift = structuredClone(contract);
+  precedenceDrift.semanticPolicy.repositoryBase.precedence = [
+    "cli",
+    "repository-cli",
+    "repository-config",
+    "workspace-config",
+    "legacy-create-config",
+    "legacy-omitted",
   ];
   assert.throws(
-    () =>
-      assert.deepEqual(
-        errorFieldsDrift,
-        expectedContract,
-        "create-base semantic contract is stale",
-      ),
-    /create-base semantic contract is stale/,
-    "contract checker accepted drift from the exact JSON error field vocabulary",
+    () => assert.deepEqual(precedenceDrift, expectedContract, "repository-base semantic contract is stale"),
+    /repository-base semantic contract is stale/,
+    "contract checker accepted incorrect repository/global CLI precedence",
   );
 
-  const flattenedDrift = {
-    schemaVersion: contract.schemaVersion,
-    ...contract.semanticPolicy.createBase,
-  };
+  const createPrecedenceDrift = structuredClone(contract);
+  createPrecedenceDrift.semanticPolicy.createBase.precedence = [
+    "repository-cli",
+    "cli",
+    "repository-config",
+    "workspace-config",
+    "legacy-omitted",
+  ];
   assert.throws(
-    () => assert.deepEqual(flattenedDrift, expectedContract, "create-base semantic contract is stale"),
-    /create-base semantic contract is stale/,
-    "contract checker accepted the stale flattened create-base policy",
+    () => assert.deepEqual(createPrecedenceDrift, expectedContract, "repository-base semantic contract is stale"),
+    /repository-base semantic contract is stale/,
+    "contract checker accepted create precedence without defaults.create.baseBranch",
   );
 
   const coverage = JSON.parse(
@@ -379,41 +500,47 @@ function validateContracts() {
       "utf8",
     ),
   );
-  const create = coverage.commands.find(({ name }) => name === "create");
-  assert.ok(create, "command coverage is missing create");
-  assert.ok(
-    create.requiredOptions?.includes("--base"),
-    "create command coverage is missing --base",
-  );
+  for (const commandName of ["create", "clone"]) {
+    const command = coverage.commands.find(({ name }) => name === commandName);
+    assert.ok(command, `command coverage is missing ${commandName}`);
+    for (const option of ["--base", "--repo-base"]) {
+      assert.ok(
+        command.requiredOptions?.includes(option),
+        `${commandName} command coverage is missing ${option}`,
+      );
+    }
+  }
 }
 
-
 function validateDeliberateDrift(fixtureSkillRoot = sourceSkillRoot) {
-  const temporaryRoot = mkdtempSync(join(tmpdir(), "arashi-create-base-guidance-"));
+  const temporaryRoot = mkdtempSync(join(tmpdir(), "arashi-repository-base-guidance-"));
   try {
-    for (const [name, from, to, expected] of [
+    for (const [name, relativePath, from, to, expected] of [
       [
-        "selected-set",
-        "every effective selected repository",
-        "only repositories receiving a newly created target",
-        /selected repository|missing/i,
+        "precedence",
+        join("references", "commands", "create.md"),
+        "Configured create then considers deprecated `defaults.create.baseBranch` before legacy omitted behavior",
+        "Configured create skips the deprecated key and proceeds directly to omitted behavior",
+        /precedence|missing/i,
       ],
       [
-        "standalone-persistence",
-        "does not load or persist `defaults.create.baseBranch`",
-        "loads and persists `defaults.create.baseBranch`",
+        "clone-alignment",
+        join("references", "commands", "workspace.md"),
+        "coordinated target branch",
+        "effective base branch",
+        /coordinated|missing/i,
+      ],
+      [
+        "standalone-repository-base",
+        join("references", "commands", "create.md"),
+        "rejects `--repo-base`",
+        "accepts `--repo-base`",
         /standalone|missing/i,
-      ],
-      [
-        "reuse-ancestry",
-        "does not assert or check ancestry",
-        "asserts and rewrites ancestry",
-        /reuse|ancestry|missing/i,
       ],
     ]) {
       const root = join(temporaryRoot, name);
       cpSync(fixtureSkillRoot, root, { recursive: true });
-      const path = join(root, "references", "commands", "create.md");
+      const path = join(root, relativePath);
       const original = readFileSync(path, "utf8");
       assert.equal(original.split(from).length - 1, 1, `${name} drift marker must occur once`);
       writeFileSync(path, original.replace(from, to));

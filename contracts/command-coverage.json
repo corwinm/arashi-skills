@@ -18,7 +18,11 @@
       "standalone": {
         "support": "configured-only",
         "reason": "Cloning child repositories requires a persisted repository map."
-      }
+      },
+      "requiredOptions": [
+        "--base",
+        "--repo-base"
+      ]
     },
     {
       "name": "completion",
@@ -34,6 +38,7 @@
       "reference": "references/commands/create.md",
       "requiredOptions": [
         "--base",
+        "--repo-base",
         "--tab",
         "--tmux"
       ],
