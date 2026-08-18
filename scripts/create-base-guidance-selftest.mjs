@@ -232,37 +232,56 @@ function hasAffirmativeAction(clause, actionPattern) {
   return false;
 }
 
-function createBaseContradiction(sentence) {
-  if (/defaults\.create\.baseBranch/i.test(sentence)) {
-    const explicitlyRejectsLegacyKey =
-      /\b(?:unsupported|no longer supported|removed|obsolete|invalid|forbidden|rejects?|rejected|replac(?:e|ed|ement)|migrat(?:e|ed|ion)|move(?:d)?|do not|does not|never|cannot|can't|must not)\b/i.test(
-        sentence,
+function removedCreateBaseGuidanceContradiction(content) {
+  const blocks = content
+    .replace(/```[\s\S]*?```/g, (block) => block.replace(/\n/g, " "))
+    .split(/\n{2,}/)
+    .flatMap((block) => block.split(/\n(?=\s*(?:[-*+] |\d+\. ))/))
+    .map((block) => block.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+  const contexts = blocks.flatMap((block, index) => {
+    if (/^#{1,6}\s/.test(block) && /defaults\.create\.baseBranch/i.test(block))
+      return [`${block} ${blocks[index + 1] ?? ""}`];
+    return block.split(/(?<=[.!?])\s+/);
+  });
+  const mention = /defaults\.create\.baseBranch/gi;
+  const rejection =
+    /\b(?:unsupported|no longer supported|removed|obsolete|invalid|forbidden|rejects?|rejected|replac(?:e|ed|ement)|migrat(?:e|ed|ion)|move(?:d)?)\b|\b(?:(?:do|does|is|are|was|were|will|must|should|can|may)\s+not|never|cannot|can't|must not)\b[^.!?]{0,50}\b(?:set|use|configure|add|put|place|accept|support|read|honor)\b[^.!?]{0,50}defaults\.create\.baseBranch|\b(?:instead of|rather than)\s*`?defaults\.create\.baseBranch|defaults\.create\.baseBranch[^.!?]{0,80}(?:\b(?:does not|never|cannot|can't|must not)\b[^.!?]{0,40}\b(?:appl(?:y|ies)|works?|accepts?|supports?|reads?|honors?|uses?)\b|\b(?:is|are|was|were)\s+not\s+(?:supported|accepted|used|read|honored|valid|allowed)\b)/i;
+  const actionBeforeMention =
+    /\b(?:set|use|configure|add|put|place|accepts?|supports?|reads?|uses?|honors?)\b/gi;
+  const affirmativeAfterMention =
+    /\b(?:can|may|should)\s+(?:still\s+)?(?:be\s+)?(?:use|used|set|configure|configured|add|added|accept|accepted|support|supported|read|honor|honored)|\b(?:is|remains?|stays?)\s+(?!not\b)(?:still\s+)?(?:supported|accepted|valid|allowed|used|read|honored)|\b(?:arashi|create|configuration|config)\s+(?:still\s+)?(?:accepts?|supports?|reads?|uses?|honors?)\b|\bstill\s+(?:applies|works|controls?|defines?|selects?|chooses?|determines?)\b|\bcontinues?\s+to\s+(?:control|define|set|select|choose|determine)\b/i;
+  const activeBehaviorAfterMention =
+    /\b(?:appl(?:y|ies)|works?|controls?|defines?|selects?|chooses?|determines?)\b/gi;
+
+  for (const context of contexts) {
+    for (const match of context.matchAll(mention)) {
+      const localIndex = match.index ?? 0;
+      const before = context.slice(0, localIndex);
+      const clauseStart = Math.max(
+        before.lastIndexOf("."),
+        before.lastIndexOf(";"),
+        before.lastIndexOf("!"),
+        before.lastIndexOf("?"),
       );
-    const recommendsLegacyKey =
-      /\b(?:set|use|configure|add|put|place)\b[^.]{0,40}`?defaults\.create\.baseBranch/i.test(
-        sentence,
-      );
-    const negatesRecommendation =
-      /\b(?:do not|never|must not)\b[^.]{0,30}\b(?:set|use|configure|add|put|place)\b[^.]{0,40}`?defaults\.create\.baseBranch/i.test(
-        sentence,
-      );
-    const describesLegacyBehavior =
-      /defaults\.create\.baseBranch[^.]{0,100}\b(?:remains?[^.]{0,30}create-only|applies only)\b/i.test(
-        sentence,
-      );
-    const claimsLegacyAcceptance =
-      /\b(?:arashi|create|configuration|config)\b[^.]{0,40}\b(?:still\s+)?(?:accepts?|supports?|reads?|uses?|honors?)\b/i.test(
-        sentence,
-      );
-    if (
-      describesLegacyBehavior ||
-      claimsLegacyAcceptance ||
-      (recommendsLegacyKey && !negatesRecommendation) ||
-      !explicitlyRejectsLegacyKey
-    ) {
-      return "recommends or describes behavior for the removed defaults.create.baseBranch key";
+      const sameClauseBefore = before.slice(clauseStart + 1);
+      const after = context.slice(localIndex + match[0].length);
+
+      for (const action of sameClauseBefore.matchAll(actionBeforeMention)) {
+        const suffix = sameClauseBefore.slice((action.index ?? 0) + action[0].length);
+        if (/^(?:support|use)$/i.test(action[0]) && /^\s+(?:for|of)\b/i.test(suffix)) continue;
+        if (/\b(?:instead of|rather than)\s*`?$/i.test(suffix)) continue;
+        if (!actionIsNegated(sameClauseBefore, action.index)) return true;
+      }
+      if (affirmativeAfterMention.test(after)) return true;
+      if (hasAffirmativeAction(after, activeBehaviorAfterMention)) return true;
+      if (!rejection.test(context)) return true;
     }
   }
+  return false;
+}
+
+function createBaseContradiction(sentence) {
   const clauses = contrastClauses(sentence);
   const reuseScope = /reused? target|target[^.]{0,40}reuse/i.test(sentence);
   const successScope = /success(?:ful)?[^.]{0,80}repositor|repositor[^.]{0,80}success/i.test(
@@ -360,6 +379,11 @@ function unsupportedBaseVariableClaim(sentence) {
 function validatePackageWideClaims(root, label) {
   for (const { content, path } of installableGuidanceFiles(root)) {
     const relativePath = relative(root, path);
+    assert.equal(
+      removedCreateBaseGuidanceContradiction(content),
+      false,
+      `${label}/${relativePath} recommends or describes behavior for the removed defaults.create.baseBranch key`,
+    );
     for (const sentence of semanticSentences(content)) {
       const contradiction = createBaseContradiction(sentence);
       assert.equal(
@@ -549,6 +573,15 @@ function validateContracts() {
       );
     }
   }
+  for (const commandName of ["status", "doctor"]) {
+    const command = coverage.commands.find(({ name }) => name === commandName);
+    assert.ok(command, `command coverage is missing ${commandName}`);
+    assert.equal(
+      command.reference,
+      "references/commands/automation.md",
+      `${commandName} command coverage must route to configured-base guidance`,
+    );
+  }
 }
 
 function validateDeliberateDrift(fixtureSkillRoot = sourceSkillRoot) {
@@ -595,6 +628,12 @@ function validateDeliberateDrift(fixtureSkillRoot = sourceSkillRoot) {
 \`defaults.create.baseBranch\` remains a deprecated create-only compatibility input.
 Set \`defaults.create.baseBranch\` to choose the create base.
 Although \`defaults.create.baseBranch\` was removed from the schema, create still accepts it.
+\`defaults.create.baseBranch\` was removed from the schema, but you can still use it.
+\`defaults.create.baseBranch\` was removed from the schema but continues to control create.
+The removed \`defaults.create.baseBranch\` controls the create base.
+\`defaults.create.baseBranch\` controls create, while editor-scoped defaults are unsupported.
+- \`defaults.create.baseBranch\` was removed.
+- \`defaults.create.baseBranch\` controls the create base
 `,
     );
     assert.throws(
@@ -609,6 +648,16 @@ Although \`defaults.create.baseBranch\` was removed from the schema, create stil
       negatedTutorialPath,
       `${readFileSync(negatedTutorialPath, "utf8")}
 \`defaults.create.baseBranch\` never applies. Do not set \`defaults.create.baseBranch\`. Replace \`defaults.create.baseBranch\` with root \`baseBranch\`; it is no longer supported.
+Configuration supports root \`baseBranch\`; \`defaults.create.baseBranch\` was removed.
+Configuration does not support \`defaults.create.baseBranch\`.
+Support for \`defaults.create.baseBranch\` was removed.
+Use of \`defaults.create.baseBranch\` is forbidden.
+\`defaults.create.baseBranch\` is not supported.
+Use root \`baseBranch\` instead of \`defaults.create.baseBranch\`.
+
+## \`defaults.create.baseBranch\`
+
+This property is unsupported; migrate to root \`baseBranch\`.
 `,
     );
     validateSkill(negatedGuidanceRoot, "negated-create-base-guidance");
