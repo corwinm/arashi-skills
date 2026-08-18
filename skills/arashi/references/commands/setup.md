@@ -2,7 +2,7 @@
 
 Install or update the CLI and configure supported shell completion.
 
-Installed `arashi <command> --help` is the parameter authority.
+Installed `aw <command> --help` is the parameter authority.
 
 ## Installation
 
@@ -14,59 +14,59 @@ Use the website flow for your platform and environment policy.
 
 Expected outcomes:
 
-- `arashi --version` exits `0`
-- `arashi --help` exits `0`
+- `aw --version` exits `0`
+- `aw --help` exits `0`
 
 ## Repository setup
 
-`arashi setup` runs configured repository setup scripts in workspace order. It requires configured mode.
+`aw setup` runs configured repository setup scripts in workspace order. It requires configured mode.
 
 ```bash
 # all configured repositories
-arashi setup
+aw setup
 
 # repeat or comma-separate selectors; group and name filters intersect
-arashi setup --only api --group services
+aw setup --only api --group services
 
 # one machine-readable result
-arashi setup --only api --json
+aw setup --only api --json
 ```
 
-Targets without setup scripts are skipped. Failed or timed-out scripts produce a non-zero result; JSON mode captures script diagnostics and keeps stdout to one document. Setup scripts are not lifecycle hooks. Use `arashi setup --help` for current options.
+Targets without setup scripts are skipped. Failed or timed-out scripts produce a non-zero result; JSON mode captures script diagnostics and keeps stdout to one document. Setup scripts are not lifecycle hooks. Use `aw setup --help` for current options.
 
 ## Shell Completion
 
 Arashi generates shell-specific completion scripts for Bash, Zsh, and Fish through one public command:
 
 ```bash
-arashi completion bash
-arashi completion zsh
-arashi completion fish
+aw completion bash
+aw completion zsh
+aw completion fish
 ```
 
-Completion activation and the parent-shell wrapper are separate manual choices. `arashi shell init <shell>` emits only the manual wrapper; it does not activate completion. `arashi shell install` owns both wrapper and completion activation lines in its managed profile block, and repeated installs idempotently upgrade the complete block.
+Completion activation and the parent-shell wrapper are separate manual choices. `aw shell init <shell>` emits only the manual wrapper; it does not activate completion. `aw shell install` owns both wrapper and completion activation lines in its managed profile block, and repeated installs idempotently upgrade the complete block.
 
 For manual activation, run the commands for the current shell. Each line is independent, so install only the wrapper or only completion when that is the intended scope.
 
 **Bash**
 
 ```bash
-eval "$(command arashi shell init bash)"
-source <(command arashi completion bash)
+eval "$(command aw shell init bash)"
+source <(command aw completion bash)
 ```
 
 **Zsh**
 
 ```zsh
-eval "$(command arashi shell init zsh)"
-source <(command arashi completion zsh)
+eval "$(command aw shell init zsh)"
+source <(command aw completion zsh)
 ```
 
 **Fish**
 
 ```fish
-command arashi shell init fish | source
-command arashi completion fish | source
+command aw shell init fish | source
+command aw completion fish | source
 ```
 
 Static command and option completion works outside a configured workspace. Dynamic ownership is exact: each `--only` segment completes repository names; each `--group` segment completes configured groups; `switch [filter]` and `remove [target]` complete branch, worktree name, or path values, while `--path` narrows them to exact worktree paths; `move --from` and `move --to` complete workspace branch, name, or path references; supported-shell arguments and finite constrained options complete only their declared values; unclassified slots receive no local candidates. Each request has a 200 ms whole-query budget and uses only local read-only discovery: no network requests, hooks, prompts, workspace mutation, or child-repository operations. Budget expiry or discovery failure is silently empty while static completion remains available. Generated completion functions invoke `command arashi` so wrapper functions cannot recursively intercept completion queries.
@@ -75,7 +75,7 @@ Zsh and Fish can present candidate descriptions from Arashi's shared completion 
 
 ## Executable names
 
-`aw` is the supported **Arashi Workspace** executable shorthand. Supported npm and direct installations provide equivalent `arashi` and `aw` executable names. `arashi` remains the canonical product and command vocabulary; `aw` is not a Commander command alias or a second command vocabulary. Keep workflow examples and command discovery canonical: use `arashi --version`, `arashi --help`, and `arashi <command> --help`. See current installation-channel details about collision handling, shell integration, completion, updates, and manual installation at https://arashi.haphazard.dev.
+Use `aw` for workflow examples and command discovery. The `arashi` executable remains supported for existing scripts and workflows, and supported npm and direct installations provide both names through the same implementation. See current installation-channel details about collision handling, shell integration, completion, updates, and manual installation at https://arashi.haphazard.dev.
 
 ## Updating Arashi
 
@@ -83,13 +83,13 @@ Use the docs site for current install-method guidance. The CLI can also check up
 
 ```bash
 # check without changing files
-arashi update --check
+aw update --check
 
 # show the selected package-manager command or installer invocation
-arashi update --dry-run
+aw update --dry-run
 
 # run a supported npm-managed update non-interactively
-arashi update --yes
+aw update --yes
 ```
 
 `update --check` conflicts with `--dry-run` and `-n`. Arashi rejects either combination before release lookup, installer planning, package-manager execution, binary replacement, or mutation in both the native Commander path and the npm-managed wrapper path.

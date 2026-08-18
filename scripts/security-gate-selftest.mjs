@@ -37,6 +37,17 @@ function testFailOnPipeToShell() {
   rmSync(root, { recursive: true, force: true });
 }
 
+function testFailOnUnsafeAwSubstitution() {
+  const root = makeCase("fail-unsafe-aw-substitution");
+  writeFileSync(join(root, "skills", "arashi", "SKILL.md"), "target=$(aw list | fzf)\n");
+
+  const result = runGate(root);
+  assert.equal(result.status, 1, "gate should fail on unsafe aw command substitution");
+  assert.match(result.stdout, /ATH004/, "gate should report ATH004 finding");
+
+  rmSync(root, { recursive: true, force: true });
+}
+
 function testPassOnCleanContent() {
   const root = makeCase("pass-clean");
   writeFileSync(join(root, "skills", "arashi", "SKILL.md"), "npm install --global arashi@1.7.0\n");
@@ -52,7 +63,7 @@ function testAllowCanonicalShellInitEvalOnly() {
   const root = makeCase("allow-shell-init-eval");
   const skillPath = join(root, "skills", "arashi", "SKILL.md");
   for (const shell of ["bash", "zsh"]) {
-    writeFileSync(skillPath, `eval "$(command arashi shell init ${shell})"\n`);
+    writeFileSync(skillPath, `eval "$(command aw shell init ${shell})"\n`);
     const allowed = runGate(root);
     assert.equal(
       allowed.status,
@@ -62,12 +73,13 @@ function testAllowCanonicalShellInitEvalOnly() {
   }
 
   for (const command of [
-    'eval "$(command arashi completion bash)"',
-    'eval "$(command arashi shell init fish)"',
+    'eval "$(command aw completion bash)"',
+    'eval "$(command aw shell init fish)"',
     'eval "$(arashi shell init bash)"',
-    'eval "$(command arashi shell init bash); touch /tmp/injected"',
-    'eval "$(command arashi shell init bash)$(printf injected)"',
-    "eval '$(command arashi shell init bash)'",
+    'eval "$(command aw shell init bash); touch /tmp/injected"',
+    'eval "$(command aw shell init bash)$(printf injected)"',
+    "eval '$(command aw shell init bash)'",
+    'eval \"$(command arashi shell init bash)\"',
   ]) {
     writeFileSync(skillPath, `${command}\n`);
     const rejected = runGate(root);
@@ -113,6 +125,7 @@ function testFailOnExpiredException() {
 
 function main() {
   testFailOnPipeToShell();
+  testFailOnUnsafeAwSubstitution();
   testPassOnCleanContent();
   testAllowCanonicalShellInitEvalOnly();
   testFailOnExpiredException();

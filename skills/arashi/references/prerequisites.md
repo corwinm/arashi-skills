@@ -7,9 +7,9 @@ Check only the requirements for the operation being performed.
 | Requirement | Check | Expected result |
 | --- | --- | --- |
 | Git | `git --version` | Version string and exit code `0` |
-| Installed Arashi CLI | `arashi --version` | Version string and exit code `0` |
+| Installed Arashi CLI | `aw --version` | Version string and exit code `0` |
 
-If `arashi --version` fails, follow the current installation instructions at https://arashi.haphazard.dev. An already-installed standalone binary can perform local operations without Node.js or GitHub access.
+If `aw --version` fails, follow the current installation instructions at https://arashi.haphazard.dev. An already-installed standalone binary can perform local operations without Node.js or GitHub access.
 
 ## Conditional prerequisites
 

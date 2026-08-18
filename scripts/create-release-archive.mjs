@@ -1,9 +1,18 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import {
+  createReadStream,
+  createWriteStream,
+  existsSync,
+  mkdtempSync,
+  renameSync,
+  rmSync,
+} from "node:fs";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
+import { createGzip } from "node:zlib";
 
 export const CANONICAL_RELEASE_MEMBERS = Object.freeze([
   "skills",
@@ -74,25 +83,67 @@ export function verifyReleaseArchive(archivePath) {
   }
 }
 
-export function createReleaseArchive({ repositoryRoot, outputPath }) {
+export async function createReleaseArchive({
+  repositoryRoot,
+  outputPath,
+  spawnSyncImpl = spawnSync,
+}) {
   const root = resolve(repositoryRoot);
   const output = resolve(outputPath);
-  const result = spawnSync("tar", ["-czf", output, ...CANONICAL_RELEASE_MEMBERS], {
-    cwd: root,
-    encoding: "utf8",
-    env: { ...process.env, COPYFILE_DISABLE: "1" },
-    maxBuffer: 16 * 1024 * 1024,
-  });
-  if (result.error || result.status !== 0) {
-    return {
-      ok: false,
-      output,
-      defects: [`archive creation failed: ${result.error?.message ?? result.stderr.trim()}`],
-      members: [],
-    };
+  const relativeOutput = relative(root, output);
+  const outputIsWithinRoot =
+    relativeOutput !== "" &&
+    relativeOutput !== ".." &&
+    !relativeOutput.startsWith(`..${sep}`) &&
+    !isAbsolute(relativeOutput);
+  const outputTopLevel = relativeOutput.split(sep)[0];
+  const stagingParent =
+    outputIsWithinRoot && (outputTopLevel === "skills" || outputTopLevel === "security")
+      ? root
+      : dirname(output);
+  const temporaryRoot = mkdtempSync(join(stagingParent, ".arashi-release-archive-"));
+  const temporaryTar = join(temporaryRoot, "canonical.tar");
+  let adjacentTemporaryRoot;
+  try {
+    rmSync(output, { force: true });
+    const tarResult = spawnSyncImpl("tar", ["-cf", temporaryTar, ...CANONICAL_RELEASE_MEMBERS], {
+      cwd: root,
+      encoding: "utf8",
+      env: { ...process.env, COPYFILE_DISABLE: "1" },
+    });
+    if (tarResult.error || tarResult.status !== 0) {
+      return {
+        ok: false,
+        output,
+        defects: [`archive creation failed: ${tarResult.error?.message ?? tarResult.stderr.trim()}`],
+        members: [],
+      };
+    }
+
+    adjacentTemporaryRoot = mkdtempSync(join(dirname(output), ".arashi-release-output-"));
+    const temporaryGzip = join(adjacentTemporaryRoot, "canonical.tar.gz");
+    try {
+      await pipeline(
+        createReadStream(temporaryTar),
+        createGzip({ mtime: 0 }),
+        createWriteStream(temporaryGzip, { flags: "wx" }),
+      );
+    } catch (error) {
+      return {
+        ok: false,
+        output,
+        defects: [`archive compression failed: ${error.message}`],
+        members: [],
+      };
+    }
+
+    renameSync(temporaryGzip, output);
+    const verification = verifyReleaseArchive(output);
+    return { ...verification, output };
+  } finally {
+    if (adjacentTemporaryRoot) rmSync(adjacentTemporaryRoot, { recursive: true, force: true });
+    rmSync(temporaryRoot, { recursive: true, force: true });
   }
-  const verification = verifyReleaseArchive(output);
-  return { ...verification, output };
 }
 
 function printResult(result, created) {
@@ -138,7 +189,7 @@ if (isDirect) {
     const args = parseArgs(process.argv.slice(2));
     const result = args.verify
       ? verifyReleaseArchive(args.verify)
-      : createReleaseArchive({ repositoryRoot: args.root, outputPath: args.output });
+      : await createReleaseArchive({ repositoryRoot: args.root, outputPath: args.output });
     printResult(result, !args.verify);
     process.exitCode = result.ok ? 0 : 1;
   } catch (error) {

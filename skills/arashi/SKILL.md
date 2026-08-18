@@ -12,16 +12,16 @@ compatibility:
   optional_commands: [npm, node, fzf, tmux, sesh, herdr]
 entry_commands:
   install_arashi: "see https://arashi.haphazard.dev for installation instructions"
-  verify_arashi: arashi --version
-  discover_commands: arashi --help
+  verify_arashi: aw --version
+  discover_commands: aw --help
   workflows:
-    configured: arashi init && arashi status
-    intermediate: arashi clone --all && arashi create <branch> && arashi switch <branch>
-    advanced: arashi pull && arashi sync
-    standalone: arashi init --zero-config && arashi status
+    configured: aw init && aw status
+    intermediate: aw clone --all && aw create <branch> && aw switch <branch>
+    advanced: aw pull && aw sync
+    standalone: aw init --zero-config && aw status
   session_shortcuts:
-    list: arashi list
-    switch: arashi switch
+    list: aw list
+    switch: aw switch
 visibility: public
 status: draft
 ---
@@ -32,21 +32,21 @@ Coordinate Git worktrees across configured Arashi workspaces, or use Arashi ad h
 
 ## Start
 
-1. Assume the CLI is installed unless installation was requested or `arashi --version` fails.
-2. Use installed `arashi --help` and `arashi <command> --help` as parameter authority.
+1. Assume the CLI is installed unless installation was requested or `aw --version` fails.
+2. Use installed `aw --help` and `aw <command> --help` as parameter authority.
 3. Choose one mode using the section below, and initialize it when the workspace is fresh.
-4. After the chosen workspace is initialized or otherwise discoverable, diagnose health with `arashi doctor --json` before lower-level recovery.
+4. After the chosen workspace is initialized or otherwise discoverable, diagnose health with `aw doctor --json` before lower-level recovery.
 5. Load only the reference for the task.
 
 ## Choose a mode
 
-- **Configured mode**: Prefer configured mode; use ordinary `arashi init` for persisted defaults, custom paths, repository groups, workspace or repository hooks, child repositories, or coordinated commands. This is also the preferred mode for a single repository that needs those features.
-- **Zero-config standalone mode**: use `arashi init --zero-config` only for ad hoc work in an unconfigured non-bare Git project. It does not create or persist `.arashi` configuration. Passive discovery does not repair ignore coverage, and bootstrap must not edit tracked `.gitignore` or global Git configuration automatically.
+- **Configured mode**: Prefer configured mode; use ordinary `aw init` for persisted defaults, custom paths, repository groups, workspace or repository hooks, child repositories, or coordinated commands. This is also the preferred mode for a single repository that needs those features.
+- **Zero-config standalone mode**: use `aw init --zero-config` only for ad hoc work in an unconfigured non-bare Git project. It does not create or persist `.arashi` configuration. Passive discovery does not repair ignore coverage, and bootstrap must not edit tracked `.gitignore` or global Git configuration automatically.
 
 ## Universal operating rules
 
 - Filter before broad mutation. For mutating, expensive, network-heavy, or long-running multi-repository commands, use `--group` or `--only` unless the user explicitly requested every managed repository.
-- Preserve existing Git state. Preview broad removal with `arashi remove --dry-run`; do not delete worktrees, branches, or uncommitted changes without explicit scope.
+- Preserve existing Git state. Preview broad removal with `aw remove --dry-run`; do not delete worktrees, branches, or uncommitted changes without explicit scope.
 - Never create or modify global Git ignore configuration for Arashi. In configured workspaces, choose repository-local, tracked, or no-write ignore policy deliberately; bare repositories report administrative paths without editing ignore files.
 - Use `--json` for parsed non-interactive output. Treat `JSON_UNSUPPORTED_FOR_MODE` as a structured refusal for interactive, shell-code, or launch behavior.
 - Treat launcher and hook failures as real failures. Do not synthesize terminal/session identifiers, bypass user security policy, interpolate user paths into shell source, or silently fall back to a different launcher.

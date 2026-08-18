@@ -40,7 +40,7 @@ For normal dependency setup, prefer package-manager content-addressed stores plu
 
 Use lifecycle hooks when you need globs, remapping, external sources, interpolation, required entries, or conditional behavior. Do not invent unsupported materialization fields.
 
-\`arashi create --dry-run\` previews the ordered materialization plan in declaration order without mutation. \`arashi doctor\` non-mutatively diagnoses configured source availability and managed destination safety without repair and without capability probes.
+\`aw create --dry-run\` previews the ordered materialization plan in declaration order without mutation. \`aw doctor\` non-mutatively diagnoses configured source availability and managed destination safety without repair and without capability probes.
 `;
 
 function section(content, heading) {

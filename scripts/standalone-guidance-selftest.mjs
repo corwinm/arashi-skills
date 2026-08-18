@@ -20,7 +20,7 @@ const requirements = new Map([
     "SKILL.md",
     [
       "zero-config standalone",
-      "arashi init --zero-config",
+      "aw init --zero-config",
       "non-bare Git project",
       "ad hoc work",
       "Prefer configured mode",
@@ -35,9 +35,9 @@ const requirements = new Map([
       "Configured workflow",
       "1. Initialize only when configuration is absent",
       "2. Diagnose the initialized workspace before changing state",
-      "ordinary `arashi init`",
+      "ordinary `aw init`",
       "Standalone Repository Workflow",
-      "arashi init --zero-config",
+      "aw init --zero-config",
       "literal `.worktrees/` rule",
       "commands/workspace.md",
       "main worktree",
@@ -47,9 +47,9 @@ const requirements = new Map([
   [
     "references/commands/workspace.md",
     [
-      "arashi init --zero-config",
-      "arashi init --zero-config --dry-run",
-      "arashi init --zero-config --json",
+      "aw init --zero-config",
+      "aw init --zero-config --dry-run",
+      "aw init --zero-config --json",
       ".worktrees/<branch>",
       "exact planned destination",
       "git check-ignore --no-index -q -- \"$destination\"",
@@ -63,14 +63,14 @@ const requirements = new Map([
       "setup",
       "--repos",
       "--all",
-      "ordinary `arashi init`",
+      "ordinary `aw init`",
     ],
   ],
   [
     "references/troubleshooting.md",
     [
       "exact `.worktrees/<branch>` destination is not ignored",
-      "arashi init --zero-config",
+      "aw init --zero-config",
       'current_root=$(git rev-parse --show-toplevel)',
       'git_dir=$(git rev-parse --path-format=absolute --git-dir)',
       'main_root=${current_root%/.worktrees/*}',
@@ -203,8 +203,8 @@ function validateCoverageContract() {
       if (["list", "setup"].includes(name)) {
         const owner = readFileSync(join(sourceSkillRoot, command.reference), "utf8");
         assert.ok(
-          owner.includes(`arashi ${name}`),
-          `${name} coverage owner does not document arashi ${name}`
+          owner.includes(`aw ${name}`),
+          `${name} coverage owner does not document aw ${name}`
         );
       }
     } else {

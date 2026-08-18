@@ -277,7 +277,7 @@ function validateDeliberateDrift() {
     );
     writeFileSync(
       commandsPath,
-      `${commands}\nRun \`arashi status\` before \`arashi create topic --no-hook-input\`.\n`,
+      `${commands}\nRun \`aw status\` before \`aw create topic --no-hook-input\`.\n`,
     );
     assert.doesNotThrow(
       () => validateSkill(driftSkillRoot, "valid-multiple-command-guidance"),
@@ -286,7 +286,7 @@ function validateDeliberateDrift() {
 
     writeFileSync(
       commandsPath,
-      `${commands}\nRun \`arashi create topic\` before \`arashi status --no-hook-input\`.\n`,
+      `${commands}\nRun \`aw create topic\` before \`aw status --no-hook-input\`.\n`,
     );
     assert.throws(
       () => validateSkill(driftSkillRoot, "invalid-multiple-command-guidance"),

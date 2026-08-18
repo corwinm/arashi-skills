@@ -2,72 +2,72 @@
 
 Select an existing worktree and resolve one launch mode without unsafe fallback.
 
-Installed `arashi <command> --help` is the parameter authority.
+Installed `aw <command> --help` is the parameter authority.
 
 ## Worktree listing
 
-`arashi list` prints known worktree paths for navigation and automation.
+`aw list` prints known worktree paths for navigation and automation.
 
 ```bash
-arashi list
-arashi list --table
-arashi list --json
+aw list
+aw list --table
+aw list --json
 ```
 
-Default output is pipe-friendly; `--table` adds headers and `--json` emits structured worktree data. Standalone mode lists only the standalone repository's worktrees and does not traverse sub-repositories. Use `arashi list --help` for current depth and verbosity options.
+Default output is pipe-friendly; `--table` adds headers and `--json` emits structured worktree data. Standalone mode lists only the standalone repository's worktrees and does not traverse sub-repositories. Use `aw list --help` for current depth and verbosity options.
 
 ## Worktree Switching
 
-Use `arashi switch` to open a terminal context for an existing worktree, or change the current shell directory when shell integration is active.
+Use `aw switch` to open a terminal context for an existing worktree, or change the current shell directory when shell integration is active.
 
 ```bash
 # create and explicitly launch in plain tmux
-arashi create feature-auth --tmux
+aw create feature-auth --tmux
 
 # parent workspace worktrees (default)
-arashi switch
+aw switch
 
 # child repositories in current workspace only
-arashi switch --repos docs
+aw switch --repos docs
 
 # include parent workspaces + nested child repo worktrees
-arashi switch --all
+aw switch --all
 
 # select one exact worktree by full path
-arashi switch --path /path/to/worktree
+aw switch --path /path/to/worktree
 
 # force Cursor / VS Code / Kiro for one run
-arashi switch --cursor feature-auth
-arashi switch --vscode feature-auth
-arashi switch --kiro feature-auth
+aw switch --cursor feature-auth
+aw switch --vscode feature-auth
+aw switch --kiro feature-auth
 
 # request parent-shell cd when shell integration is active
-arashi switch --cd feature-auth
+aw switch --cd feature-auth
 
 # force launch behavior for one run while preserving a configured launcher
-arashi switch --launch feature-auth
+aw switch --launch feature-auth
 
 # sesh mode inside tmux
-arashi switch --sesh
+aw switch --sesh
 
 # force plain tmux for this invocation
-arashi switch --tmux feature-auth
+aw switch --tmux feature-auth
 
 # explicitly open or focus the worktree in Herdr
-arashi switch --herdr feature-auth
+aw switch --herdr feature-auth
 
 # request a tab/equivalent in the selected launcher for this invocation
-arashi switch --tab feature-auth
-arashi switch --tab --herdr feature-auth
+aw switch --tab feature-auth
+aw switch --tab --herdr feature-auth
 
 # capability failure example: explicit IDEs do not expose tab launch
-arashi switch --tab --vscode feature-auth
+aw switch --tab --vscode feature-auth
 
 # bypass a configured explicit sesh or Herdr switch mode without forcing behavior
-arashi switch --ignore-configured-launcher feature-auth
+aw switch --ignore-configured-launcher feature-auth
 
 # force generic automatic launch and bypass a configured named launcher
-arashi switch --launch --ignore-configured-launcher feature-auth
+aw switch --launch --ignore-configured-launcher feature-auth
 ```
 
 Expected outcomes:
@@ -85,7 +85,7 @@ Expected outcomes:
 - with no explicit or configured launcher, trimmed `HERDR_ENV` must equal exactly `1` to select Herdr automatically; automatic tmux remains earlier, while Herdr is earlier than cmux, IDE, and terminal fallbacks
 - positively detected Kitty is automatic only, requires Kitty 0.43+ with permitted remote control, and reports `mode: "kitty"`; there is no explicit Kitty launcher flag, and `kitty` is not a persisted create or switch mode
 - once managed Kitty is selected, version, permission, state, duplicate, focus, or launch failure reports actionable `LAUNCH_FAILED` detail and does not fall back to another launcher
-- `arashi switch --cd` changes the current shell directory when invoked through the installed shell wrapper; without shell integration it warns and does not launch an alternate context
+- `aw switch --cd` changes the current shell directory when invoked through the installed shell wrapper; without shell integration it warns and does not launch an alternate context
 - `--launch` preserves a configured `sesh` or `herdr` launcher while forcing launch behavior
 - `--ignore-configured-launcher` alone bypasses only a configured `sesh` or `herdr` launcher; it preserves configured or contextual `auto`, `cd`, or `launch` behavior and does not independently force or prevent parent-shell `cd`
 - The exact generic automatic-launch request is `--launch --ignore-configured-launcher`; explicit launcher and tab selectors remain authoritative and keep their prerequisite, failure, and no-fallback policy
@@ -107,21 +107,21 @@ For create, the complete precedence examples are:
 
 ```bash
 # tab intent implies both launch and selection
-arashi create feature-auth --tab
+aw create feature-auth --tab
 
 # positive tab intent wins over both negative flags
-arashi create feature-auth --tab --no-launch --no-switch
+aw create feature-auth --tab --no-launch --no-switch
 
 # positive launch/switch flags are compatible and redundant with tab intent
-arashi create feature-auth --tab --launch
-arashi create feature-auth --tab --switch
+aw create feature-auth --tab --launch
+aw create feature-auth --tab --switch
 
 # preview the resolved tab launch without mutation
-arashi create feature-auth --tab --dry-run
+aw create feature-auth --tab --dry-run
 ```
 
 `create --tab` implies launch and switch, bypasses configured generic or editor-scoped launch defaults, wins over `--no-launch` and `--no-switch`, and uses automatic contextual launcher resolution unless `--tmux`, `--sesh`, or `--herdr` explicitly selects the adapter. `create --tab --launch` and `create --tab --switch` are compatible. `create --tab --json` returns `JSON_UNSUPPORTED_FOR_MODE` with `details.mode: "interactive-or-launch"` and exits `1`. Both JSON guards run before option or context validation, and stdout remains exactly one JSON document. After authoritative workspace/config resolution, a knowable unsupported tab request fails before managed-ignore reconciliation, hooks, branch creation, or worktree creation. Dry-run previews tab intent without mutation and does not require runtime-only session evidence. If a supported launch is attempted but fails at runtime, Arashi reports partial failure, preserves every successfully created worktree, and does not retry as a window or another launcher.
-Managed context outranks the outer terminal. For example, Ghostty inside tmux uses a tmux window; Ghostty inside Herdr uses a Herdr tab; cmux uses a workspace (its vertical-tab equivalent). Bare macOS Ghostty 1.3+ uses a Ghostty tab. Bare Terminal.app returns `TAB_DISPOSITION_UNSUPPORTED` before target preflight, AppleScript, command execution, or fallback launch. To use a true Terminal.app tab, press Command-T manually, then run `arashi switch --cd`; this requires active Arashi shell integration. To request normal automatic launch, run `arashi switch --launch --ignore-configured-launcher` directly; it opens a new Terminal window when automatic launcher resolution selects Terminal.app. Bare Git Bash/MinTTY returns an actionable `TAB_DISPOSITION_UNSUPPORTED` and does not fall back to a new window. An automatically detected IDE whose CLI is unavailable continues canonical terminal/platform resolution; after that resolution, apply the selected launcher's tab mapping or capability, and do not classify the unavailable IDE as a selected unsupported IDE.
+Managed context outranks the outer terminal. For example, Ghostty inside tmux uses a tmux window; Ghostty inside Herdr uses a Herdr tab; cmux uses a workspace (its vertical-tab equivalent). Bare macOS Ghostty 1.3+ uses a Ghostty tab. Bare Terminal.app returns `TAB_DISPOSITION_UNSUPPORTED` before target preflight, AppleScript, command execution, or fallback launch. To use a true Terminal.app tab, press Command-T manually, then run `aw switch --cd`; this requires active Arashi shell integration. To request normal automatic launch, run `aw switch --launch --ignore-configured-launcher` directly; it opens a new Terminal window when automatic launcher resolution selects Terminal.app. Bare Git Bash/MinTTY returns an actionable `TAB_DISPOSITION_UNSUPPORTED` and does not fall back to a new window. An automatically detected IDE whose CLI is unavailable continues canonical terminal/platform resolution; after that resolution, apply the selected launcher's tab mapping or capability, and do not classify the unavailable IDE as a selected unsupported IDE.
 
 For WezTerm and Herdr, an empty or missing exact pane/workspace identifier is unsupported. iTerm2 and macOS Ghostty require an exact target window, and Ghostty also requires supported-version evidence. Any missing target or supported-version evidence returns `TAB_DISPOSITION_UNSUPPORTED` before any process, automation, or fallback attempt. Denied or failed automation for a supported macOS tab adapter returns `LAUNCH_FAILED` and never falls back to a new window, another launcher, or generic terminal. Denied or failed read-only macOS automation preflight for a supported tab adapter returns `LAUNCH_FAILED` before create mutation or switch launch, with no fallback. Across every supported row, preserve the selected app/profile, current shell, and exact cwd; pass paths as distinct process arguments or through a static data-only automation protocol, strip shell-directive state from launched children, and never interpolate user-derived paths or commands into shell or AppleScript source.
 
@@ -134,7 +134,7 @@ Configure the default with `"switch": { "mode": "auto" }`. For `defaults.switch.
 - `cd` requests parent-shell switching. A configured `cd` warns and falls back to automatic launch when shell integration is unavailable; an explicit `--cd` instead warns without launching another context.
 - `launch` always enters automatic launcher selection and does not prefer `cd`.
 - `sesh` and `herdr` choose that explicit launcher regardless of detected context or shell integration.
-Use `arashi shell install` to enable parent-shell switching for bash, zsh, or fish, or `arashi shell init <shell>` for manual setup.
+Use `aw shell install` to enable parent-shell switching for bash, zsh, or fish, or `aw shell init <shell>` for manual setup.
 
 Precedence for create/switch launch behavior is: explicit flag > opt-out flag > config default > built-in default. `--tmux` is a per-invocation-only override: configured `auto` remains the persistent contextual path to plain tmux. In zero-config standalone and configured repositories alike, explicit tmux requires a non-empty trimmed `TMUX` and does not fall back after prerequisite or process failure.
 
@@ -164,7 +164,7 @@ For switch, `--launch` forces launch while preserving a configured explicit laun
 - This default workspace-launch contract is distinct from `--tab --herdr`: tab disposition uses `herdr tab create` in the active workspace, requires a non-empty exact `HERDR_WORKSPACE_ID`, and does not resolve or require the non-bare source checkout used by `herdr worktree open`.
 - A first open and an already-open response are both successful when Herdr returns a validated `worktree_opened` result with a workspace ID. Repeated launch focuses the existing workspace and reapplies the deterministic label.
 - Arashi owns Git worktree creation and removal. Never substitute `herdr worktree create`, `herdr worktree remove`, or `herdr workspace create`.
-- `arashi remove` intentionally leaves Herdr workspaces untouched. For opt-in cleanup, resolve the workspace ID before removal and use `herdr workspace close <workspace-id>` in a pre-remove hook; automatic closure is unsafe because the workspace may contain agents or unsaved terminal state.
+- `aw remove` intentionally leaves Herdr workspaces untouched. For opt-in cleanup, resolve the workspace ID before removal and use `herdr workspace close <workspace-id>` in a pre-remove hook; automatic closure is unsafe because the workspace may contain agents or unsaved terminal state.
 - Canonical workflow reference: `https://arashi.haphazard.dev/workflows/herdr/`.
 ## Session Navigation (Optional)
 
