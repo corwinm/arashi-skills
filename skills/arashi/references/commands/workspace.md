@@ -2,21 +2,21 @@
 
 Configure managed paths and repositories. Choose ignore scope deliberately and never modify global Git ignore configuration.
 
-Installed `arashi <command> --help` is the parameter authority.
+Installed `aw <command> --help` is the parameter authority.
 
 ## Workspace Initialization
 
 Prefer configured mode whenever a project can adopt Arashi, including a single repository that needs repository/workspace hooks, persisted defaults, or custom paths. Choose initialization by workspace mode:
 
-- Use ordinary `arashi init` for configured child repositories, groups, hooks, defaults, custom managed paths, or coordinated commands.
-- Use `arashi init --zero-config` for ad hoc work in an existing non-bare Git project that has not adopted Arashi, using the fixed root-level `.worktrees/<branch>` layout.
+- Use ordinary `aw init` for configured child repositories, groups, hooks, defaults, custom managed paths, or coordinated commands.
+- Use `aw init --zero-config` for ad hoc work in an existing non-bare Git project that has not adopted Arashi, using the fixed root-level `.worktrees/<branch>` layout.
 
 Preview or automate standalone bootstrap without changing its local-only policy:
 
 ```bash
-arashi init --zero-config --dry-run
-arashi init --zero-config --json
-arashi init --zero-config --dry-run --json
+aw init --zero-config --dry-run
+aw init --zero-config --json
+aw init --zero-config --dry-run --json
 ```
 
 Zero-config init accepts its mode flag plus `--dry-run`, `--verbose`, and `--json`; do not combine it with configured-init options such as `--repos-dir`, `--worktrees-dir`, `--ignore-scope`, `--force`, or `--no-discover`. It creates no `.arashi/config.json`, does not edit tracked `.gitignore`, and does not create or modify global Git configuration. If no effective rule already covers the deterministic probe, it adds only the literal `.worktrees/` rule to the repository-local exclude file resolved by Git. Dry-run plans the same directory and rule actions without writes; JSON mode emits one structured envelope.
@@ -25,16 +25,16 @@ Passive standalone discovery requires an existing main-root `.worktrees/` direct
 
 Supported standalone lifecycle commands are `create`, `list`, `status`, `switch`, `remove`, `prune`, `doctor`, `move`, and `handoff`. Invoking them from the main worktree or a linked worktree resolves the same sole main repository. Repository or group filters on these commands, including `create --only`, `create --group`, `status --group`, interactive multi-repository selection, and `switch --repos` or `switch --all`, have no standalone meaning and fail clearly.
 
-The child-coordination commands `add`, `clone`, `sync`, `pull`, `push`, `exec`, and `setup` are configured-only. Run ordinary `arashi init` to upgrade before using them; do not interpret an empty repository map as a successful no-op.
+The child-coordination commands `add`, `clone`, `sync`, `pull`, `push`, `exec`, and `setup` are configured-only. Run ordinary `aw init` to upgrade before using them; do not interpret an empty repository map as a successful no-op.
 
-For configured mode, run `arashi init` from an existing repository root, or from a non-repository parent directory when you want Arashi to create the repository during setup.
+For configured mode, run `aw init` from an existing repository root, or from a non-repository parent directory when you want Arashi to create the repository during setup.
 
 When an existing repository is bare, run init from the bare repository or a Git-discoverable descendant. Arashi canonicalizes the workspace to the absolute bare repository directory before it reads or writes configuration.
 
 Initialize an existing repository with defaults:
 
 ```bash
-arashi init
+aw init
 ```
 
 Bootstrap the current directory as a new repository:
@@ -42,7 +42,7 @@ Bootstrap the current directory as a new repository:
 ```bash
 mkdir my-arashi-workspace
 cd my-arashi-workspace
-arashi init
+aw init
 # prompt: Repository target ('.' for current directory or a child directory name) -> .
 ```
 
@@ -51,7 +51,7 @@ Bootstrap a child repository from a parent directory:
 ```bash
 mkdir scratch
 cd scratch
-arashi init
+aw init
 # prompt: Repository target ('.' for current directory or a child directory name) -> my-arashi-repo
 cd my-arashi-repo
 ```
@@ -59,13 +59,13 @@ cd my-arashi-repo
 Use a custom repositories directory:
 
 ```bash
-arashi init --repos-dir ./workspace-repos
+aw init --repos-dir ./workspace-repos
 ```
 
 Use a custom worktree base directory:
 
 ```bash
-arashi init --worktrees-dir ./workspace-worktrees
+aw init --worktrees-dir ./workspace-worktrees
 ```
 
 An explicit `--worktrees-dir` wins over the repository-aware omitted default in either repository type and is normalized before persistence.
@@ -74,13 +74,13 @@ Choose an explicit clone-local ignore preference only when the repository-local 
 
 ```bash
 # write missing managed-directory rules to the workspace-root .gitignore
-arashi init --ignore-scope tracked
+aw init --ignore-scope tracked
 
 # do not write ignore files; report unignored managed paths instead
-arashi init --ignore-scope none
+aw init --ignore-scope none
 
 # restore the repository-local default in an existing configured workspace
-arashi init --ignore-scope local
+aw init --ignore-scope local
 ```
 
 Expected outcomes:
@@ -92,7 +92,7 @@ Expected outcomes:
 - in non-bare repositories, safe configured repository and worktree directories are checked against Git's effective tracked, repository-local, and global ignore sources before any write.
 - with no explicit or stored preference, missing rules are added to the repository-local exclude file resolved by Git; tracked `.gitignore` is unchanged.
 - `tracked` and `none` are stored in clone-local Git state, not shared `.arashi/config.json`; selecting `local` clears the non-default preference.
-- `arashi init --ignore-scope local` can reset only the preference and reconcile an existing valid workspace without `--force` or reinitializing configuration, hooks, or repositories.
+- `aw init --ignore-scope local` can reset only the preference and reconcile an existing valid workspace without `--force` or reinitializing configuration, hooks, or repositories.
 - existing effective rules are honored without duplication even when their source differs from the selected scope.
 - repository root, absolute paths, and parent traversal are reported as unsafe and are never added automatically.
 - Arashi never creates or modifies global Git configuration or a global excludes file.
@@ -121,17 +121,17 @@ Expected outcomes:
 - human output explains warnings; JSON-capable modes keep stdout to one JSON document and place details under the command's managed-ignore result.
 - after configured initialization, lifecycle commands use `.arashi/config.json`; `init` itself reconciles before writing that file. Zero-config standalone bootstrap is a separate local-only path described above.
 
-Run `arashi doctor --json` to inspect missing rules, stale Arashi-owned entries, invalid stored scope, or unsafe configured paths without mutation. Follow its suggested repair; use `arashi init --ignore-scope local` to restore the default when that is the intended preference. Do not repair Arashi by setting `core.excludesFile` or editing any global Git configuration.
+Run `aw doctor --json` to inspect missing rules, stale Arashi-owned entries, invalid stored scope, or unsafe configured paths without mutation. Follow its suggested repair; use `aw init --ignore-scope local` to restore the default when that is the intended preference. Do not repair Arashi by setting `core.excludesFile` or editing any global Git configuration.
 
 ## SSH Remote Aliases for Add and Clone
 
 Configured workspaces accept Git's explicit-user SCP form, omitted-user SCP form, and `ssh://` form. For example:
 
 ```bash
-arashi add git@work-github:acme/api.git
-arashi add work-github:acme/api.git
-arashi add ssh://git@work-github/acme/api.git
-arashi add ssh://work-github/acme/api.git
+aw add git@work-github:acme/api.git
+aw add work-github:acme/api.git
+aw add ssh://git@work-github/acme/api.git
+aw add ssh://work-github/acme/api.git
 ```
 
 The host token is opaque: Git/OpenSSH owns host resolution and authentication. Arashi does not read, manage, or resolve SSH configuration, does not run an independent SSH connectivity probe, and does not synchronize aliases, keys, identities, or routing. It passes the remote to Git and reports Git's failure in the normal command result.
@@ -169,22 +169,22 @@ Materialization and config persistence are one rollback boundary. If linked-work
 
 ## Repository Cloning and Recovery
 
-Before choosing lower-level recovery commands, use `arashi doctor --json` for structured, non-mutating workspace health diagnostics. Follow the reported finding codes, severities, and suggested commands to decide whether to run `status`, `clone`, `prune`, or repository-specific Git commands next.
+Before choosing lower-level recovery commands, use `aw doctor --json` for structured, non-mutating workspace health diagnostics. Follow the reported finding codes, severities, and suggested commands to decide whether to run `status`, `clone`, `prune`, or repository-specific Git commands next.
 
-Use `arashi clone` to clone configured repositories that are missing locally:
+Use `aw clone` to clone configured repositories that are missing locally.
 
 ```bash
 # interactively choose missing repositories
-arashi clone
+aw clone
 
 # clone all missing repositories
-arashi clone --all
+aw clone --all
 ```
 
 Configured clone shares the repository base policy with configured create. Root `baseBranch` is the fallback; `repos.<name>.baseBranch` overrides it for one child. A one-off `--base <branch>` overrides configuration for every selected missing child, while repeatable `--repo-base <repository=branch>` entries override only their exact configured child:
 
 ```bash
-arashi clone --all --base release --repo-base api=api/release
+aw clone --all --base release --repo-base api=api/release
 ```
 
 Clone precedence is repository CLI > invocation CLI > repository config > workspace config > legacy omitted behavior; unlike configured create, clone never considers deprecated `defaults.create.baseBranch`. `@meta` is invalid for clone because clone selects configured children only. Malformed, duplicate, unknown, and unselected selectors and unavailable effective bases are aggregated across the selected missing set before managed-ignore reconciliation or destination creation.
@@ -195,7 +195,7 @@ The deprecated `defaults.create.baseBranch` value remains create-only and does n
 
 The older per-repository partial-success behavior applies only to a multi-repository clone with no effective base policy: a Git failure may be recorded while unaffected repositories continue. When a base policy applies, selector, remote, and base checks aggregate across the complete selected missing set, and any preflight failure blocks every selected clone before mutation.
 
-For `arashi clone --all --json`, stdout is one envelope. When an effective base policy applies, successful policy evidence appears under `data.base` as ordered records containing each selected child's `repositoryIdentity`, `repositoryName`, normalized `requestedBranch`, and stable source; when every selected child uses legacy-omitted behavior, `data.base` is absent. Selector failures use `BASE_BRANCH_POLICY_INVALID` with all issues under `error.details.issues`; unavailable remote/base preflight uses `CLONE_BASE_PREFLIGHT_FAILED` with every affected child under `error.details.repositories`, including its requested branch, source, `gitUrl`, and reason. Use the envelope, exit status, and stderr rather than parse human output.
+For `aw clone --all --json`, stdout is one envelope. When an effective base policy applies, successful policy evidence appears under `data.base` as ordered records containing each selected child's `repositoryIdentity`, `repositoryName`, normalized `requestedBranch`, and stable source; when every selected child uses legacy-omitted behavior, `data.base` is absent. Selector failures use `BASE_BRANCH_POLICY_INVALID` with all issues under `error.details.issues`; unavailable remote/base preflight uses `CLONE_BASE_PREFLIGHT_FAILED` with every affected child under `error.details.repositories`, including its requested branch, source, `gitUrl`, and reason. Use the envelope, exit status, and stderr rather than parse human output.
 
 Expected outcomes:
 
@@ -206,4 +206,4 @@ Expected outcomes:
 - an existing coordinated target is reused without rewrite or ancestry claims
 - already-present repositories are skipped
 - `--json` remains one document with per-repository effective base/source or structured aggregated failures
-- `arashi status` no longer reports missing repository spawn errors
+- `aw status` no longer reports missing repository spawn errors

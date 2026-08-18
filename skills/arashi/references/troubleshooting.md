@@ -3,15 +3,15 @@
 When the CLI is installed and the workspace is initialized or otherwise discoverable, start with the narrowest diagnostic:
 
 ```bash
-arashi doctor --json
-arashi <command> --help
+aw doctor --json
+aw <command> --help
 ```
 
-Otherwise, verify `arashi --version`, choose and initialize the intended mode, then run workspace diagnostics. Preserve the failing command, exit status, structured error code, selected repository scope, and any worktrees already created. Do not retry a mutating command with broader selectors or a different launcher until the failure is understood.
+Otherwise, verify `aw --version`, choose and initialize the intended mode, then run workspace diagnostics. Preserve the failing command, exit status, structured error code, selected repository scope, and any worktrees already created. Do not retry a mutating command with broader selectors or a different launcher until the failure is understood.
 
 ## CLI is missing or exits immediately
 
-**First diagnostic:** run `arashi --version` and identify whether the installation is npm-managed or a standalone binary.
+**First diagnostic:** run `aw --version` and identify whether the installation is npm-managed or a standalone binary.
 
 **Recovery:** follow the current installation instructions at https://arashi.haphazard.dev. Node/npm is required only for the npm path. Network access is required only for installation, update checks, or remote operations.
 
@@ -19,17 +19,17 @@ Otherwise, verify `arashi --version`, choose and initialize the intended mode, t
 
 ## Update or completion behaves unexpectedly
 
-**First diagnostic:** inspect `arashi update --help` or run `arashi update --check`. For completion, run `command arashi completion <shell>` directly so a wrapper function cannot recurse.
+**First diagnostic:** inspect `aw update --help` or run `aw update --check`. For completion, run `command aw completion <shell>` directly so a wrapper function cannot recurse.
 
-**Recovery:** `arashi completion bash` (or zsh/fish) should produce static completion. Static completion remains available outside configured workspaces. Dynamic completion is intentionally empty when discovery fails or the 200 ms whole-query budget expires; it performs no network requests, hooks, prompts, mutation, or child-repository operations.
+**Recovery:** `aw completion bash` (or zsh/fish) should produce static completion. Static completion remains available outside configured workspaces. Dynamic completion is intentionally empty when discovery fails or the 200 ms whole-query budget expires; it performs no network requests, hooks, prompts, mutation, or child-repository operations.
 
-If completion generation works but profile activation is missing, run `arashi shell install`. A standalone binary from the same release exposes the same generated completion behavior. See [Setup, update, and completion](commands/setup.md).
+If completion generation works but profile activation is missing, run `aw shell install`. A standalone binary from the same release exposes the same generated completion behavior. See [Setup, update, and completion](commands/setup.md).
 
 ## Workspace configuration or status is unhealthy
 
-**First diagnostic:** if the workspace is discoverable, use `arashi doctor --json`, then inspect `arashi status` and `.arashi/config.json` only as directed. If configuration is absent in a fresh workspace, verify `arashi --version`, choose the intended mode, and initialize it first.
+**First diagnostic:** if the workspace is discoverable, use `aw doctor --json`, then inspect `aw status` and `.arashi/config.json` only as directed. If configuration is absent in a fresh workspace, verify `aw --version`, choose the intended mode, and initialize it first.
 
-**Recovery:** run ordinary `arashi init` for a project adopting configured mode. Preserve an existing configured worktree directory and ignore scope unless the user deliberately changes it. For child repositories or custom paths, follow [Workspace and repositories](commands/workspace.md).
+**Recovery:** run ordinary `aw init` for a project adopting configured mode. Preserve an existing configured worktree directory and ignore scope unless the user deliberately changes it. For child repositories or custom paths, follow [Workspace and repositories](commands/workspace.md).
 
 **Escalate:** report the exact failed check and path classification rather than editing `.gitignore`, Git common excludes, or global configuration speculatively.
 
@@ -37,7 +37,7 @@ If completion generation works but profile activation is missing, run `arashi sh
 
 **Symptom:** the exact `.worktrees/<branch>` destination is not ignored.
 
-**First diagnostic:** preview `arashi init --zero-config --dry-run`, then verify the exact planned destination:
+**First diagnostic:** preview `aw init --zero-config --dry-run`, then verify the exact planned destination:
 
 ```bash
 current_root=$(git rev-parse --show-toplevel)
@@ -57,7 +57,7 @@ destination=".worktrees/$branch"
 git check-ignore --no-index -q -- "$destination"
 ```
 
-**Recovery:** run `arashi init --zero-config` to append the literal `.worktrees/` rule to the repository-local exclude when safe. Passive discovery does not repair ignore coverage. Do not edit tracked `.gitignore` or global Git configuration automatically.
+**Recovery:** run `aw init --zero-config` to append the literal `.worktrees/` rule to the repository-local exclude when safe. Passive discovery does not repair ignore coverage. Do not edit tracked `.gitignore` or global Git configuration automatically.
 
 **Escalate:** if the destination is external, unsafe, or already affected by a different effective rule, stop and show the classification. Adopt configured mode when custom paths or persistent policy are needed.
 
@@ -111,14 +111,14 @@ Verify the selected tool's current command contract and genuine managed context.
 
 ## Remove or prune is unsafe
 
-**First diagnostic:** run `arashi remove <target> --dry-run` and inspect branch/worktree ambiguity, dirty state, and hook previews. Use `git worktree list` before pruning stale metadata.
+**First diagnostic:** run `aw remove <target> --dry-run` and inspect branch/worktree ambiguity, dirty state, and hook previews. Use `git worktree list` before pruning stale metadata.
 
-**Recovery:** narrow the target, preserve dirty work, and retry only after the preview matches the request. Use `arashi prune` for stale Git metadata, not as a substitute for reviewing a live worktree.
+**Recovery:** narrow the target, preserve dirty work, and retry only after the preview matches the request. Use `aw prune` for stale Git metadata, not as a substitute for reviewing a live worktree.
 
 ## Recovery playbook
 
 1. Stop after the first unexplained mutation or partial failure.
-2. When workspace discovery is available, record `arashi doctor --json` and `arashi status`; always record the exact command/selectors and Git worktree state.
+2. When workspace discovery is available, record `aw doctor --json` and `aw status`; always record the exact command/selectors and Git worktree state.
 3. Preserve successful creations and dirty worktrees.
 4. Fix the owner-specific prerequisite or policy.
 5. Retry with the same narrow scope; verify before widening.

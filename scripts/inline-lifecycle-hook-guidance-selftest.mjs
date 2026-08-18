@@ -22,7 +22,7 @@ const suppliedSkillRoot = skillRootIndex >= 0 ? process.argv[skillRootIndex + 1]
 if (skillRootIndex >= 0 && !suppliedSkillRoot) throw new Error("--skill-root requires a path");
 
 const requiredHookGuidance = [
-  "Ordinary `arashi init` generates inert `.example` hook files",
+  "Ordinary `aw init` generates inert `.example` hook files",
   "`hooks.scripts.<lifecycle>`",
   "`repos.<name>.hooks.<lifecycle>`",
   "`pre-create`, `post-create`, `pre-remove`, and `post-remove`",
@@ -60,7 +60,7 @@ const requiredHookGuidance = [
   "File hooks receive `ARASHI_HOOK_SOURCE_PATH` as their absolute source path",
   "Inline hooks omit `ARASHI_HOOK_SOURCE_PATH`",
   "no path-like replacement is invented",
-  "installed `arashi create --help` and `arashi remove --help`",
+  "installed `aw create --help` and `aw remove --help`",
   "installed configuration schema",
 ];
 
@@ -94,7 +94,7 @@ function validateSkill(root, label) {
   validateCopyableHookGuidance(hooks, `${label}/references/hooks.md`);
 
   const commands = readFileSync(join(root, "references", "commands.md"), "utf8");
-  assert.match(commands, /installed `arashi --help` and `arashi <command> --help` are the parameter authority/i);
+  assert.match(commands, /installed `aw --help` and `aw <command> --help` are the parameter authority/i);
 
   for (const { content, relativePath } of installableGuidanceFiles(root)) {
     checkContradictions(content, `${label}/${relativePath}`);
@@ -240,7 +240,7 @@ function createCompleteFixture(root) {
   writeFileSync(join(root, "SKILL.md"), "# Fixture router\n");
   writeFileSync(
     join(root, "references", "commands.md"),
-    "The installed `arashi --help` and `arashi <command> --help` are the parameter authority.\n",
+    "The installed `aw --help` and `aw <command> --help` are the parameter authority.\n",
   );
   const bindingLines = [
     "`hooks.scripts.<lifecycle>` is workspace ownership and `repos.<name>.hooks.<lifecycle>` is repository ownership.",

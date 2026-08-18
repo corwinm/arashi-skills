@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
-import { validateReleaseArchiveMembers } from "./create-release-archive.mjs";
+import {
+  createReleaseArchive,
+  validateReleaseArchiveMembers,
+} from "./create-release-archive.mjs";
 
 const repositoryRoot = resolve(".");
 const producerPath = join(repositoryRoot, "scripts", "create-release-archive.mjs");
@@ -26,6 +29,7 @@ function createFixture() {
   mkdirSync(join(root, "security"), { recursive: true });
   mkdirSync(join(root, "scripts"), { recursive: true });
   writeFileSync(join(root, "skills", "arashi", "SKILL.md"), "fixture\n");
+  writeFileSync(join(root, "skills", "arashi", "large-fixture.bin"), Buffer.alloc(17 * 1024 * 1024, "x"));
   writeFileSync(join(root, "security", "policy.md"), "fixture\n");
   writeFileSync(join(root, "scripts", "maintainer.mjs"), "fixture\n");
   writeFileSync(join(root, "README.md"), "fixture\n");
@@ -48,7 +52,7 @@ function verify(archive) {
   });
 }
 
-function main() {
+async function main() {
   const roots = [];
   try {
     const fixture = createFixture();
@@ -73,6 +77,107 @@ function main() {
     for (const member of members) {
       assert.match(member, /^(?:skills(?:\/|$)|README\.md$|LICENSE$|security(?:\/|$))/);
     }
+
+    const repeatedArchive = join(fixture, "canonical-repeated.tar.gz");
+    const repeated = spawnSync(
+      process.execPath,
+      [producerPath, "--root", fixture, "--output", repeatedArchive],
+      { cwd: repositoryRoot, encoding: "utf8" },
+    );
+    assert.equal(repeated.status, 0, output(repeated));
+    assert.deepEqual(
+      readFileSync(repeatedArchive),
+      readFileSync(archive),
+      "canonical release archive must regenerate byte-for-byte from unchanged inputs",
+    );
+
+    const exdevPreload = join(fixture, "simulate-exdev.cjs");
+    writeFileSync(
+      exdevPreload,
+      `const fs = require("node:fs");
+const { syncBuiltinESMExports } = require("node:module");
+const originalRenameSync = fs.renameSync;
+fs.renameSync = (source, destination) => {
+  if (!source.startsWith(process.env.EXDEV_DESTINATION_ROOT)) {
+    const error = new Error("simulated cross-device rename");
+    error.code = "EXDEV";
+    throw error;
+  }
+  return originalRenameSync(source, destination);
+};
+syncBuiltinESMExports();
+`,
+    );
+    const crossFilesystemArchive = join(fixture, "cross-filesystem.tar.gz");
+    const crossFilesystem = spawnSync(
+      process.execPath,
+      [producerPath, "--root", fixture, "--output", crossFilesystemArchive],
+      {
+        cwd: repositoryRoot,
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          EXDEV_DESTINATION_ROOT: fixture,
+          NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ""} --require=${exdevPreload}`.trim(),
+        },
+      },
+    );
+    assert.equal(
+      crossFilesystem.status,
+      0,
+      `release creation must not rename across filesystems:\n${output(crossFilesystem)}`,
+    );
+
+    const commands = [];
+    const noExternalGzipArchive = join(fixture, "no-external-gzip.tar.gz");
+    const noExternalGzip = await createReleaseArchive({
+      repositoryRoot: fixture,
+      outputPath: noExternalGzipArchive,
+      spawnSyncImpl(command, args, options) {
+        commands.push(command);
+        if (command === "gzip") {
+          return {
+            error: Object.assign(new Error("spawnSync gzip ENOENT"), { code: "ENOENT" }),
+            status: null,
+            stderr: "",
+          };
+        }
+        return spawnSync(command, args, options);
+      },
+    });
+    assert.equal(noExternalGzip.ok, true, noExternalGzip.defects.join("\n"));
+    assert.ok(commands.includes("tar"), "archive creation must use the injected tar runner");
+    assert.equal(commands.includes("gzip"), false, "archive creation must not require external gzip");
+
+    const nestedArchive = join(fixture, "skills", "nested-output.tar.gz");
+    const nested = spawnSync(
+      process.execPath,
+      [producerPath, "--root", fixture, "--output", nestedArchive],
+      { cwd: repositoryRoot, encoding: "utf8" },
+    );
+    assert.equal(nested.status, 0, output(nested));
+    assert.equal(
+      listMembers(nestedArchive).some((member) => member.includes(".arashi-release-archive-")),
+      false,
+      "staging directories must not become packaged members",
+    );
+    const firstNestedMembers = listMembers(nestedArchive);
+    const repeatedNested = spawnSync(
+      process.execPath,
+      [producerPath, "--root", fixture, "--output", nestedArchive],
+      { cwd: repositoryRoot, encoding: "utf8" },
+    );
+    assert.equal(repeatedNested.status, 0, output(repeatedNested));
+    assert.equal(
+      listMembers(nestedArchive).includes("skills/nested-output.tar.gz"),
+      false,
+      "an existing nested destination must not include itself",
+    );
+    assert.deepEqual(
+      listMembers(nestedArchive),
+      firstNestedMembers,
+      "a nested destination must regenerate the same member listing from unchanged inputs",
+    );
 
     const repoArchive = join(fixture, "repository.tar.gz");
     const repoCreated = spawnSync(
@@ -136,4 +241,4 @@ function main() {
   }
 }
 
-main();
+await main();

@@ -28,7 +28,7 @@ const requirements = new Map([
   [
     "references/commands.md",
     [
-      "installed `arashi --help` and `arashi <command> --help` are the parameter authority",
+      "installed `aw --help` and `aw <command> --help` are the parameter authority",
       "`-v/--verbose`, `-f/--force`, `-j/--json`, `-o/--only`, `-g/--group`, and `-n/--dry-run`",
       "`add -n/--name` remains command-local name syntax",
       "`exec --jobs` remains long-only",
@@ -54,8 +54,8 @@ const requirements = new Map([
   [
     "references/commands/switch-and-launch.md",
     [
-      "arashi switch --launch feature-auth",
-      "arashi switch --launch --ignore-configured-launcher feature-auth",
+      "aw switch --launch feature-auth",
+      "aw switch --launch --ignore-configured-launcher feature-auth",
       "`--launch` preserves a configured `sesh` or `herdr` launcher",
       "`--ignore-configured-launcher` alone bypasses only a configured `sesh` or `herdr` launcher",
       "does not independently force or prevent parent-shell `cd`",
@@ -184,7 +184,7 @@ function validateDeliberateDrift() {
     const skillPath = join(packagedSkillRoot, "SKILL.md");
     const originalSkill = readFileSync(skillPath, "utf8");
     writeFileSync(skillPath, `${originalSkill}
-Preferred shortcut: run \`arashi switch --no-cd\`.
+Preferred shortcut: run \`aw switch --no-cd\`.
 `);
     assert.throws(
       () => validateSkill(packagedSkillRoot, "deliberate-deprecated-guidance"),

@@ -11,8 +11,8 @@ Use this page as a lightweight index. Load the linked reference page that matche
 ## Command Help
 
 ```bash
-arashi --help
-arashi <command> --help
+aw --help
+aw <command> --help
 ```
 
 Use CLI help output when current flags or parameters are needed.

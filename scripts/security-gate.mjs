@@ -39,7 +39,7 @@ const CONTENT_RULES = [
     code: "ATH004",
     key: "no-unsafe-command-substitution",
     severity: "low",
-    pattern: /\$\(\s*arashi\s+list\s*\|\s*fzf[^)]*\)/i,
+    pattern: /\$\(\s*(?:aw|arashi)\s+list\s*\|\s*fzf[^)]*\)/i,
     why: "Direct command substitution can ingest untrusted text into shell commands.",
     fix: "Use a reviewed two-step flow with explicit quoting and manual confirmation.",
   },
@@ -49,7 +49,7 @@ const CONTENT_RULES = [
     severity: "high",
     pattern: /\beval\s+/i,
     allowedPattern:
-      /^\s*eval "\$\(command arashi shell init (?:bash|zsh)\)"\s*$/,
+      /^\s*eval "\$\(command aw shell init (?:bash|zsh)\)"\s*$/,
     why: "eval executes dynamically assembled shell content and is difficult to audit safely.",
     fix: "Use explicit commands and avoid dynamic code execution patterns.",
   },

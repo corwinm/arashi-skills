@@ -2,7 +2,7 @@
 
 Create coordinated worktrees only after the effective repository set and base are clear.
 
-Installed `arashi <command> --help` is the parameter authority.
+Installed `aw <command> --help` is the parameter authority.
 
 ## Repository Worktree File Materialization
 
@@ -12,7 +12,7 @@ For each repository, Arashi runs repository pre-create, then every copy entry in
 
 A missing source is skipped visibly. Destinations never overwrite an existing object and never escape the new worktree. A symlink is a native symbolic link to the exact canonical source target; platform or policy capability failures are actionable and never fall back to a copy, hard link, or junction.
 
-`arashi create --dry-run` previews the ordered materialization plan in declaration order without mutation. `arashi doctor` non-mutatively diagnoses configured source availability and managed destination safety without repair and without capability probes.
+`aw create --dry-run` previews the ordered materialization plan in declaration order without mutation. `aw doctor` non-mutatively diagnoses configured source availability and managed destination safety without repair and without capability probes.
 
 Use `copy` for `.env` or local configuration that must be independently mutable in each worktree; the supported same-path case does not require a shell hook. Use `symlink` only for intentionally shared state, because mutation is shared with the canonical checkout and native symbolic-link capability varies by platform.
 
@@ -40,14 +40,14 @@ Configured workspaces use one shared repository base policy for configured `crea
 
 Do not duplicate branch ancestry under create and clone defaults. `defaults.create` continues to own launch and switch behavior, not canonical base policy.
 
-For a one-off invocation-wide override, use `arashi create <target> --base <branch>` or `arashi clone --base <branch>`. Add the repeatable repository-specific `--repo-base <repository=branch>` option for exceptions. `@meta` selects the meta repository for configured create; clone accepts only exact configured child names:
+For a one-off invocation-wide override, use `aw create <target> --base <branch>` or `aw clone --base <branch>`. Add the repeatable repository-specific `--repo-base <repository=branch>` option for exceptions. `@meta` selects the meta repository for configured create; clone accepts only exact configured child names:
 
 ```bash
-arashi create feature/release --base release \
+aw create feature/release --base release \
   --repo-base @meta=meta/release \
   --repo-base api=api/release
 
-arashi clone --all --base release --repo-base api=api/release
+aw clone --all --base release --repo-base api=api/release
 ```
 
 For each repository, shared precedence is repository CLI > invocation CLI > repository config > workspace config. Configured create then considers deprecated `defaults.create.baseBranch` before legacy omitted behavior; clone skips that create-only key and proceeds directly to legacy omitted behavior. Policy source terms remain `repository-cli`, `cli`, `repository-config`, `workspace-config`, and `legacy-omitted`. A repository override changes only its matching selected repository.
@@ -95,17 +95,17 @@ Use command defaults in `.arashi/config.json` to control post-create behavior an
 For `defaults.create.launch`, choose `none`, `auto`, `sesh`, or `herdr`. Omitting it has the built-in `none` behavior. The independent `switch` boolean still opts into or out of post-create selection, but launch implies switch: resolving `auto`, `sesh`, or `herdr` always selects the newly created primary worktree even when `switch` is false or `--no-switch` is present. Conversely, `launch: "none"` does not suppress an independently enabled switch.
 
 Scope create defaults to the invocation host. Terminal invocations use only `defaults.create`. Editor-hosted invocations use only `defaults.editors.<host>.create` for the matching `vscode`, `cursor`, or `kiro` host and do not fall back to generic defaults or another editor host when that scope is absent. Implicit standalone create has no configured defaults and continues to use explicit flags only.
-Use one-off CLI overrides when one `arashi create` run should differ from its matching configured scope:
+Use one-off CLI overrides when one `aw create` run should differ from its matching configured scope:
 
 ```bash
-arashi create feature-auth --launch
-arashi create feature-auth --tmux
-arashi create feature-auth --sesh
-arashi create feature-auth --herdr
-arashi create feature-auth --tab
-arashi create feature-auth --no-launch
-arashi create feature-auth --no-switch
-arashi create feature-auth --move-changes
+aw create feature-auth --launch
+aw create feature-auth --tmux
+aw create feature-auth --sesh
+aw create feature-auth --herdr
+aw create feature-auth --tab
+aw create feature-auth --no-launch
+aw create feature-auth --no-switch
+aw create feature-auth --move-changes
 ```
 
 Create launch precedence is `--sesh` or `--herdr` > `--launch` > `--no-launch` > matching configured `launch` > built-in `none`. An explicit launcher implies launch even with `--no-launch`; simultaneous `--sesh` and `--herdr` is rejected before repository discovery or mutation. `--no-launch` suppresses a configured launcher when no explicit launcher is present. Switch precedence is resolved independently before launch-implies-switch is applied.
@@ -118,18 +118,18 @@ If work starts before the right coordinated worktree exists, move compatible unc
 
 ```bash
 # after creating the target worktree
-arashi move --to feature-auth
+aw move --to feature-auth
 
 # explicit source and target for unattended automation
-arashi move --from main --to feature-auth --json
+aw move --from main --to feature-auth --json
 ```
 
 Expected outcomes:
 
-- `arashi create <branch>` leaves existing uncommitted changes in place and prints move guidance when compatible changed repositories are detected.
-- `arashi create <branch> --json` includes dirty-workspace guidance as structured data, not human text.
-- `arashi create <branch> --move-changes` moves compatible staged, unstaged, and untracked changes after successful worktree creation.
-- `arashi move` refuses dirty target repositories and reports recovery commands if a stash-backed transfer needs manual recovery.
+- `aw create <branch>` leaves existing uncommitted changes in place and prints move guidance when compatible changed repositories are detected.
+- `aw create <branch> --json` includes dirty-workspace guidance as structured data, not human text.
+- `aw create <branch> --move-changes` moves compatible staged, unstaged, and untracked changes after successful worktree creation.
+- `aw move` refuses dirty target repositories and reports recovery commands if a stash-backed transfer needs manual recovery.
 Precedence for create/switch launch behavior is: explicit flag > opt-out flag > config default > built-in default. `--tmux` is a per-invocation-only override: configured `auto` remains the persistent contextual path to plain tmux. In zero-config standalone and configured repositories alike, explicit tmux requires a non-empty trimmed `TMUX` and does not fall back after prerequisite or process failure.
 
 For switch, `--tmux` conflicts with `--cd` and any explicit launcher in `--sesh`, `--herdr`, `--vscode`, `--cursor`, or `--kiro`. `--tmux --launch` is compatible launch intent, and `--tmux --ignore-configured-launcher` keeps explicit tmux authoritative while bypassing configured launchers. For create, `--tmux` implies launch and target selection: `--tmux --no-launch` and `--tmux --no-switch` still create and launch the primary worktree, while create `--tmux` conflicts with `--sesh` or `--herdr`.
