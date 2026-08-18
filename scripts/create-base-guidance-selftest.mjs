@@ -29,7 +29,6 @@ if (skillRootArgumentIndex >= 0 && !suppliedSkillRoot) {
 const expectedRepositoryBasePolicy = {
   configuration: {
     child: "repos.<name>.baseBranch",
-    legacyCreateOnly: "defaults.create.baseBranch",
     meta: "meta.baseBranch",
     workspace: "baseBranch",
   },
@@ -43,7 +42,6 @@ const expectedRepositoryBasePolicy = {
     "cli",
     "repository-config",
     "workspace-config",
-    "legacy-create-config",
     "legacy-omitted",
   ],
   sources: [
@@ -56,7 +54,12 @@ const expectedRepositoryBasePolicy = {
   scope: {
     clone: "configured-only",
     create: "configured-and-standalone-global",
+    doctor: "configured-only",
+    handoff: "configured-only",
+    pull: "configured-only-with-upstream-fallback-when-absent",
+    pushFallback: "configured-no-upstream-only",
     repositoryOverride: "configured-only",
+    status: "configured-only",
   },
   clone: {
     coordinated: "checkout-current-target-from-effective-base",
@@ -85,7 +88,6 @@ const expectedCreateBasePolicy = {
     "cli",
     "repository-config",
     "workspace-config",
-    "defaults.create.baseBranch",
     "legacy-omitted",
   ],
   normalization: { originPrefix: "remove-at-most-one" },
@@ -355,14 +357,13 @@ function validateSkill(root, label) {
     "root `baseBranch`",
     "`meta.baseBranch`",
     "`repos.<name>.baseBranch`",
-    "configured `create` and `clone`",
+    "shared repository base policy for `create`, `clone`, `status`, `pull`",
     "aw create <target> --base <branch>",
     "aw clone --base <branch>",
     "`--repo-base <repository=branch>`",
     "`@meta`",
-    "shared precedence is repository CLI > invocation CLI > repository config > workspace config",
-    "Configured create then considers deprecated `defaults.create.baseBranch` before legacy omitted behavior",
-    "clone skips that create-only key",
+    "For create and clone, precedence is repository CLI > invocation CLI > repository config > workspace config",
+    "Status, pull, push fallback, handoff, and doctor apply repository config then root policy",
     "complete effective selected set",
     "before hooks, managed-ignore reconciliation, Git refs, or filesystem mutation",
     "local branch first and then `origin/<branch>`",
@@ -370,8 +371,9 @@ function validateSkill(root, label) {
     "creation point",
     "does not reset, rebase, rewrite, or ancestry-check",
     "`defaults.create.baseBranch`",
-    "deprecated create-only compatibility input",
-    "migrate it to root `baseBranch`",
+    "is unsupported",
+    "Move a workspace-wide value to root `baseBranch`",
+    "before repository or hook discovery",
     "implicit standalone mode",
     "invocation-only",
     "rejects `--repo-base`",
@@ -403,7 +405,7 @@ function validateSkill(root, label) {
 
   assert.match(
     guidance,
-    /shared precedence is repository CLI > invocation CLI > repository config > workspace config[\s\S]*configured create then considers deprecated `defaults\.create\.baseBranch` before legacy omitted behavior[\s\S]*clone skips that create-only key/i,
+    /For create and clone, precedence is repository CLI > invocation CLI > repository config > workspace config[\s\S]*Status, pull, push fallback, handoff, and doctor apply repository config then root policy/,
     `${label}/references/commands/create.md must state exact per-repository precedence`,
   );
   assert.doesNotMatch(
@@ -492,12 +494,13 @@ function validateContracts() {
     "cli",
     "repository-config",
     "workspace-config",
+    "defaults.create.baseBranch",
     "legacy-omitted",
   ];
   assert.throws(
     () => assert.deepEqual(createPrecedenceDrift, expectedContract, "repository-base semantic contract is stale"),
     /repository-base semantic contract is stale/,
-    "contract checker accepted create precedence without defaults.create.baseBranch",
+    "contract checker accepted the removed defaults.create.baseBranch precedence source",
   );
 
   const coverage = JSON.parse(
@@ -525,8 +528,8 @@ function validateDeliberateDrift(fixtureSkillRoot = sourceSkillRoot) {
       [
         "precedence",
         join("references", "commands", "create.md"),
-        "Configured create then considers deprecated `defaults.create.baseBranch` before legacy omitted behavior",
-        "Configured create skips the deprecated key and proceeds directly to omitted behavior",
+        "For create and clone, precedence is repository CLI > invocation CLI > repository config > workspace config",
+        "For create and clone, precedence is workspace config > repository config > invocation CLI > repository CLI",
         /precedence|missing/i,
       ],
       [
