@@ -113,7 +113,13 @@ const expectedCreateBasePolicy = {
       base: "optional",
       baseFields: ["requestedBranch", "source", "repositories"],
       requestedBranch: "normalized-logical-branch",
-      sources: ["repository-cli", "cli", "repository-config", "workspace-config"],
+      sources: [
+        "repository-cli",
+        "cli",
+        "repository-config",
+        "workspace-config",
+        "legacy-omitted",
+      ],
       targetActions: ["created", "reused"],
       success: {
         ordering: "effective-selected-repository-order",
