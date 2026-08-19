@@ -204,6 +204,41 @@ function validateDeliberateDrift() {
     );
 
     writeFileSync(hooksPath, hooks);
+    const summaryContract =
+      "Configured-create human output summarizes the complete outcome ledger with succeeded, skipped, and failed counts";
+    assert.equal(
+      hooks.split(summaryContract).length - 1,
+      1,
+      "deliberate drift requires exactly one configured-create summary contract",
+    );
+    writeFileSync(
+      hooksPath,
+      hooks.replace(summaryContract, "Configured-create human output lists lifecycle results"),
+    );
+    assert.throws(
+      () => validateSkill(driftSkillRoot, "deliberate-summary-drift"),
+      /summarizes the complete outcome ledger/,
+      "checker accepted configured-create summary drift",
+    );
+
+    writeFileSync(hooksPath, hooks.replace("`data.hookOutcomes`", "`data.hooks`"));
+    assert.throws(
+      () => validateSkill(driftSkillRoot, "deliberate-success-ledger-path-drift"),
+      /data\.hookOutcomes/,
+      "checker accepted success ledger path drift",
+    );
+
+    writeFileSync(
+      hooksPath,
+      hooks.replace("`error.details.hookOutcomes`", "`error.details.hooks`"),
+    );
+    assert.throws(
+      () => validateSkill(driftSkillRoot, "deliberate-failure-ledger-path-drift"),
+      /error\.details\.hookOutcomes/,
+      "checker accepted failure ledger path drift",
+    );
+
+    writeFileSync(hooksPath, hooks);
     const row =
       "| Repository `pre-create.<repo>` | After that child worktree is materialized, before its repository setup | New child worktree |";
     assert.equal(
