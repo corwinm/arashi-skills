@@ -54,6 +54,7 @@ Expected outcomes:
 - Markdown mode includes workspace path/branch, current repository context, per-repository status, dirty or error repositories needing attention, related links, validation evidence, todos, risks, and next commands.
 - Markdown is the default; omit the deprecated compatibility spelling `--markdown` from preferred commands.
 - JSON mode emits one envelope with `command: "handoff"`, workspace metadata, per-repository status records, supplied context arrays, warnings, and generated next-command hints.
+- Configured handoffs preserve upstream, configured-base, and remote-default roles. Markdown combines a shared base/default target; JSON keeps both records. Configured-base lag or unavailability triggers detailed status guidance.
 - `aw handoff` is read-only: it does not run validation commands, stage files, commit, push, delete worktrees, or write report files by default.
 - Only pass `--validation` entries for commands that actually ran; put pending or unverified checks in `--todo` or `--risk`.
 
@@ -142,8 +143,13 @@ Expected outcomes:
 
 - changed repositories with publishable local branch commits are pushed
 - clean or intentionally untouched child repositories are skipped with reasons
-- `--dry-run` previews without mutating remotes
+- branches with an upstream use it for publishability comparison while preserving Git's existing push destination policy
+- branches without an upstream use the refreshed configured base for publishability when one exists; failure to refresh or compare fails planning without remote-default substitution
+- configured base never becomes the destination; `--set-upstream` publishes the current branch
+- `--dry-run` never updates remote branches, but may refresh a local configured-base tracking ref
 - `--json` emits one envelope with per-repository results, totals, and warnings for skipped repositories
+
+For configured inspection and synchronization, `aw status` adds configured-base drift without replacing upstream/default state, `aw pull` merges the refreshed configured remote base and preserves current-upstream behavior only when no policy exists, and `aw doctor` emits `REPOSITORY_CONFIGURED_BASE_BEHIND` or `REPOSITORY_CONFIGURED_BASE_UNAVAILABLE`. Do not apply persisted base policy in standalone mode.
 ## Multi-Repository Command Execution
 
 Use `aw exec` when you need to run the same non-interactive inspection or validation command from each selected managed repository. Put the child command after `--`; Arashi options must come before that delimiter, and child command options must come after it.

@@ -187,11 +187,11 @@ Configured clone shares the repository base policy with configured create. Root 
 aw clone --all --base release --repo-base api=api/release
 ```
 
-Clone precedence is repository CLI > invocation CLI > repository config > workspace config > legacy omitted behavior; unlike configured create, clone never considers deprecated `defaults.create.baseBranch`. `@meta` is invalid for clone because clone selects configured children only. Malformed, duplicate, unknown, and unselected selectors and unavailable effective bases are aggregated across the selected missing set before managed-ignore reconciliation or destination creation.
+Clone precedence is repository CLI > invocation CLI > repository config > workspace config > legacy omitted behavior. The removed `defaults.create.baseBranch` property is unsupported for the workspace as a whole and must be migrated before clone or any other configured command runs. `@meta` is invalid for clone because clone selects configured children only. Malformed, duplicate, unknown, and unselected selectors and unavailable effective bases are aggregated across the selected missing set before managed-ignore reconciliation or destination creation.
 
 From the main configured workspace, a child with an effective base is cloned at that branch and tracks `origin/<base>`. With no effective policy, clone preserves remote-default behavior. Inside a coordinated worktree, the active coordinated target branch remains the checkout: the effective base is only the creation point when that target is missing. If the target already exists, clone reuses it unchanged; it does not reset, rebase, rewrite, or ancestry-check the target against the base.
 
-The deprecated `defaults.create.baseBranch` value remains create-only and does not affect clone. Migrate it to root `baseBranch` when create and clone should share the value. Clone is configured-only; implicit standalone mode supports no clone policy or repository-specific override.
+The removed `defaults.create.baseBranch` property is unsupported. Move a workspace-wide value to root `baseBranch`, or use `meta.baseBranch` / `repos.<name>.baseBranch` for a repository-specific value. Clone is configured-only; implicit standalone mode supports no clone policy or repository-specific override.
 
 The older per-repository partial-success behavior applies only to a multi-repository clone with no effective base policy: a Git failure may be recorded while unaffected repositories continue. When a base policy applies, selector, remote, and base checks aggregate across the complete selected missing set, and any preflight failure blocks every selected clone before mutation.
 

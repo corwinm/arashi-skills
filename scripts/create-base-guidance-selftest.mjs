@@ -29,7 +29,6 @@ if (skillRootArgumentIndex >= 0 && !suppliedSkillRoot) {
 const expectedRepositoryBasePolicy = {
   configuration: {
     child: "repos.<name>.baseBranch",
-    legacyCreateOnly: "defaults.create.baseBranch",
     meta: "meta.baseBranch",
     workspace: "baseBranch",
   },
@@ -43,7 +42,6 @@ const expectedRepositoryBasePolicy = {
     "cli",
     "repository-config",
     "workspace-config",
-    "legacy-create-config",
     "legacy-omitted",
   ],
   sources: [
@@ -56,7 +54,12 @@ const expectedRepositoryBasePolicy = {
   scope: {
     clone: "configured-only",
     create: "configured-and-standalone-global",
+    doctor: "configured-only",
+    handoff: "configured-only",
+    pull: "configured-only-with-upstream-fallback-when-absent",
+    pushFallback: "configured-no-upstream-only",
     repositoryOverride: "configured-only",
+    status: "configured-only",
   },
   clone: {
     coordinated: "checkout-current-target-from-effective-base",
@@ -85,7 +88,6 @@ const expectedCreateBasePolicy = {
     "cli",
     "repository-config",
     "workspace-config",
-    "defaults.create.baseBranch",
     "legacy-omitted",
   ],
   normalization: { originPrefix: "remove-at-most-one" },
@@ -148,7 +150,7 @@ const expectedCreateBasePolicy = {
 };
 
 const expectedContract = {
-  schemaVersion: 8,
+  schemaVersion: 9,
   commands: ["create", "clone"],
   options: ["--base", "--repo-base"],
   semanticPolicy: {
@@ -226,6 +228,55 @@ function actionIsNegated(clause, actionIndex) {
 function hasAffirmativeAction(clause, actionPattern) {
   for (const match of clause.matchAll(actionPattern)) {
     if (!actionIsNegated(clause, match.index)) return true;
+  }
+  return false;
+}
+
+function removedCreateBaseGuidanceContradiction(content) {
+  const blocks = content
+    .replace(/```[\s\S]*?```/g, (block) => block.replace(/\n/g, " "))
+    .split(/\n{2,}/)
+    .flatMap((block) => block.split(/\n(?=\s*(?:[-*+] |\d+\. ))/))
+    .map((block) => block.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+  const contexts = blocks.flatMap((block, index) => {
+    if (/^#{1,6}\s/.test(block) && /defaults\.create\.baseBranch/i.test(block))
+      return [`${block} ${blocks[index + 1] ?? ""}`];
+    return block.split(/(?<=[.!?])\s+/);
+  });
+  const mention = /defaults\.create\.baseBranch/gi;
+  const rejection =
+    /\b(?:unsupported|no longer supported|removed|obsolete|invalid|forbidden|rejects?|rejected|replac(?:e|ed|ement)|migrat(?:e|ed|ion)|move(?:d)?)\b|\b(?:(?:do|does|is|are|was|were|will|must|should|can|may)\s+not|never|cannot|can't|must not)\b[^.!?]{0,50}\b(?:set|use|configure|add|put|place|accept|support|read|honor)\b[^.!?]{0,50}defaults\.create\.baseBranch|\b(?:instead of|rather than)\s*`?defaults\.create\.baseBranch|defaults\.create\.baseBranch[^.!?]{0,80}(?:\b(?:does not|never|cannot|can't|must not)\b[^.!?]{0,40}\b(?:appl(?:y|ies)|works?|accepts?|supports?|reads?|honors?|uses?)\b|\b(?:is|are|was|were)\s+not\s+(?:supported|accepted|used|read|honored|valid|allowed)\b)/i;
+  const actionBeforeMention =
+    /\b(?:set|use|configure|add|put|place|accepts?|supports?|reads?|uses?|honors?)\b/gi;
+  const affirmativeAfterMention =
+    /\b(?:can|may|should)\s+(?:still\s+)?(?:be\s+)?(?:use|used|set|configure|configured|add|added|accept|accepted|support|supported|read|honor|honored)|\b(?:is|remains?|stays?)\s+(?!not\b)(?:still\s+)?(?:supported|accepted|valid|allowed|used|read|honored)|\b(?:arashi|create|configuration|config)\s+(?:still\s+)?(?:accepts?|supports?|reads?|uses?|honors?)\b|\bstill\s+(?:applies|works|controls?|defines?|selects?|chooses?|determines?)\b|\bcontinues?\s+to\s+(?:control|define|set|select|choose|determine)\b/i;
+  const activeBehaviorAfterMention =
+    /\b(?:appl(?:y|ies)|works?|controls?|defines?|selects?|chooses?|determines?)\b/gi;
+
+  for (const context of contexts) {
+    for (const match of context.matchAll(mention)) {
+      const localIndex = match.index ?? 0;
+      const before = context.slice(0, localIndex);
+      const clauseStart = Math.max(
+        before.lastIndexOf("."),
+        before.lastIndexOf(";"),
+        before.lastIndexOf("!"),
+        before.lastIndexOf("?"),
+      );
+      const sameClauseBefore = before.slice(clauseStart + 1);
+      const after = context.slice(localIndex + match[0].length);
+
+      for (const action of sameClauseBefore.matchAll(actionBeforeMention)) {
+        const suffix = sameClauseBefore.slice((action.index ?? 0) + action[0].length);
+        if (/^(?:support|use)$/i.test(action[0]) && /^\s+(?:for|of)\b/i.test(suffix)) continue;
+        if (/\b(?:instead of|rather than)\s*`?$/i.test(suffix)) continue;
+        if (!actionIsNegated(sameClauseBefore, action.index)) return true;
+      }
+      if (affirmativeAfterMention.test(after)) return true;
+      if (hasAffirmativeAction(after, activeBehaviorAfterMention)) return true;
+      if (!rejection.test(context)) return true;
+    }
   }
   return false;
 }
@@ -328,6 +379,11 @@ function unsupportedBaseVariableClaim(sentence) {
 function validatePackageWideClaims(root, label) {
   for (const { content, path } of installableGuidanceFiles(root)) {
     const relativePath = relative(root, path);
+    assert.equal(
+      removedCreateBaseGuidanceContradiction(content),
+      false,
+      `${label}/${relativePath} recommends or describes behavior for the removed defaults.create.baseBranch key`,
+    );
     for (const sentence of semanticSentences(content)) {
       const contradiction = createBaseContradiction(sentence);
       assert.equal(
@@ -355,14 +411,13 @@ function validateSkill(root, label) {
     "root `baseBranch`",
     "`meta.baseBranch`",
     "`repos.<name>.baseBranch`",
-    "configured `create` and `clone`",
+    "shared repository base policy for `create`, `clone`, `status`, `pull`",
     "aw create <target> --base <branch>",
     "aw clone --base <branch>",
     "`--repo-base <repository=branch>`",
     "`@meta`",
-    "shared precedence is repository CLI > invocation CLI > repository config > workspace config",
-    "Configured create then considers deprecated `defaults.create.baseBranch` before legacy omitted behavior",
-    "clone skips that create-only key",
+    "For create and clone, precedence is repository CLI > invocation CLI > repository config > workspace config",
+    "Status, pull, push fallback, handoff, and doctor apply repository config then root policy",
     "complete effective selected set",
     "before hooks, managed-ignore reconciliation, Git refs, or filesystem mutation",
     "local branch first and then `origin/<branch>`",
@@ -370,8 +425,9 @@ function validateSkill(root, label) {
     "creation point",
     "does not reset, rebase, rewrite, or ancestry-check",
     "`defaults.create.baseBranch`",
-    "deprecated create-only compatibility input",
-    "migrate it to root `baseBranch`",
+    "is unsupported",
+    "Move a workspace-wide value to root `baseBranch`",
+    "before repository or hook discovery",
     "implicit standalone mode",
     "invocation-only",
     "rejects `--repo-base`",
@@ -403,7 +459,7 @@ function validateSkill(root, label) {
 
   assert.match(
     guidance,
-    /shared precedence is repository CLI > invocation CLI > repository config > workspace config[\s\S]*configured create then considers deprecated `defaults\.create\.baseBranch` before legacy omitted behavior[\s\S]*clone skips that create-only key/i,
+    /For create and clone, precedence is repository CLI > invocation CLI > repository config > workspace config[\s\S]*Status, pull, push fallback, handoff, and doctor apply repository config then root policy/,
     `${label}/references/commands/create.md must state exact per-repository precedence`,
   );
   assert.doesNotMatch(
@@ -492,12 +548,13 @@ function validateContracts() {
     "cli",
     "repository-config",
     "workspace-config",
+    "defaults.create.baseBranch",
     "legacy-omitted",
   ];
   assert.throws(
     () => assert.deepEqual(createPrecedenceDrift, expectedContract, "repository-base semantic contract is stale"),
     /repository-base semantic contract is stale/,
-    "contract checker accepted create precedence without defaults.create.baseBranch",
+    "contract checker accepted the removed defaults.create.baseBranch precedence source",
   );
 
   const coverage = JSON.parse(
@@ -516,6 +573,15 @@ function validateContracts() {
       );
     }
   }
+  for (const commandName of ["status", "doctor"]) {
+    const command = coverage.commands.find(({ name }) => name === commandName);
+    assert.ok(command, `command coverage is missing ${commandName}`);
+    assert.equal(
+      command.reference,
+      "references/commands/automation.md",
+      `${commandName} command coverage must route to configured-base guidance`,
+    );
+  }
 }
 
 function validateDeliberateDrift(fixtureSkillRoot = sourceSkillRoot) {
@@ -525,8 +591,8 @@ function validateDeliberateDrift(fixtureSkillRoot = sourceSkillRoot) {
       [
         "precedence",
         join("references", "commands", "create.md"),
-        "Configured create then considers deprecated `defaults.create.baseBranch` before legacy omitted behavior",
-        "Configured create skips the deprecated key and proceeds directly to omitted behavior",
+        "For create and clone, precedence is repository CLI > invocation CLI > repository config > workspace config",
+        "For create and clone, precedence is workspace config > repository config > invocation CLI > repository CLI",
         /precedence|missing/i,
       ],
       [
@@ -552,6 +618,49 @@ function validateDeliberateDrift(fixtureSkillRoot = sourceSkillRoot) {
       writeFileSync(path, original.replace(from, to));
       assert.throws(() => validateSkill(root, name), expected);
     }
+
+    const legacyGuidanceRoot = join(temporaryRoot, "removed-create-base-guidance");
+    cpSync(fixtureSkillRoot, legacyGuidanceRoot, { recursive: true });
+    const legacyTutorialPath = join(legacyGuidanceRoot, "references", "tutorial.md");
+    writeFileSync(
+      legacyTutorialPath,
+      `${readFileSync(legacyTutorialPath, "utf8")}
+\`defaults.create.baseBranch\` remains a deprecated create-only compatibility input.
+Set \`defaults.create.baseBranch\` to choose the create base.
+Although \`defaults.create.baseBranch\` was removed from the schema, create still accepts it.
+\`defaults.create.baseBranch\` was removed from the schema, but you can still use it.
+\`defaults.create.baseBranch\` was removed from the schema but continues to control create.
+The removed \`defaults.create.baseBranch\` controls the create base.
+\`defaults.create.baseBranch\` controls create, while editor-scoped defaults are unsupported.
+- \`defaults.create.baseBranch\` was removed.
+- \`defaults.create.baseBranch\` controls the create base
+`,
+    );
+    assert.throws(
+      () => validateSkill(legacyGuidanceRoot, "removed-create-base-guidance"),
+      /removed defaults\.create\.baseBranch|recommends/i,
+    );
+
+    const negatedGuidanceRoot = join(temporaryRoot, "negated-create-base-guidance");
+    cpSync(fixtureSkillRoot, negatedGuidanceRoot, { recursive: true });
+    const negatedTutorialPath = join(negatedGuidanceRoot, "references", "tutorial.md");
+    writeFileSync(
+      negatedTutorialPath,
+      `${readFileSync(negatedTutorialPath, "utf8")}
+\`defaults.create.baseBranch\` never applies. Do not set \`defaults.create.baseBranch\`. Replace \`defaults.create.baseBranch\` with root \`baseBranch\`; it is no longer supported.
+Configuration supports root \`baseBranch\`; \`defaults.create.baseBranch\` was removed.
+Configuration does not support \`defaults.create.baseBranch\`.
+Support for \`defaults.create.baseBranch\` was removed.
+Use of \`defaults.create.baseBranch\` is forbidden.
+\`defaults.create.baseBranch\` is not supported.
+Use root \`baseBranch\` instead of \`defaults.create.baseBranch\`.
+
+## \`defaults.create.baseBranch\`
+
+This property is unsupported; migrate to root \`baseBranch\`.
+`,
+    );
+    validateSkill(negatedGuidanceRoot, "negated-create-base-guidance");
 
     const environmentRoot = join(temporaryRoot, "invented-hook-environment");
     cpSync(fixtureSkillRoot, environmentRoot, { recursive: true });
