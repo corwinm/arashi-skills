@@ -49,7 +49,7 @@
     {
       "name": "doctor",
       "status": "covered",
-      "reference": "references/commands.md",
+      "reference": "references/commands/automation.md",
       "standalone": {
         "support": "supported"
       }
@@ -198,7 +198,7 @@
     {
       "name": "status",
       "status": "covered",
-      "reference": "references/commands.md",
+      "reference": "references/commands/automation.md",
       "standalone": {
         "support": "supported"
       }

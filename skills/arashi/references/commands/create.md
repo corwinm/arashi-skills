@@ -22,7 +22,7 @@ Use lifecycle hooks when you need globs, remapping, external sources, interpolat
 
 ## Create from a Coordinated Base Branch
 
-Configured workspaces use one shared repository base policy for configured `create` and `clone`. Put the fallback at root `baseBranch`; use `meta.baseBranch` only for the meta repository and `repos.<name>.baseBranch` only for a child that differs:
+Configured workspaces use one shared repository base policy for `create`, `clone`, `status`, `pull`, no-upstream `push` comparison, `handoff`, and `doctor`. Put the workspace policy at root `baseBranch`; use `meta.baseBranch` only for the meta repository and `repos.<name>.baseBranch` only for a child that differs:
 
 ```json
 {
@@ -50,7 +50,7 @@ aw create feature/release --base release \
 aw clone --all --base release --repo-base api=api/release
 ```
 
-For each repository, shared precedence is repository CLI > invocation CLI > repository config > workspace config. Configured create then considers deprecated `defaults.create.baseBranch` before legacy omitted behavior; clone skips that create-only key and proceeds directly to legacy omitted behavior. Policy source terms remain `repository-cli`, `cli`, `repository-config`, `workspace-config`, and `legacy-omitted`. A repository override changes only its matching selected repository.
+For create and clone, precedence is repository CLI > invocation CLI > repository config > workspace config. Status, pull, push fallback, handoff, and doctor apply repository config then root policy. Policy source terms remain `repository-cli`, `cli`, `repository-config`, `workspace-config`, and `legacy-omitted`. A repository override changes only its matching selected repository.
 
 Arashi validates malformed, duplicate, unknown, and unselected selectors and invalid branch names across the complete effective selected set before hooks, managed-ignore reconciliation, Git refs, or filesystem mutation. `@meta` is rejected for clone. `--only`, `--group`, and interactive selection determine the effective set before this preflight; an override for an unselected repository is an error rather than an ignored hint.
 
@@ -58,7 +58,7 @@ When a policy applies, create resolves each selected repository independently us
 
 An existing target remains authoritative. Create and coordinated clone reuse it unchanged. Arashi does not reset, rebase, rewrite, or ancestry-check it against the effective base. For a missing child in a coordinated worktree, clone uses the effective base only as the missing coordinated target's creation point and leaves the child checked out on the coordinated target branch, never on the base branch. See [Repository Cloning and Recovery](workspace.md#repository-cloning-and-recovery).
 
-`defaults.create.baseBranch` remains a deprecated create-only compatibility input; migrate it to root `baseBranch` to make the canonical value apply to configured create and clone. Until migration, the legacy value affects create only and clone keeps remote-default behavior. If the legacy and canonical values conflict, fix the configuration instead of relying on an implicit winner; matching values use the canonical policy and still produce one migration diagnostic.
+`defaults.create.baseBranch` is unsupported. Move a workspace-wide value to root `baseBranch`, or use `meta.baseBranch` / `repos.<name>.baseBranch` for a repository-specific value. Arashi rejects the removed property even when canonical policy is also present, before repository or hook discovery and before network, Git, ignore, or filesystem mutation. `defaults.create.launch` and `defaults.create.switch` remain supported.
 
 In implicit standalone mode, `--base` is invocation-only for create. Standalone create ignores configured root/meta/child policy, rejects `--repo-base`, and does not add standalone clone support. Omitting `--base` preserves the existing current-`HEAD` start point and creates no `.arashi` configuration.
 
