@@ -105,6 +105,12 @@ const contradictionFixtures = [
     claim:
       "Publication does not guarantee absolute race freedom generally, but guarantees it when the parent exists.",
   },
+  {
+    id: "stale-316-operational-condition",
+    diagnostic: "stale #316 operational condition",
+    claim:
+      "Do not use `aw add` to edit an existing entry; directly edit the config until #316 ships.",
+  },
 ];
 
 const truthfulNegationFixtures = [
@@ -132,7 +138,7 @@ Installation privately prepares each complete scaffold, then uses atomic no-repl
 
 Treat hook source as sensitive: never print, repeat, preview, diagnose, or report inline or generated-script bodies. Add shows one sanitized final summary and confirmation, then performs at most one configuration save. Its transaction owns script installation, and rollback removes only unchanged scripts created by that invocation. The initial default-no decline continues minimal add, but final-confirmation decline or Ctrl+C after opting in is cancellation and performs no config save.
 
-Do not misuse \`aw add\` to edit an existing entry. Until the interactive editor tracked by #316 ships, directly edit and validate \`.arashi/config.json\` using the installed schema and the focused materialization and hook references above.
+Do not use \`aw add\` to edit an existing entry. First inspect the installed \`aw --help\`. If it lists \`configure\`, follow the installed \`aw configure --help\`. Otherwise, directly edit and validate \`.arashi/config.json\` using the installed schema and the focused materialization and hook references above. See the [canonical configuration workflow](https://arashi.haphazard.dev/workflows/config/).
 `;
 
 function section(content) {

@@ -3,7 +3,8 @@
   "focusedReference": "references/commands/workspace.md",
   "requiredLinks": [
     "create.md#repository-worktree-file-materialization",
-    "../hooks.md"
+    "../hooks.md",
+    "https://arashi.haphazard.dev/workflows/config/"
   ],
   "requirements": [
     {
@@ -108,8 +109,23 @@
     },
     {
       "id": "existing-edit-boundary",
-      "pattern": "Do not misuse `aw add` to edit an existing entry[\\s\\S]{0,260}#316[\\s\\S]{0,260}directly edit and validate `\\.arashi/config\\.json`",
-      "diagnostic": "direct-config guidance and #316 boundary"
+      "pattern": "Do not (?:misuse|use) `aw add` to edit an existing entry",
+      "diagnostic": "existing-entry aw-add prohibition"
+    },
+    {
+      "id": "installed-capability-discovery",
+      "pattern": "inspect (?:the )?installed `aw --help`",
+      "diagnostic": "installed aw-help capability discovery"
+    },
+    {
+      "id": "configure-capability",
+      "pattern": "If (?:it|`aw --help`) (?:lists|includes|shows) `configure`[^.]*follow (?:the )?installed `aw configure --help`",
+      "diagnostic": "configure capability help path"
+    },
+    {
+      "id": "direct-config-fallback",
+      "pattern": "Otherwise[^.]*directly edit and validate `\\.arashi/config\\.json`[^.]*installed schema[^.]*references",
+      "diagnostic": "direct-config installed-schema fallback"
     }
   ],
   "contradictionPatterns": [
@@ -136,6 +152,10 @@
     {
       "pattern": "(?:\\b(?:installation|installer|onboarding|Arashi|publication)\\s+(?:(?:is|provides|achieves)\\s+(?:absolutely |completely |fully )?race[- ]free|guarantees\\s+absolute race freedom)\\b|\\b(?:publication|installation)\\s+(?:does not|doesn't|doesn’t)\\s+guarantee\\s+absolute race freedom[^.\\n]{0,100}\\b(?:but|however|yet)\\b[^.\\n]{0,40}\\bguarantees?\\s+(?:it|absolute race freedom)\\b)",
       "diagnostic": "contradictory absolute race-freedom claim"
+    },
+    {
+      "pattern": "\\buntil #316 ships\\b",
+      "diagnostic": "stale #316 operational condition"
     }
   ],
   "forbiddenPatterns": [
