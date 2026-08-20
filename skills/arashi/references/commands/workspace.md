@@ -155,6 +155,22 @@ The command writes the equivalent global Git configuration:
 
 The committed Arashi remote can remain `git@github.com:acme/api.git`, while Git rewrites it locally for that developer. Arashi does not install or synchronize that rewrite.
 
+## Optional Repository Onboarding During Add
+
+Run `aw add <remote>`. Optional onboarding is eligible only when stdin and stdout are TTYs and neither `--json` nor `--force` is active. The first onboarding prompt defaults to no and a decline continues with the minimal repository entry. Non-TTY, `--json`, and `--force` invocations stay on that minimal path without discovery or onboarding prompts. Onboarding configures only the repository being added, never workspace hooks or unsupported fields.
+
+Every optional section starts unselected: `copy`, `symlink`, `pre-create`, `post-create`, `pre-remove`, and `post-remove`. Copy and symlink discovery is a bounded, root-only metadata scan whose suggestions remain unselected path names; never read, inspect, or disclose their contents. Manual entries remain available, pass canonical path validation, and receive the dependency-sharing warning when applicable. Follow [Repository Worktree File Materialization](create.md#repository-worktree-file-materialization) for copy-versus-symlink behavior and safety.
+
+For hooks, choose exactly one source per selected lifecycle: a user-supplied inline command or an editable active native script. Inline commands are always user supplied in Bash shorthand or canonical `bash`, `powershell`, and `cmd` interpreter shapes. Follow the [Lifecycle Hooks reference](../hooks.md) for canonical repository ownership and runtime behavior.
+
+A create script is installed under the active configuration root at `.arashi/hooks/<pre|post-create>.<repo><ext>`. A remove script path is beneath the runtime-resolved target repository from that same active root plus `repos.<name>.path`, at `.arashi/hooks/<pre|post-remove><ext>`; in linked-parent mode this is the linked active child worktree, not the canonical clone. POSIX creates only `.sh` at mode `0755`, while Windows deterministically creates one `.ps1`. Generated scripts are safe, silent successful no-op scaffolds, not `.example` files, and need no rename, `chmod`, or activation step. They are immediately runtime-ready and never overwrite an existing path.
+
+Installation privately prepares each complete scaffold, then uses atomic no-replace publication at the active path. It rejects observable symlink traversal and unsafe parents, and validates parent identities before and after publication. This is the strongest practical pure Node/Bun safety, not absolute race freedom: a hostile local process with workspace write access can still substitute an ancestor between validation and publication.
+
+Treat hook source as sensitive: never print, repeat, preview, diagnose, or report inline or generated-script bodies. Add shows one sanitized final summary and confirmation, then performs at most one configuration save. Its transaction owns script installation, and rollback removes only unchanged scripts created by that invocation. The initial default-no decline continues minimal add, but final-confirmation decline or Ctrl+C after opting in is cancellation and performs no config save.
+
+Do not misuse `aw add` to edit an existing entry. Until the interactive editor tracked by #316 ships, directly edit and validate `.arashi/config.json` using the installed schema and the focused materialization and hook references above.
+
 ## Adding a Repository from a Linked Parent Worktree
 
 A direct add from the canonical parent checkout keeps the existing one-clone flow: Arashi clones beneath that checkout's configured `reposDir` and updates that checkout's `.arashi/config.json`.

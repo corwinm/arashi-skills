@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "focusedReference": "references/commands/workspace.md",
+  "requiredLinks": [
+    "create.md#repository-worktree-file-materialization",
+    "../hooks.md"
+  ],
+  "requirements": [
+    {
+      "id": "eligibility",
+      "pattern": "stdin and stdout are TTYs[^.]*neither `--json` nor `--force`",
+      "diagnostic": "eligible human-TTY predicate"
+    },
+    {
+      "id": "default-no-minimal",
+      "pattern": "first onboarding prompt defaults to no[^.]*minimal repository entry",
+      "diagnostic": "default-no minimal add"
+    },
+    {
+      "id": "suppressed-modes",
+      "pattern": "Non-TTY, `--json`, and `--force`[^.]*minimal path[^.]*without discovery or onboarding prompts",
+      "diagnostic": "non-TTY/JSON/force suppression"
+    },
+    {
+      "id": "repository-only-scope",
+      "pattern": "only the repository being added[^.]*never workspace hooks or unsupported fields",
+      "diagnostic": "repository-only onboarding scope"
+    },
+    {
+      "id": "section-scope",
+      "pattern": "`copy`, `symlink`, `pre-create`, `post-create`, `pre-remove`, and `post-remove`",
+      "diagnostic": "copy/symlink and four-lifecycle section scope"
+    },
+    {
+      "id": "suggestion-secrecy",
+      "pattern": "bounded, root-only[^.]*unselected path names[^.]*never read, inspect, or disclose their contents",
+      "diagnostic": "bounded content-free unselected suggestions"
+    },
+    {
+      "id": "manual-validation-warning",
+      "pattern": "Manual entries remain available[^.]*canonical path validation[^.]*dependency-sharing warning",
+      "diagnostic": "manual validation and dependency warning"
+    },
+    {
+      "id": "exclusive-source",
+      "pattern": "exactly one source per selected lifecycle[^.]*user-supplied inline command or an editable active native script",
+      "diagnostic": "exclusive inline-or-file lifecycle source"
+    },
+    {
+      "id": "inline-shape",
+      "pattern": "Inline commands are always user supplied[^.]*Bash shorthand or canonical `bash`, `powershell`, and `cmd` interpreter shapes",
+      "diagnostic": "user-supplied canonical inline commands"
+    },
+    {
+      "id": "create-active-path",
+      "pattern": "active configuration root[^.]*`\\.arashi/hooks/<pre\\|post-create>\\.<repo><ext>`",
+      "diagnostic": "exact active create-script path"
+    },
+    {
+      "id": "remove-active-path",
+      "pattern": "remove script path[^.]*runtime-resolved target repository[^.]*`repos\\.<name>\\.path`[^.]*`\\.arashi/hooks/<pre\\|post-remove><ext>`[^.]*linked active child worktree",
+      "diagnostic": "runtime-resolved remove-script path"
+    },
+    {
+      "id": "platform-ready",
+      "pattern": "POSIX creates only `\\.sh` at mode `0755`[^.]*Windows deterministically creates one `\\.ps1`",
+      "diagnostic": "deterministic runtime-ready platform script"
+    },
+    {
+      "id": "safe-noop-activation",
+      "pattern": "safe, silent successful no-op[^.]*not `\\.example` files[^.]*no rename, `chmod`, or activation step",
+      "diagnostic": "safe no-op without activation ceremony"
+    },
+    {
+      "id": "no-overwrite",
+      "pattern": "never overwrite an existing path",
+      "diagnostic": "no-overwrite script ownership"
+    },
+    {
+      "id": "practical-publication-safety",
+      "pattern": "privately prepares? each complete scaffold[\\s\\S]{0,320}atomic no-replace publication[\\s\\S]{0,320}rejects observable symlink traversal and unsafe parents[\\s\\S]{0,220}validates parent identities before and after publication",
+      "diagnostic": "practical no-native publication safety"
+    },
+    {
+      "id": "residual-local-race",
+      "pattern": "strongest practical pure Node/Bun safety[^.]*not absolute race freedom[^.]*local process with workspace write access[^.]*substitute an ancestor between validation and publication",
+      "diagnostic": "narrow residual local ancestor-substitution race"
+    },
+    {
+      "id": "body-secrecy",
+      "pattern": "never print, repeat, preview, diagnose, or report inline or generated-script bodies",
+      "diagnostic": "hook-body secrecy"
+    },
+    {
+      "id": "confirmation-save",
+      "pattern": "one sanitized final summary and confirmation[^.]*at most one configuration save",
+      "diagnostic": "single sanitized confirmation and save"
+    },
+    {
+      "id": "transaction-rollback",
+      "pattern": "transaction owns script installation[^.]*rollback removes only unchanged scripts created by that invocation",
+      "diagnostic": "transaction-owned script rollback"
+    },
+    {
+      "id": "cancellation",
+      "pattern": "initial default-no decline continues minimal add[^.]*final-confirmation decline or Ctrl\\+C after opting in is cancellation[^.]*no config save",
+      "diagnostic": "top-decline versus later-cancellation boundary"
+    },
+    {
+      "id": "existing-edit-boundary",
+      "pattern": "Do not misuse `aw add` to edit an existing entry[\\s\\S]{0,260}#316[\\s\\S]{0,260}directly edit and validate `\\.arashi/config\\.json`",
+      "diagnostic": "direct-config guidance and #316 boundary"
+    }
+  ],
+  "contradictionPatterns": [
+    {
+      "pattern": "(?:\\bonboarding\\s+(?:(?:may|can|will)\\s+)?(?:also\\s+)?configures?\\s+workspace hooks\\b|\\bonboarding\\s+(?:does not|doesn't|doesn’t)\\s+configure\\s+workspace hooks[^.\\n]{0,100}\\b(?:but|however|yet)\\b[^.\\n]{0,40}\\b(?:may|can|will)?\\s*(?:also\\s+)?configure(?:s)?\\s+(?:them|workspace hooks)\\b)",
+      "diagnostic": "contradictory workspace-hook onboarding scope"
+    },
+    {
+      "pattern": "(?:\\b(?:existing\\s+)?hook paths?\\s+(?:may|can|will|shall)\\s+be\\s+overwritten\\b|never overwrite an existing path[^.]*\\b(?:except|unless|however|but)\\b|\\bexisting hook paths?\\s+(?:are|is)\\s+not overwritten[^.\\n]{0,100}\\b(?:but|however|yet)\\b[^.\\n]{0,40}\\b(?:are|is)\\s+overwritten\\b)",
+      "diagnostic": "contradictory existing-path overwrite exception"
+    },
+    {
+      "pattern": "(?:\\b(?:add|onboarding)\\s+(?:(?:then|also)\\s+)?(?:requests?|will request|prompts?)\\s+(?:for\\s+)?(?:a\\s+)?second(?:\\s+final)?\\s+confirmation\\b|\\b(?:add|onboarding)\\s+(?:does not|doesn't|doesn’t)\\s+(?:request|prompt for)\\s+(?:a\\s+)?second(?:\\s+final)?\\s+confirmation[^.\\n]{0,100}\\b(?:but|however|yet)\\b[^.\\n]{0,40}\\b(?:requests?|prompts? for)\\s+(?:one|a second(?:\\s+final)?\\s+confirmation)\\b)",
+      "diagnostic": "contradictory additional final confirmation"
+    },
+    {
+      "pattern": "(?:\\b(?:add|onboarding)\\s+(?:(?:then|also)\\s+)?(?:saves|will save|writes|will write)\\s+(?:the\\s+)?configuration\\s+(?:a\\s+)?second time\\b|\\b(?:add|onboarding)\\s+(?:does not|doesn't|doesn’t)\\s+(?:save|write)\\s+(?:the\\s+)?configuration\\s+(?:a\\s+)?second time[^.\\n]{0,100}\\b(?:but|however|yet)\\b[^.\\n]{0,40}\\b(?:saves?|writes?)\\s+(?:it|the configuration)\\s+(?:again|a second time)\\b)",
+      "diagnostic": "contradictory additional configuration save"
+    },
+    {
+      "pattern": "(?:\\b(?:installation|installer|onboarding|Arashi)\\s+(?:uses|requires|loads|ships)\\s+(?:a\\s+)?native (?:helper|addon|module|code)\\b|\\b(?:installation|installer|onboarding|Arashi)\\s+(?:does not|doesn't|doesn’t)\\s+(?:use|require)\\s+(?:a\\s+)?native helper[^.\\n]{0,100}\\b(?:but|however|yet)\\b[^.\\n]{0,40}\\buses?\\s+(?:one|a native helper)\\b)",
+      "diagnostic": "contradictory native-helper installation claim"
+    },
+    {
+      "pattern": "(?:\\b(?:installation|installer|onboarding|Arashi|publication)\\s+(?:(?:is|provides|achieves)\\s+(?:absolutely |completely |fully )?race[- ]free|guarantees\\s+absolute race freedom)\\b|\\b(?:publication|installation)\\s+(?:does not|doesn't|doesn’t)\\s+guarantee\\s+absolute race freedom[^.\\n]{0,100}\\b(?:but|however|yet)\\b[^.\\n]{0,40}\\bguarantees?\\s+(?:it|absolute race freedom)\\b)",
+      "diagnostic": "contradictory absolute race-freedom claim"
+    }
+  ],
+  "forbiddenPatterns": [
+    {
+      "pattern": "\\barashi add\\b",
+      "diagnostic": "legacy executable spelling in onboarding guidance"
+    },
+    {
+      "pattern": "suggestions? (?:are|remain) (?:automatically )?selected",
+      "diagnostic": "automatic suggestion selection"
+    },
+    {
+      "pattern": "(?:display|print|echo|include)[^.]*hook (?:body|command)",
+      "diagnostic": "hook-body disclosure"
+    }
+  ]
+}

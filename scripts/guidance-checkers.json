@@ -1,4 +1,5 @@
 [
+  "scripts/add-onboarding-guidance-selftest.mjs",
   "scripts/bare-init-worktree-default-guidance-selftest.mjs",
   "scripts/cli-flag-rationalization-guidance-selftest.mjs",
   "scripts/create-base-guidance-selftest.mjs",
