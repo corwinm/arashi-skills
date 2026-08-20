@@ -88,6 +88,8 @@ File hooks receive `ARASHI_HOOK_SOURCE_PATH` as their absolute source path. Inli
 
 Create hooks are fail-fast; later success cannot mask an earlier failure. Create-hook validation, timeout, or nonzero failure fails create and enters the owned Git rollback boundary.
 
+Configured-create human output summarizes the complete outcome ledger with succeeded, skipped, and failed counts, collapses routine success and skip rows, and retains attributed details for every failure. Nonzero hook stdout and stderr remain on their original streams instead of being duplicated into the summary. Automation and agents that need every evaluated outcome must use `--json`; success records are in `data.hookOutcomes`, failure records are in `error.details.hookOutcomes`, and JSON stdout remains exactly one document.
+
 Configured-create dry-run performs no hook discovery, returns an empty hook ledger, and has no hook preview surface. `--no-hooks` is create-only and remove does not accept it.
 
 ## Remove lifecycle
