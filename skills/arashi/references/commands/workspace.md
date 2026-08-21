@@ -155,21 +155,13 @@ The command writes the equivalent global Git configuration:
 
 The committed Arashi remote can remain `git@github.com:acme/api.git`, while Git rewrites it locally for that developer. Arashi does not install or synchronize that rewrite.
 
-## Optional Repository Onboarding During Add
+## Adding a Repository
 
-Run `aw add <remote>`. Optional onboarding is eligible only when stdin and stdout are TTYs and neither `--json` nor `--force` is active. The first onboarding prompt defaults to no and a decline continues with the minimal repository entry. Non-TTY, `--json`, and `--force` invocations stay on that minimal path without discovery or onboarding prompts. Onboarding configures only the repository being added, never workspace hooks or unsupported fields.
+Use `aw add <remote>` to add a repository to a configured workspace. When run interactively, the command walks through repository configuration and hook initialization.
 
-Every optional section starts unselected: `copy`, `symlink`, `pre-create`, `post-create`, `pre-remove`, and `post-remove`. Copy and symlink discovery is a bounded, root-only metadata scan whose suggestions remain unselected path names; never read, inspect, or disclose their contents. Manual entries remain available, pass canonical path validation, and receive the dependency-sharing warning when applicable. Follow [Repository Worktree File Materialization](create.md#repository-worktree-file-materialization) for copy-versus-symlink behavior and safety.
+Direct the user to run `aw add <remote>` themselves when they want the guided flow or need to decide which files should be copied or symlinked and which repository hooks should be initialized. Do not suggest `--json` or `--force` for that flow; those options skip the interactive setup.
 
-For hooks, choose exactly one source per selected lifecycle: a user-supplied inline command or an editable active native script. Inline commands are always user supplied in Bash shorthand or canonical `bash`, `powershell`, and `cmd` interpreter shapes. Follow the [Lifecycle Hooks reference](../hooks.md) for canonical repository ownership and runtime behavior.
-
-A create script is installed under the active configuration root at `.arashi/hooks/<pre|post-create>.<repo><ext>`. A remove script path is beneath the runtime-resolved target repository from that same active root plus `repos.<name>.path`, at `.arashi/hooks/<pre|post-remove><ext>`; in linked-parent mode this is the linked active child worktree, not the canonical clone. POSIX creates only `.sh` at mode `0755`, while Windows deterministically creates one `.ps1`. Generated scripts are safe, silent successful no-op scaffolds, not `.example` files, and need no rename, `chmod`, or activation step. They are immediately runtime-ready and never overwrite an existing path.
-
-Installation privately prepares each complete scaffold, then uses atomic no-replace publication at the active path. It rejects observable symlink traversal and unsafe parents, and validates parent identities before and after publication. This is the strongest practical pure Node/Bun safety, not absolute race freedom: a hostile local process with workspace write access can still substitute an ancestor between validation and publication.
-
-Treat hook source as sensitive: never print, repeat, preview, diagnose, or report inline or generated-script bodies. Add shows one sanitized final summary and confirmation, then performs at most one configuration save. Its transaction owns script installation, and rollback removes only unchanged scripts created by that invocation. The initial default-no decline continues minimal add, but final-confirmation decline or Ctrl+C after opting in is cancellation and performs no config save.
-
-Do not use `aw add` to edit an existing entry. First inspect the installed `aw --help`. If it lists `configure`, follow the installed `aw configure --help`. Otherwise, directly edit and validate `.arashi/config.json` using the installed schema and the focused materialization and hook references above. See the [canonical configuration workflow](https://arashi.haphazard.dev/workflows/config/).
+If the user only wants the minimal repository entry and has supplied the remote and any required name, the agent can run `aw add` directly. Do not use `aw add` to edit an existing entry. Inspect `aw --help` for the installed configuration command; if none is available, edit and validate `.arashi/config.json` using [Repository Worktree File Materialization](create.md#repository-worktree-file-materialization) and the [Lifecycle Hooks reference](../hooks.md).
 
 ## Adding a Repository from a Linked Parent Worktree
 
