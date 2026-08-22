@@ -1,6 +1,7 @@
 [
   "scripts/bare-init-worktree-default-guidance-selftest.mjs",
   "scripts/cli-flag-rationalization-guidance-selftest.mjs",
+  "scripts/configure-workspace-guidance-selftest.mjs",
   "scripts/create-base-guidance-selftest.mjs",
   "scripts/create-launch-guidance-selftest.mjs",
   "scripts/executable-alias-guidance-selftest.mjs",
