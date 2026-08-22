@@ -155,6 +155,14 @@ The command writes the equivalent global Git configuration:
 
 The committed Arashi remote can remain `git@github.com:acme/api.git`, while Git rewrites it locally for that developer. Arashi does not install or synchronize that rewrite.
 
+## Adding a Repository
+
+Use `aw add <remote>` to add a repository to a configured workspace. When run interactively, the command walks through repository configuration and hook initialization.
+
+Direct the user to run `aw add <remote>` themselves when they want the guided flow or need to decide which files should be copied or symlinked and which repository hooks should be initialized. Do not suggest `--json` or `--force` for that flow; those options skip the interactive setup.
+
+If the user only wants the minimal repository entry and has supplied the remote and any required name, the agent can run `aw add` directly. Do not use `aw add` to edit an existing entry. Inspect `aw --help` for the installed configuration command; if none is available, edit and validate `.arashi/config.json` using [Repository Worktree File Materialization](create.md#repository-worktree-file-materialization) and the [Lifecycle Hooks reference](../hooks.md).
+
 ## Adding a Repository from a Linked Parent Worktree
 
 A direct add from the canonical parent checkout keeps the existing one-clone flow: Arashi clones beneath that checkout's configured `reposDir` and updates that checkout's `.arashi/config.json`.
