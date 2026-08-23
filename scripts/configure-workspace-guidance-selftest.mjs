@@ -11,6 +11,8 @@ const checkerPath = fileURLToPath(import.meta.url);
 const repositoryRoot = resolve(dirname(checkerPath), "..");
 const sourceSkillRoot = join(repositoryRoot, "skills", "arashi");
 const relativePath = "references/commands/workspace.md";
+const skillRelativePath = "SKILL.md";
+const hooksRelativePath = "references/hooks.md";
 const skillRootArgumentIndex = process.argv.indexOf("--skill-root");
 const suppliedSkillRoot =
   skillRootArgumentIndex >= 0 ? process.argv[skillRootArgumentIndex + 1] : undefined;
@@ -161,8 +163,43 @@ function validateDescriptorFamilies(guidance, label) {
 
 function validateSkill(root, label) {
   const content = readFileSync(join(root, relativePath), "utf8");
+  const skillContent = readFileSync(join(root, skillRelativePath), "utf8");
+  const hooksContent = readFileSync(join(root, hooksRelativePath), "utf8");
   const guidance = section(content, "Inspecting and Editing Workspace Configuration");
   const items = paragraphs(guidance);
+
+  assert.match(
+    skillContent,
+    /## Task routing[\s\S]*\*\*[^\n]*configure[^\n]*existing workspace[^\n]*\*\*:[^\n]*\(references\/commands\/workspace\.md\)/i,
+    `${label}/${skillRelativePath} must route existing-workspace configuration tasks to workspace guidance`,
+  );
+
+  const hookItems = paragraphs(hooksContent);
+  requireParagraph(
+    hookItems,
+    /ordinary outcomes and previews[^.\n]*never disclose[^.\n]*inline command bodies[^.\n]*active-file contents/i,
+    `${label}/${hooksRelativePath} must keep ordinary hook surfaces body-free`,
+  );
+  requireParagraph(
+    hookItems,
+    /`--json` output[^.\n]*never discloses[^.\n]*inline command bodies[^.\n]*active-file contents/i,
+    `${label}/${hooksRelativePath} must keep JSON hook surfaces body-free`,
+  );
+  requireParagraph(
+    hookItems,
+    /diagnostics and logs[^.\n]*never disclose[^.\n]*inline command bodies[^.\n]*active-file contents/i,
+    `${label}/${hooksRelativePath} must keep diagnostic hook surfaces body-free`,
+  );
+  requireParagraph(
+    hookItems,
+    /cancellation output[^.\n]*never discloses[^.\n]*inline command bodies[^.\n]*active-file contents/i,
+    `${label}/${hooksRelativePath} must keep cancellation hook surfaces body-free`,
+  );
+  requireParagraph(
+    hookItems,
+    /only command-text exceptions[^.\n]*currently visible inline entry[^.\n]*`aw configure`[^.\n]*exact final `aw configure` JSON preview[^.\n]*those two surfaces show persisted command text/i,
+    `${label}/${hooksRelativePath} must limit visible command text to the current configure entry and exact final preview`,
+  );
 
   validateDescriptorFamilies(guidance, label);
 
@@ -268,6 +305,48 @@ function validateSkill(root, label) {
 }
 
 const driftCases = [
+  {
+    name: "skill-configure-routing",
+    path: skillRelativePath,
+    from: "Initialize, add, clone, configure an existing workspace, or repair managed paths",
+    to: "Initialize, add, clone, or repair managed paths",
+    diagnostic: /route existing-workspace configuration tasks/,
+  },
+  {
+    name: "hooks-ordinary-body-secrecy",
+    path: hooksRelativePath,
+    from: "Ordinary outcomes and previews never disclose inline command bodies or active-file contents.",
+    to: "Ordinary outcomes and previews may disclose inline command bodies or active-file contents.",
+    diagnostic: /keep ordinary hook surfaces body-free/,
+  },
+  {
+    name: "hooks-json-body-secrecy",
+    path: hooksRelativePath,
+    from: "`--json` output never discloses inline command bodies or active-file contents.",
+    to: "`--json` output may disclose inline command bodies or active-file contents.",
+    diagnostic: /keep JSON hook surfaces body-free/,
+  },
+  {
+    name: "hooks-diagnostic-body-secrecy",
+    path: hooksRelativePath,
+    from: "Diagnostics and logs never disclose inline command bodies or active-file contents.",
+    to: "Diagnostics and logs may disclose inline command bodies or active-file contents.",
+    diagnostic: /keep diagnostic hook surfaces body-free/,
+  },
+  {
+    name: "hooks-cancellation-body-secrecy",
+    path: hooksRelativePath,
+    from: "Cancellation output never discloses inline command bodies or active-file contents.",
+    to: "Cancellation output may disclose inline command bodies or active-file contents.",
+    diagnostic: /keep cancellation hook surfaces body-free/,
+  },
+  {
+    name: "hooks-visible-text-exception",
+    path: hooksRelativePath,
+    from: "The only command-text exceptions are the currently visible inline entry during `aw configure` editing and the exact final `aw configure` JSON preview; those two surfaces show persisted command text.",
+    to: "All previews and diagnostics show persisted command text.",
+    diagnostic: /limit visible command text to the current configure entry and exact final preview/,
+  },
   {
     name: "descriptor-path",
     from: "`defaults.switch.mode`",
@@ -398,7 +477,7 @@ function validateControlledDrift() {
       roots.push(root);
       const skillRoot = join(root, "skills", "arashi");
       cpSync(sourceSkillRoot, skillRoot, { recursive: true });
-      const guidancePath = join(skillRoot, relativePath);
+      const guidancePath = join(skillRoot, drift.path ?? relativePath);
       const original = readFileSync(guidancePath, "utf8");
       assert.ok(original.includes(drift.from), `${drift.name} drift fixture source is stale`);
       writeFileSync(guidancePath, original.replace(drift.from, drift.to));

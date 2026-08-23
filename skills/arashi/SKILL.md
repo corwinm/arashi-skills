@@ -55,7 +55,7 @@ Coordinate Git worktrees across configured Arashi workspaces, or use Arashi ad h
 ## Task routing
 
 - **Install, update, or shell completion**: [Setup commands](references/commands/setup.md) and [Prerequisites](references/prerequisites.md)
-- **Initialize, add, clone, or repair managed paths**: [Workspace commands](references/commands/workspace.md)
+- **Initialize, add, clone, configure an existing workspace, or repair managed paths**: [Workspace commands](references/commands/workspace.md)
 - **Run across repositories, parse JSON, hand off, or push**: [Automation commands](references/commands/automation.md)
 - **Create coordinated worktrees or move changes**: [Create commands](references/commands/create.md)
 - **Switch, launch, or select a session context**: [Switch and launch](references/commands/switch-and-launch.md) and [Session shortcuts](references/session-shortcuts.md)

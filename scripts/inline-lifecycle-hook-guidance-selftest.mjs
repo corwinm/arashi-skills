@@ -48,7 +48,11 @@ const requiredHookGuidance = [
   "`sourceOwnerKind`",
   "`sourceOwnerName`",
   "`sourceScriptPath` is `null` or omitted",
-  "Outcomes, previews, diagnostics, and logs never disclose snippet text",
+  "Ordinary outcomes and previews never disclose inline command bodies or active-file contents",
+  "`--json` output never discloses inline command bodies or active-file contents",
+  "Diagnostics and logs never disclose inline command bodies or active-file contents",
+  "Cancellation output never discloses inline command bodies or active-file contents",
+  "The only command-text exceptions are the currently visible inline entry during `aw configure` editing and the exact final `aw configure` JSON preview",
   "Standalone and user-global hooks remain native-file only",
   "`$ARASHI_*`",
   "`$env:ARASHI_*`",
@@ -88,8 +92,8 @@ function validateSkill(root, label) {
   );
   assert.match(
     hooks,
-    /`sourceKind: "inline-config"`[^\n]*`sourceOwnerKind`[^\n]*`sourceOwnerName`[^\n]*`sourceScriptPath` is `null` or omitted[^\n]*never disclose snippet text/i,
-    `${label}/references/hooks.md does not bind source metadata to no-disclosure`,
+    /`sourceKind: "inline-config"`[^\n]*`sourceOwnerKind`[^\n]*`sourceOwnerName`[^\n]*`sourceScriptPath` is `null` or omitted[^\n]*ordinary outcomes and previews never disclose[^\n]*`--json` output never discloses[^\n]*diagnostics and logs never disclose[^\n]*cancellation output never discloses[^\n]*only command-text exceptions[^\n]*currently visible inline entry[^\n]*exact final `aw configure` JSON preview/i,
+    `${label}/references/hooks.md does not bind source metadata to body-free surfaces and the narrow configure exception`,
   );
   validateCopyableHookGuidance(hooks, `${label}/references/hooks.md`);
 
@@ -246,7 +250,7 @@ function createCompleteFixture(root) {
     "`hooks.scripts.<lifecycle>` is workspace ownership and `repos.<name>.hooks.<lifecycle>` is repository ownership.",
     "Windows selects `powershell`, then `cmd`, then `bash`; an unavailable entry falls through to the next configured entry and no available variant fails as `interpreter_unavailable`.",
     "Remove dry-run keeps source-aware previews; Configured-create dry-run performs no hook discovery, returns an empty hook ledger, and has no hook preview surface.",
-    "`sourceKind: \"inline-config\"`, `sourceOwnerKind`, `sourceOwnerName`, and `sourceScriptPath` is `null` or omitted; Outcomes, previews, diagnostics, and logs never disclose snippet text.",
+    "`sourceKind: \"inline-config\"`, `sourceOwnerKind`, `sourceOwnerName`, and `sourceScriptPath` is `null` or omitted. Ordinary outcomes and previews never disclose inline command bodies or active-file contents. `--json` output never discloses inline command bodies or active-file contents. Diagnostics and logs never disclose inline command bodies or active-file contents. Cancellation output never discloses inline command bodies or active-file contents. The only command-text exceptions are the currently visible inline entry during `aw configure` editing and the exact final `aw configure` JSON preview; those two surfaces show persisted command text.",
   ];
   const configuredExample = [
     "## Configured Inline Hooks",
