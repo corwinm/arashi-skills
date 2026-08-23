@@ -1,92 +1,54 @@
-# arashi-skills
+# Arashi Skill
 
-Dedicated skills package repository for Arashi.
+Install the Arashi skill for coding agents with [`skills`](https://skills.sh/corwinm/arashi-skills/arashi):
 
 ```bash
 npx skills add https://github.com/corwinm/arashi-skills --skill arashi
 ```
 
-## Purpose
+The skill helps agents use [Arashi](https://github.com/corwinm/arashi) safely across single repositories and coordinated meta-repositories. It provides task routing, workflow guidance, command references, and troubleshooting for common worktree operations.
 
-This repository provides the Arashi skill package used by `skills.sh` users to:
+## Before you start
 
-- install and use the Arashi CLI with a predictable first-run flow
-- run pre-configured workflows for common meta-repository tasks
-- self-serve troubleshooting before raising support issues
+The Arashi CLI is installed separately. Follow the [getting-started guide](https://arashi.haphazard.dev/getting-started/), then verify it with:
 
-Implementation code for the Arashi CLI remains in [`repos/arashi`](../arashi/README.md). This repository focuses on skill metadata and integration documentation that ships with the installed skill.
-
-## Repository Layout
-
-```text
-.
-├── contracts/
-│   ├── command-coverage.json
-│   ├── create-base-branch.json
-│   ├── create-launch-config.json
-│   ├── lifecycle-hook-guidance.json
-│   └── switch-config.json
-├── skills/
-│   └── arashi/
-│       ├── SKILL.md
-│       ├── references/
-│       └── assets/
+```bash
+aw --version
 ```
 
-## Contribution Notes
+Use `aw --help` and `aw <command> --help` for current command options. The `arashi` executable remains available for existing scripts and workflows.
 
-1. Keep commands deterministic and copy-pasteable across macOS, Linux, and Windows terminals.
-2. Update the smallest affected reference first for detailed workflow, command, troubleshooting, or shortcut instructions.
-3. Update `skills/arashi/SKILL.md` only when skill routing, operating policy, or reference links change.
-4. Include expected outcomes for every workflow or troubleshooting instruction.
-5. Keep skill references self-contained under `skills/arashi/`.
-6. Keep repository-level validation metadata under `contracts/`, deliberately outside `skills/` so it is not shipped as part of the installed skill. Keep `command-coverage.json` aligned with every top-level CLI command, and keep the create/switch semantic manifests aligned with canonical configuration. Record normal skill coverage with a skill-relative reference, every intentional exclusion with a stable reason, and each command's standalone support classification. Keep the complete `init --zero-config` dry-run, JSON, compatible-option, and incompatible-option policy synchronized with the CLI contract; `install` remains excluded because it is bootstrap-only.
+## What the skill covers
 
-## Canonical Commands
+- Installing, updating, and diagnosing Arashi
+- Configured and standalone workspace setup
+- Creating, switching, moving, and removing worktrees
+- Coordinated status, execution, pull, push, and sync workflows
+- Editor, terminal, hook, and shell integration
+- Safe recovery and troubleshooting
 
-- Install skill: `npx skills add https://github.com/corwinm/arashi-skills --skill arashi`
-- Arashi CLI install guide: `https://arashi.haphazard.dev`
-- Verify Arashi CLI: `arashi --version`
-- Discover commands and current parameters: `arashi --help` and `arashi <command> --help`
-- Use installed CLI help output as the source of truth for current flags before documenting or recommending command parameters.
-- Official curl installer can offer shell integration during install; use `ARASHI_SHELL_INTEGRATION=yes|no` for unattended runs
-- If verification exits immediately or returns code `137`, reinstall with a pinned release and report the bad release artifact
-- Configure command defaults: set `.arashi/config.json` `defaults.create` / `defaults.switch`
+Start with [`skills/arashi/SKILL.md`](./skills/arashi/SKILL.md). Its [package index](./skills/arashi/README.md) routes to focused references, tutorials, workflows, and troubleshooting without loading the entire guide at once.
 
-## Workflow Docs
+## Documentation
 
-- Overview: `https://arashi.haphazard.dev/workflows/`
-- Curated agent docs: `https://arashi.haphazard.dev/llms.txt`
-- Full Markdown docs export: `https://arashi.haphazard.dev/llms-full.txt`
-- Hooks reference: `skills/arashi/references/hooks.md`
-- Hooks docs: `https://arashi.haphazard.dev/workflows/hooks/`
-- Config: `https://arashi.haphazard.dev/workflows/config/`
-- VS Code and VS Code-based editors: `https://arashi.haphazard.dev/workflows/vscode/`
-- tmux and sesh: `https://arashi.haphazard.dev/workflows/tmux-and-sesh/`
-- Agents: `https://arashi.haphazard.dev/workflows/agents-and-specs/`
-- Agents Markdown: `https://arashi.haphazard.dev/workflows/agents-and-specs.md`
+- [Arashi documentation](https://arashi.haphazard.dev/)
+- [Workflow guides](https://arashi.haphazard.dev/workflows/)
+- [Command reference](https://arashi.haphazard.dev/commands/)
+- [Agent-readable documentation](https://arashi.haphazard.dev/llms.txt)
 
-## Security Compliance
+## Contributing
 
-- Canonical gate command: `node scripts/security-gate.mjs --root . --exceptions security/audit-exceptions.json`
-- Security gate self-test: `node scripts/security-gate-selftest.mjs`
-- All authored semantic guidance: `node scripts/validate-guidance.mjs`
-- Canonical release archive: `node scripts/create-release-archive.mjs --output arashi-skill-package.tar.gz`
-- All extracted-package semantic guidance: `node scripts/validate-guidance.mjs --skill-root package-check/skills/arashi`
-- Registration, aggregate, archive, and workflow self-tests: `node scripts/guidance-registration-selftest.mjs`, `node scripts/guidance-aggregate-selftest.mjs`, `node scripts/release-archive-selftest.mjs`, and `node scripts/workflow-composition-selftest.mjs`
-- Focused TDD/diagnostics remain available as `node scripts/<feature>-guidance-selftest.mjs` with optional `--skill-root <extracted-skill-root>`.
-- Cross-repository command contracts: `(cd ../.. && pnpm contracts:check)`
-- Policy and thresholds: `security/policy.md`
-- Baseline findings and remediation tracking: `security/baseline-findings.md`
-- Exception metadata file: `security/audit-exceptions.json`
-- Exception workflow: `security/exceptions.md`
+Keep detailed operational guidance inside `skills/arashi/` and keep repository-level validation policy outside the installed skill. Before submitting changes, run:
 
-## Skill Entry Point
+```bash
+node scripts/validate-guidance.mjs
+node scripts/security-gate.mjs --root . --exceptions security/audit-exceptions.json
+node scripts/create-release-archive.mjs --output arashi-skill-package.tar.gz
+```
 
-- Manifest: `skills/arashi/SKILL.md`
-- References index: `skills/arashi/README.md`
+See the [maintainer publication policy](https://github.com/corwinm/arashi-skills/blob/main/docs/publication.md) and [security policy](./security/policy.md) for the complete release and compliance process.
 
-## Related Repositories
+## Related repositories
 
-- Arashi implementation: [github.com/corwinm/arashi](https://github.com/corwinm/arashi)
-- Specs and planning: [github.com/corwinm/arashi-arashi](https://github.com/corwinm/arashi-arashi)
+- [Arashi CLI](https://github.com/corwinm/arashi)
+- [Arashi specifications and planning](https://github.com/corwinm/arashi-arashi)
