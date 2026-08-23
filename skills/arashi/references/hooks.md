@@ -73,7 +73,7 @@ A string is Bash shorthand. Explicit interpreter objects support `bash`, `powers
 
 Use inline hooks for short reviewable commands and external files for substantial, reusable scripts. Inline configuration is executable code. An inline value and its corresponding native file are ambiguous: create, remove, remove dry-run, and doctor fail before mutation and execute neither source. Inline sources preserve native-file lifecycle timing, cwd, multiplicity, timeout, input, failure, rollback/finalization, and ordered outcomes. Standalone and user-global hooks remain native-file only.
 
-Inline metadata reports `sourceKind: "inline-config"`, `sourceOwnerKind`, and `sourceOwnerName`; `sourceScriptPath` is `null` or omitted. Outcomes, previews, diagnostics, and logs never disclose snippet text.
+Inline metadata reports `sourceKind: "inline-config"`, `sourceOwnerKind`, and `sourceOwnerName`; `sourceScriptPath` is `null` or omitted. Ordinary outcomes and previews never disclose inline command bodies or active-file contents. `--json` output never discloses inline command bodies or active-file contents. Diagnostics and logs never disclose inline command bodies or active-file contents. Cancellation output never discloses inline command bodies or active-file contents. The only command-text exceptions are the currently visible inline entry during `aw configure` editing and the exact final `aw configure` JSON preview; those two surfaces show persisted command text.
 
 File hooks receive `ARASHI_HOOK_SOURCE_PATH` as their absolute source path. Inline hooks omit `ARASHI_HOOK_SOURCE_PATH`; no path-like replacement is invented.
 

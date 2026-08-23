@@ -97,6 +97,35 @@ Expected outcomes:
 - repository root, absolute paths, and parent traversal are reported as unsafe and are never added automatically.
 - Arashi never creates or modifies global Git configuration or a global excludes file.
 
+## Inspecting and Editing Workspace Configuration
+
+Use `aw configure` in an existing configured workspace to inspect supported settings and make human-confirmed interactive edits; it is an explicit product-owned editor, not a generic JSON Schema-generated editor.
+
+The supported scope families and fields are:
+
+- workspace settings: `reposDir`, `worktreesDir`, `baseBranch`, and `sync.timeoutSeconds`;
+- workspace lifecycle hooks: `hooks.timeout`, `hooks.scripts.pre-create`, `hooks.scripts.post-create`, `hooks.scripts.pre-remove`, and `hooks.scripts.post-remove`;
+- command defaults: `defaults.create.switch`, `defaults.create.launch`, and `defaults.switch.mode`;
+- editor defaults: `defaults.editors.vscode.create.switch`, `defaults.editors.vscode.create.launch`, `defaults.editors.cursor.create.switch`, `defaults.editors.cursor.create.launch`, `defaults.editors.kiro.create.switch`, and `defaults.editors.kiro.create.launch`;
+- meta-repository policy: `meta.baseBranch`;
+- one existing repository: `repos.<name>.groups`, `repos.<name>.baseBranch`, `repos.<name>.copy`, `repos.<name>.symlink`, `repos.<name>.hooks.pre-create`, `repos.<name>.hooks.post-create`, `repos.<name>.hooks.pre-remove`, and `repos.<name>.hooks.post-remove`; `repos.<name>.path` and `repos.<name>.gitUrl` are identity-only context and are noneditable.
+
+Inspection labels a canonical persisted field `Configured` when present and `Not configured` when absent, while a separately labeled effective value can be inherited or built-in and never persists merely because it was inspected. `Not configured` does not mean invalid or ineffective, and runtime diagnosis remains the responsibility of `aw doctor`.
+
+For each selected editable field, keep preserves the persisted field exactly through canonical serialization, edit sets or replaces it using the accepted shape, and clear removes only the selected optional field and empty owning containers. Required `reposDir` supports keep. It supports edit. Clear is forbidden. Empty input is not a substitute for an explicit action.
+
+A pre-existing active native file is external active state. Configure never offers clear. It never deletes the file. It never overwrites the file. It offers keep/skip instead. Workspace active files use the exact canonical paths `<workspace>/.arashi/hooks/pre-create<ext>`, `<workspace>/.arashi/hooks/post-create<ext>`, `<workspace>/.arashi/hooks/pre-remove<ext>`, and `<workspace>/.arashi/hooks/post-remove<ext>`; repository create files use `<workspace>/.arashi/hooks/pre-create.<repo><ext>` and `<workspace>/.arashi/hooks/post-create.<repo><ext>`, while repository remove files use `<repo>/.arashi/hooks/pre-remove<ext>` and `<repo>/.arashi/hooks/post-remove<ext>`.
+
+Before any mutation, the final confirmation shows the exact serialized candidate JSON, including plaintext inline command bodies, and a separate active-file plan listing lifecycle, exact path, safe no-op state, and runtime-ready permissions; it does not put generated file contents into the JSON preview. Declining the final preview leaves configuration bytes and active files unchanged. Interrupting the final preview leaves configuration bytes and active files unchanged. Cancellation output does not repeat inline command bodies.
+
+When canonical serialization equals the original snapshot and there is no active-file plan, configure reports no changes before final mutation confirmation or persistence and does not install files. Keep and skip therefore preserve unchanged bytes instead of causing a canonical rewrite.
+
+Both human and `--json` modes require a canonically configured valid workspace: missing `.arashi/config.json`, standalone context, and invalid configuration fail before any prompt or inspection, and configure never initializes or repairs configuration. Interactive editing additionally requires both stdin and stdout to be TTYs; a non-TTY invocation without `--json` fails before prompting or mutation.
+
+`aw configure --json` emits exactly one stable sanitized inspection document. It never prompts. It never mutates. For hook-source details, ordinary views, JSON inspection, and cancellation output expose only lifecycle and interpreter presence and omit inline command bodies and active-file contents; only visible inline entry and the final exact JSON preview show persisted command text. The command does not provide `--set` or `--unset` mutation flags.
+
+For unsupported canonical fields, edit `.arashi/config.json` directly and validate the resulting workspace with `aw doctor --json`. Preserve fields outside the supported configure scopes; do not assume that `aw configure` exposes every schema field or repairs unrelated configuration.
+
 ## Managed Ignore Reconciliation
 
 In non-bare repositories, configured initialization and configuration-backed lifecycle commands reconcile the safe normalized `reposDir` and `worktreesDir` rules before they materialize or continue work that depends on those paths. This applies to `init`, `pull`, `clone`, `add`, and `create`. A fresh clone with no stored preference defaults to the repository-local Git exclude file and does not unexpectedly dirty tracked `.gitignore`.
@@ -161,7 +190,7 @@ Use `aw add <remote>` to add a repository to a configured workspace. When run in
 
 Direct the user to run `aw add <remote>` themselves when they want the guided flow or need to decide which files should be copied or symlinked and which repository hooks should be initialized. Do not suggest `--json` or `--force` for that flow; those options skip the interactive setup.
 
-If the user only wants the minimal repository entry and has supplied the remote and any required name, the agent can run `aw add` directly. Do not use `aw add` to edit an existing entry. Inspect `aw --help` for the installed configuration command; if none is available, edit and validate `.arashi/config.json` using [Repository Worktree File Materialization](create.md#repository-worktree-file-materialization) and the [Lifecycle Hooks reference](../hooks.md).
+If the user only wants the minimal repository entry and has supplied the remote and any required name, the agent can run `aw add` directly. Do not use `aw add` to edit an existing entry; use `aw configure` for supported edits and reserve direct editing of `.arashi/config.json` for unsupported canonical fields, following [Repository Worktree File Materialization](create.md#repository-worktree-file-materialization) and the [Lifecycle Hooks reference](../hooks.md), then validate with `aw doctor --json`.
 
 ## Adding a Repository from a Linked Parent Worktree
 
