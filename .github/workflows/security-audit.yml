@@ -27,6 +27,9 @@ jobs:
       - name: Run security gate self-test
         run: node scripts/security-gate-selftest.mjs
 
+      - name: Validate README onboarding
+        run: node scripts/readme-contract-selftest.mjs
+
       - name: Test semantic guidance infrastructure
         run: |
           node scripts/guidance-registration-selftest.mjs

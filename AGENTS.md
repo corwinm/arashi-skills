@@ -12,7 +12,7 @@ This repository contains the Arashi skill package and supporting references.
 ## Working Rules
 
 - Keep commands deterministic and copy-pasteable.
-- Treat `arashi --help` and `arashi <command> --help` as the source of truth for current command parameters.
+- Use `aw` for documented workflows and treat `aw --help` and `aw <command> --help` as the source of truth for current command parameters. The `arashi` executable remains supported for existing scripts and workflows.
 - Update the smallest affected reference first for detailed procedural changes.
 - Update `skills/arashi/SKILL.md` only when skill routing, operating policy, or reference links change.
 - Keep skill references self-contained and aligned with the canonical docs site.
