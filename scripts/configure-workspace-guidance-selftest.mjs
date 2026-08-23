@@ -273,8 +273,8 @@ function validateSkill(root, label) {
   assert.match(jsonPolicy, /never mutates?/i, `${label}/${relativePath} --json must independently never mutate`);
   requireParagraph(
     items,
-    /ordinary[^.\n]*JSON[^.\n]*(?:cancellation|cancelled)[^.\n]*(?:only|expose)[^.\n]*lifecycle[^.\n]*interpreter presence[^.\n]*(?:omit|never|without)[^.\n]*(?:inline command )?bodies/i,
-    `${label}/${relativePath} must keep ordinary, JSON, and cancellation views body-free`,
+    /for hook-source details[^.\n]*ordinary[^.\n]*JSON[^.\n]*(?:cancellation|cancelled)[^.\n]*(?:only|expose)[^.\n]*lifecycle[^.\n]*interpreter presence[^.\n]*(?:omit|never|without)[^.\n]*(?:inline command )?bodies/i,
+    `${label}/${relativePath} must scope ordinary, JSON, and cancellation body secrecy to hook-source details`,
   );
   requireParagraph(
     items,
@@ -454,6 +454,12 @@ const driftCases = [
     from: "It never prompts. It never mutates.",
     to: "It never prompts. It mutates.",
     diagnostic: /--json must independently never mutate/,
+  },
+  {
+    name: "hook-source-secrecy-scope",
+    from: "For hook-source details, ordinary views, JSON inspection, and cancellation output expose only lifecycle and interpreter presence and omit inline command bodies and active-file contents",
+    to: "Ordinary views, JSON inspection, and cancellation output expose only lifecycle and interpreter presence and omit inline command bodies and active-file contents",
+    diagnostic: /scope ordinary, JSON, and cancellation body secrecy to hook-source details/,
   },
   {
     name: "existing-entry-route",

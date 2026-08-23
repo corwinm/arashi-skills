@@ -122,7 +122,7 @@ When canonical serialization equals the original snapshot and there is no active
 
 Both human and `--json` modes require a canonically configured valid workspace: missing `.arashi/config.json`, standalone context, and invalid configuration fail before any prompt or inspection, and configure never initializes or repairs configuration. Interactive editing additionally requires both stdin and stdout to be TTYs; a non-TTY invocation without `--json` fails before prompting or mutation.
 
-`aw configure --json` emits exactly one stable sanitized inspection document. It never prompts. It never mutates. Ordinary views, JSON inspection, and cancellation output expose only lifecycle and interpreter presence and omit inline command bodies and active-file contents; only visible inline entry and the final exact JSON preview show persisted command text. The command does not provide `--set` or `--unset` mutation flags.
+`aw configure --json` emits exactly one stable sanitized inspection document. It never prompts. It never mutates. For hook-source details, ordinary views, JSON inspection, and cancellation output expose only lifecycle and interpreter presence and omit inline command bodies and active-file contents; only visible inline entry and the final exact JSON preview show persisted command text. The command does not provide `--set` or `--unset` mutation flags.
 
 For unsupported canonical fields, edit `.arashi/config.json` directly and validate the resulting workspace with `aw doctor --json`. Preserve fields outside the supported configure scopes; do not assume that `aw configure` exposes every schema field or repairs unrelated configuration.
 
