@@ -4,6 +4,43 @@ Create coordinated worktrees only after the effective repository set and base ar
 
 Installed `aw <command> --help` is the parameter authority.
 
+## Configuring Worktree Naming
+
+For configured workspaces, edit `.arashi/config.json` directly; `aw configure` does not expose worktree naming. Add `worktreeNaming` as a root object, not beneath `defaults`, `meta`, or a repository entry:
+
+```json
+{
+  "worktreeNaming": {
+    "style": "repo-branch",
+    "branchSlashes": "flatten"
+  }
+}
+```
+
+The fields use closed vocabularies:
+
+- `style` accepts exactly `default`, `branch`, and `repo-branch`.
+- `branchSlashes` accepts exactly `preserve` and `flatten`.
+
+Omitting the `worktreeNaming` object or either individual field applies `default` and `preserve` without migrating and without persisting either default. Given a repository named `example` and branch `feature/auth`, the directory path is:
+
+| Repository | `style` | `branchSlashes` | Directory path |
+| --- | --- | --- | --- |
+| bare | `default` | `preserve` | `example/feature/auth` |
+| bare | `default` | `flatten` | `example/feature-auth` |
+| bare | `branch` | `preserve` | `feature/auth` |
+| bare | `branch` | `flatten` | `feature-auth` |
+| bare | `repo-branch` | `preserve` | `example-feature/auth` |
+| bare | `repo-branch` | `flatten` | `example-feature-auth` |
+| non-bare | `default` | `preserve` | `feature/auth` |
+| non-bare | `default` | `flatten` | `feature-auth` |
+| non-bare | `branch` | `preserve` | `feature/auth` |
+| non-bare | `branch` | `flatten` | `feature-auth` |
+| non-bare | `repo-branch` | `preserve` | `example-feature/auth` |
+| non-bare | `repo-branch` | `flatten` | `example-feature-auth` |
+
+The Git branch remains the exact requested name; only the directory path is transformed. A path collision fails without generating an alternate suffix. Existing worktrees are never renamed, and recorded metadata remains authoritative for locating them. Coordinated child placement remains unchanged. Standalone `.worktrees/<branch>` placement remains unchanged.
+
 ## Repository Worktree File Materialization
 
 Configured mode accepts direct `repos.<name>.copy` and `repos.<name>.symlink` arrays. Each declared repository-relative path uses the same relative path in the canonical Git primary source checkout and the new worktree destination. This configuration is configured-only and is not available in zero-config standalone mode.

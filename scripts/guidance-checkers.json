@@ -15,5 +15,6 @@
   "scripts/standalone-guidance-selftest.mjs",
   "scripts/switch-mode-guidance-selftest.mjs",
   "scripts/tab-launch-disposition-guidance-selftest.mjs",
-  "scripts/tmux-launch-guidance-selftest.mjs"
+  "scripts/tmux-launch-guidance-selftest.mjs",
+  "scripts/worktree-naming-guidance-selftest.mjs"
 ]
