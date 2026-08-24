@@ -33,6 +33,11 @@ Omitting the `worktreeNaming` object or either individual field applies `default
 | bare | `repo-branch` | `preserve` | `example-feature/auth` |
 | bare | `repo-branch` | `flatten` | `example-feature-auth` |
 | non-bare | `default` | `preserve` | `feature/auth` |
+| non-bare | `default` | `flatten` | `feature-auth` |
+| non-bare | `branch` | `preserve` | `feature/auth` |
+| non-bare | `branch` | `flatten` | `feature-auth` |
+| non-bare | `repo-branch` | `preserve` | `example-feature/auth` |
+| non-bare | `repo-branch` | `flatten` | `example-feature-auth` |
 
 The Git branch remains the exact requested name; only the directory path is transformed. A path collision fails without generating an alternate suffix. Existing worktrees are never renamed, and recorded metadata remains authoritative for locating them. Coordinated child placement remains unchanged. Standalone `.worktrees/<branch>` placement remains unchanged.
 
