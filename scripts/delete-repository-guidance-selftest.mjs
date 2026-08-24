@@ -64,8 +64,8 @@ function validateSkill(root, label) {
   );
   requireParagraph(
     items,
-    /human TTY.*omitted.*`aw delete`.*checkbox.*(?:one or many|one\/many).*combined preview.*one default-no confirmation/i,
-    `${label}/${relativePath} must teach omitted-target human-TTY one/many selection and combined confirmation`,
+    /human TTY.*omitted.*`aw delete`.*checkbox.*(?:one or many|one\/many).*names? and (?:submitted )?values?.*exact(?:ly)?.*configured keys?.*(?:no|not|never).*(?:path|Git URL).*(?:group|description).*metadata.*combined preview.*one default-no confirmation/i,
+    `${label}/${relativePath} must teach key-only TTY checkbox names and values without repository metadata`,
   );
   requireParagraph(
     items,
@@ -74,8 +74,8 @@ function validateSkill(root, label) {
   );
   requireParagraph(
     items,
-    /`aw delete <repository> --dry-run`.*before.*`aw delete <repository> --force`.*(?:exact|complete) plan.*(?:accepted|reviewed|confirmed)/i,
-    `${label}/${relativePath} must require exact-key dry-run before accepted force automation`,
+    /`aw delete <repository> --dry-run`.*produces?.*(?:exact|complete).*plan.*review.*(?:accept|confirm).*only then.*`aw delete <repository> --force`.*same exact (?:configured )?key/i,
+    `${label}/${relativePath} must require dry-run to produce a reviewed exact-key plan before force automation`,
   );
   requireParagraph(
     items,
@@ -123,6 +123,16 @@ function validateSkill(root, label) {
     /(?:but|and|also|force) deletes? remote (?:repositories|branches)/i,
     `${label}/${relativePath} must not claim remote repositories or branches are deleted`,
   );
+  assert.doesNotMatch(
+    guidance,
+    /TTY checkbox[\s\S]{0,80}(?:may|can|will)\s+(?:label|name|submit|use)[\s\S]{0,120}(?:path|Git URL)[\s\S]{0,120}(?:may|can|will)\s+include[\s\S]{0,80}(?:group|description).*metadata/i,
+    `${label}/${relativePath} must require key-only TTY checkbox names and values`,
+  );
+  assert.doesNotMatch(
+    guidance,
+    /^[ \t]*(?!(?:do not|never|must not|should not|cannot)\b)[^.\n]{0,120}\brun `aw delete [^`]*--force` immediately[\s\S]{0,220}(?:review[^.]*after|without first[^.]*dry-run)/im,
+    `${label}/${relativePath} must advise force only after exact-key dry-run scope review`,
+  );
 }
 
 const driftCases = [
@@ -146,9 +156,9 @@ const driftCases = [
   },
   {
     name: "interactive-selection",
-    from: "checkbox for one or many configured keys, followed by one combined preview and one default-no confirmation",
-    to: "single-select repository prompt followed by separate confirmations",
-    diagnostic: /one\/many selection and combined confirmation/,
+    from: "checkbox for one or many configured keys",
+    to: "single-select repository prompt",
+    diagnostic: /key-only TTY checkbox names and values/,
   },
   {
     name: "omitted-automation",
@@ -158,9 +168,9 @@ const driftCases = [
   },
   {
     name: "dry-run-force",
-    from: "Run `aw delete <repository> --dry-run` before `aw delete <repository> --force` only after the exact complete plan is reviewed and accepted",
+    from: "Only then run `aw delete <repository> --force` with the same exact configured key",
     to: "Run `aw delete <repository> --force` immediately",
-    diagnostic: /dry-run before accepted force automation/,
+    diagnostic: /dry-run to produce a reviewed exact-key plan before force automation/,
   },
   {
     name: "remove-distinction",
@@ -194,12 +204,43 @@ const driftCases = [
   },
 ];
 
+const contradictionCases = [
+  {
+    name: "interactive-key-metadata",
+    addition:
+      "The TTY checkbox may label and submit each repository by its path or Git URL and may include group and description metadata.",
+    diagnostic: /key-only TTY checkbox names and values/,
+  },
+  {
+    name: "force-before-dry-run-review",
+    addition:
+      "For non-interactive automation, run `aw delete api --force` immediately; review its scope afterward without first producing and reviewing the exact-key dry-run plan.",
+    diagnostic: /force only after exact-key dry-run scope review/,
+  },
+];
+
+const truthfulControlCases = [
+  {
+    name: "interactive-key-metadata-negation",
+    addition:
+      "The TTY checkbox name and submitted value must not use a repository path or Git URL and must not include group or description metadata.",
+    allows: true,
+  },
+  {
+    name: "force-before-dry-run-review-negation",
+    addition:
+      "Do not run `aw delete api --force` immediately without first producing and reviewing the exact-key dry-run plan.",
+    allows: true,
+  },
+];
+
 function validateControlledDrift() {
   const roots = [];
   const falseAcceptances = [];
+  const falseRejections = [];
   try {
     for (const layout of ["source", "package"]) {
-      for (const drift of driftCases) {
+      for (const drift of [...driftCases, ...contradictionCases, ...truthfulControlCases]) {
         const root = mkdtempSync(join(tmpdir(), `arashi-delete-${layout}-${drift.name}-`));
         roots.push(root);
         const skillRoot =
@@ -207,12 +248,25 @@ function validateControlledDrift() {
         cpSync(sourceSkillRoot, skillRoot, { recursive: true });
         const guidancePath = join(skillRoot, relativePath);
         const original = readFileSync(guidancePath, "utf8");
-        assert.equal(
-          original.split(drift.from).length - 1,
-          1,
-          `${drift.name} drift fixture source must occur exactly once`,
-        );
-        writeFileSync(guidancePath, original.replace(drift.from, drift.to));
+        if (drift.addition) {
+          const nextHeading = "\n## Managed Ignore Reconciliation";
+          assert.equal(
+            original.split(nextHeading).length - 1,
+            1,
+            `${drift.name} contradiction fixture insertion point must occur exactly once`,
+          );
+          writeFileSync(
+            guidancePath,
+            original.replace(nextHeading, `\n\n${drift.addition}\n${nextHeading}`),
+          );
+        } else {
+          assert.equal(
+            original.split(drift.from).length - 1,
+            1,
+            `${drift.name} drift fixture source must occur exactly once`,
+          );
+          writeFileSync(guidancePath, original.replace(drift.from, drift.to));
+        }
 
         const result = spawnSync(
           process.execPath,
@@ -223,14 +277,17 @@ function validateControlledDrift() {
             env: { ...process.env, ARASHI_DELETE_GUIDANCE_SKIP_FIXTURES: "1" },
           },
         );
-        if (result.status === 0) {
+        if (drift.allows && result.status !== 0) {
+          falseRejections.push(`${layout}/${drift.name}`);
+        } else if (!drift.allows && result.status === 0) {
           falseAcceptances.push(`${layout}/${drift.name}`);
-        } else {
+        } else if (!drift.allows) {
           assert.match(output(result), drift.diagnostic, `${layout}/${drift.name} wrong diagnostic`);
         }
       }
     }
     assert.deepEqual(falseAcceptances, [], `accepted delete guidance drift: ${falseAcceptances.join(", ")}`);
+    assert.deepEqual(falseRejections, [], `rejected truthful delete guidance: ${falseRejections.join(", ")}`);
   } finally {
     for (const root of roots) rmSync(root, { recursive: true, force: true });
   }

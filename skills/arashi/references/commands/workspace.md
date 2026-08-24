@@ -132,9 +132,9 @@ Explicit destructive intent is required for configured repository dependency del
 
 Inspect the installed `aw delete --help` before planning an invocation. Use only parameters supported by that installed command.
 
-`aw delete <repository>` selects one exact configured `repos.<repository>` key, not a path, branch, fuzzy match, or alias. In a human TTY, omitted-target `aw delete` presents a checkbox for one or many configured keys, followed by one combined preview and one default-no confirmation. An omitted target in non-TTY or JSON mode returns `DELETE_SELECTION_REQUIRED`; neither `--force` nor `--dry-run` chooses, invents, infers, or defaults a target.
+`aw delete <repository>` selects one exact configured `repos.<repository>` key, not a path, branch, fuzzy match, or alias. In a human TTY, omitted-target `aw delete` presents a checkbox for one or many configured keys. Every checkbox name and submitted value is exactly its configured key; the prompt exposes no repository path, Git URL, group, description, or other metadata. The selection is followed by one combined preview and one default-no confirmation. An omitted target in non-TTY or JSON mode returns `DELETE_SELECTION_REQUIRED`; neither `--force` nor `--dry-run` chooses, invents, infers, or defaults a target.
 
-Run `aw delete <repository> --dry-run` before `aw delete <repository> --force` only after the exact complete plan is reviewed and accepted. Force is appropriate only for explicitly accepted non-interactive automation or disclosed Git data-loss risk; an ordinary clean human-TTY mutation can instead use the command's combined default-no confirmation.
+`aw delete <repository> --dry-run` produces the exact complete plan for that exact configured key without mutation. Review its complete scope and accept it only when it matches the request. Only then run `aw delete <repository> --force` with the same exact configured key. Force is appropriate only for explicitly accepted non-interactive automation or disclosed Git data-loss risk; an ordinary clean human-TTY mutation can instead use the command's combined default-no confirmation.
 
 ```bash
 aw delete api --dry-run
