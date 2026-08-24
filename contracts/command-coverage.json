@@ -47,6 +47,15 @@
       }
     },
     {
+      "name": "delete",
+      "status": "covered",
+      "reference": "references/commands/workspace.md",
+      "standalone": {
+        "support": "configured-only",
+        "reason": "Deleting configured repositories requires persisted workspace configuration."
+      }
+    },
+    {
       "name": "doctor",
       "status": "covered",
       "reference": "references/commands/automation.md",

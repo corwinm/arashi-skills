@@ -168,7 +168,7 @@ function validateCoverageContract() {
       "status",
       "switch"
     ].map((name) => [name, "supported"]),
-    ...["add", "clone", "exec", "pull", "push", "setup", "sync"].map((name) => [
+    ...["add", "clone", "delete", "exec", "pull", "push", "setup", "sync"].map((name) => [
       name,
       "configured-only"
     ]),
