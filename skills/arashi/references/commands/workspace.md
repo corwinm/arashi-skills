@@ -126,6 +126,34 @@ Both human and `--json` modes require a canonically configured valid workspace: 
 
 For unsupported canonical fields, edit `.arashi/config.json` directly and validate the resulting workspace with `aw doctor --json`. Preserve fields outside the supported configure scopes; do not assume that `aw configure` exposes every schema field or repairs unrelated configuration.
 
+## Deleting Configured Repository Dependencies
+
+Explicit destructive intent is required for configured repository dependency deletion. A request to inspect, detach, or clean state, or to perform branch/worktree cleanup, does not grant permission to delete a configured dependency; do not infer that permission. Route branch/worktree cleanup through the appropriate existing command and installed help.
+
+Inspect the installed `aw delete --help` before planning an invocation. Use only parameters supported by that installed command.
+
+`aw delete <repository>` selects one exact configured `repos.<repository>` key, not a path, branch, fuzzy match, or alias. In a human TTY, omitted-target `aw delete` presents a checkbox for one or many configured keys. Every checkbox name and submitted value is exactly its configured key; the prompt exposes no repository path, Git URL, group, description, or other metadata. The selection is followed by one combined preview and one default-no confirmation. An omitted target in non-TTY or JSON mode returns `DELETE_SELECTION_REQUIRED`; neither `--force` nor `--dry-run` chooses, invents, infers, or defaults a target.
+
+`aw delete <repository> --dry-run` produces the exact complete plan for that exact configured key without mutation. Review its complete scope and accept it only when it matches the request. Only then run `aw delete <repository> --force` with the same exact configured key. Force is appropriate only for explicitly accepted non-interactive automation or disclosed Git data-loss risk; an ordinary clean human-TTY mutation can instead use the command's combined default-no confirmation.
+
+```bash
+aw delete api --dry-run
+aw delete api --force
+
+# Human TTY only: choose one or many exact configured keys
+aw delete
+```
+
+`aw delete` owns configured repository dependency deletion; `aw remove` owns branch/worktree removal. Do not substitute `aw remove`, hand-edit config, or broadly delete paths or hooks to imitate `aw delete`.
+
+The deletion plan covers the canonical clone, all owned linked worktrees, local refs, the exact `repos.<repository>` entry, and canonical local repository-targeted hook files/templates. It preserves unrelated config, managed-ignore policy, shared hooks, user-global hooks, remote repositories, and remote branches.
+
+Treat dirty or unpublished work, ignored files, and local refs as data to preserve, publish, or clean rather than as automatically disposable. Obtain explicit acceptance before `--force`; force bypasses confirmation and disclosed Git data-loss guards only. Path and symlink, topology, identity, hook ambiguity, and concurrent-config safeguards remain mandatory and cannot be bypassed.
+
+Plans and results may expose logical hook identity or hook paths, but never request, read, print, or expose hook contents or inline command bodies. Compare every planned path, ref, warning, and preserved-global indication with the requested exact key, and report material data-loss blockers without asking for secret source content.
+
+On `DELETE_PARTIAL_FAILURE`, distinguish completed and surviving state, note later repositories that were not started, and follow the command's safe-retry guidance for each incomplete repository. Do not claim rollback, full deletion, or fully deleted state, and never replace the per-repository guidance with broad manual cleanup.
+
 ## Managed Ignore Reconciliation
 
 In non-bare repositories, configured initialization and configuration-backed lifecycle commands reconcile the safe normalized `reposDir` and `worktreesDir` rules before they materialize or continue work that depends on those paths. This applies to `init`, `pull`, `clone`, `add`, and `create`. A fresh clone with no stored preference defaults to the repository-local Git exclude file and does not unexpectedly dirty tracked `.gitignore`.
