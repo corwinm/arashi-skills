@@ -4,6 +4,7 @@
   "scripts/configure-workspace-guidance-selftest.mjs",
   "scripts/create-base-guidance-selftest.mjs",
   "scripts/create-launch-guidance-selftest.mjs",
+  "scripts/delete-repository-guidance-selftest.mjs",
   "scripts/executable-alias-guidance-selftest.mjs",
   "scripts/inline-lifecycle-hook-guidance-selftest.mjs",
   "scripts/installed-content-guidance-selftest.mjs",
