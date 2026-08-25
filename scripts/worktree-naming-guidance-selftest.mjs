@@ -196,6 +196,7 @@ const contradictionRules = [
     /(?:`maxPathLength`|path (?:length )?(?:budget|limit))[^.\n]{0,140}(?:guarantees?|ensures?|makes certain)[^.\n]{0,100}(?:repository-internal|files? (?:inside|within|in) (?:the )?repository|every (?:repository )?file)[^.\n]{0,50}(?:fit|fits|within)/i,
     "repository-content limitation",
     true,
+    /\b(?:guarantees?|ensures?)\b|\bmakes\s+certain\b/iu,
   ],
 ];
 
@@ -217,11 +218,24 @@ function contradictionClauses(content) {
     });
 }
 
-function containsContradiction(content, pattern, negationAware) {
+const predicateNegation =
+  /(?:\b(?:do|does|is|are|was|were|can|could|will|would|may|might|must|should)\s+not\b|\b(?:cannot|never)\b|\b\w+n't\b)(?:\s+[\p{L}\p{N}_-]+){0,2}\s*$/iu;
+
+function hasAffirmativePredicate(fragment, predicate) {
+  const flags = predicate.flags.includes("g") ? predicate.flags : `${predicate.flags}g`;
+  return Array.from(fragment.matchAll(new RegExp(predicate.source, flags))).some((match) => {
+    const prefix = fragment.slice(0, match.index);
+    return !predicateNegation.test(prefix);
+  });
+}
+
+function containsContradiction(content, pattern, negationAware, predicate) {
   if (!negationAware) return pattern.test(content);
-  return contradictionClauses(content).some(
-    (fragment) => pattern.test(fragment) && !truthfulNegation.test(fragment),
-  );
+  return contradictionClauses(content).some((fragment) => {
+    if (!pattern.test(fragment)) return false;
+    if (!truthfulNegation.test(fragment)) return true;
+    return predicate ? hasAffirmativePredicate(fragment, predicate) : false;
+  });
 }
 
 function validatePackageWidePolicy(root, label) {
@@ -232,8 +246,8 @@ function validatePackageWidePolicy(root, label) {
     validateEnumClaims(content, "style", ["default", "branch", "repo-branch"], `${label}/${path}`);
     validateEnumClaims(content, "branchSlashes", ["preserve", "flatten"], `${label}/${path}`);
 
-    for (const [pattern, family, negationAware = false] of contradictionRules) {
-      if (containsContradiction(content, pattern, negationAware)) {
+    for (const [pattern, family, negationAware = false, predicate] of contradictionRules) {
+      if (containsContradiction(content, pattern, negationAware, predicate)) {
         defects.push(`${label}/${path} contains contradictory worktree naming guidance for ${family}`);
       }
     }
@@ -495,6 +509,11 @@ const additiveContradictions = [
   [
     "repository-content-guarantee-concessive-clause",
     "Although the path budget cannot guarantee repository-internal files fit, the path budget guarantees every repository-internal file fits within the limit.",
+    /contradictory worktree naming guidance for repository-content limitation/,
+  ],
+  [
+    "repository-content-guarantee-elided-subject-negation",
+    "The `maxPathLength` budget does not affect branch names and guarantees every repository-internal file fits within the limit.",
     /contradictory worktree naming guidance for repository-content limitation/,
   ],
 ].map(([name, claim, diagnostic]) =>
