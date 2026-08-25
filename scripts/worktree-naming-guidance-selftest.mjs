@@ -178,7 +178,7 @@ const contradictionRules = [
     true,
   ],
   [
-    /`maxPathLength`[^.\n]{0,120}(?:measured|counted)[^.\n]{0,50}(?:bytes?|Unicode code points?|characters?)/i,
+    /`maxPathLength`[^.\n]{0,120}(?:measured|counted)[^.\n]{0,50}(?:UTF-?8(?:\s+code units?)?|bytes?|Unicode code points?|characters?)/i,
     "UTF-16 measurement",
     true,
   ],
@@ -443,6 +443,7 @@ const additiveContradictions = [
   ["component-only-limit", "`maxPathLength` limits only the generated directory component.", /contradictory worktree naming guidance for full absolute destination scope/],
   ["automatic-default", "Arashi automatically chooses and persists a platform default for `maxPathLength`.", /contradictory worktree naming guidance for no automatic platform default/],
   ["measurement-unit", "`maxPathLength` is measured in Unicode code points.", /contradictory worktree naming guidance for UTF-16 measurement/],
+  ["measurement-unit-utf8-code-units", "`maxPathLength` is measured in UTF-8 code units.", /contradictory worktree naming guidance for UTF-16 measurement/],
   ["numeric-collision-suffix", "A shortened path budget uses an incrementing numeric collision suffix.", /contradictory worktree naming guidance for deterministic hash suffix/],
   ["independent-child-shortening", "Coordinated children shorten their parents independently.", /contradictory worktree naming guidance for authoritative coordinated parent/],
   ["repository-content-guarantee", "The `maxPathLength` budget guarantees every repository-internal file fits within the limit.", /contradictory worktree naming guidance for repository-content limitation/],
