@@ -202,11 +202,26 @@ const contradictionRules = [
 const truthfulNegation =
   /\b(?:do|does|is|are|was|were|can|could|will|would|may|might|must|should)\s+not\b|\b(?:cannot|never)\b|n't\b/i;
 
+function contradictionClauses(content) {
+  return content
+    .split(/(?<=[.!?])\s+|\n+|;\s*/u)
+    .flatMap((fragment) =>
+      fragment.split(
+        /(?:\s*,?\s*\b(?:but|while|whereas|however|yet)\b\s*|\s*,?\s*\band\b\s*(?=(?:`|[A-Z]|\b(?:the|this|that|each|standalone|existing|coordinated|maxPathLength)\b)))/u,
+      ),
+    )
+    .flatMap((fragment) => {
+      if (!/^\s*(?:although|though|even\s+though)\b/iu.test(fragment)) return [fragment];
+      const comma = fragment.indexOf(",");
+      return comma < 0 ? [fragment] : [fragment.slice(0, comma), fragment.slice(comma + 1)];
+    });
+}
+
 function containsContradiction(content, pattern, negationAware) {
   if (!negationAware) return pattern.test(content);
-  return content
-    .split(/(?<=[.!?])\s+|\n+|\s*,?\s*\b(?:but|however|yet)\b\s*|;\s*/u)
-    .some((fragment) => pattern.test(fragment) && !truthfulNegation.test(fragment));
+  return contradictionClauses(content).some(
+    (fragment) => pattern.test(fragment) && !truthfulNegation.test(fragment),
+  );
 }
 
 function validatePackageWidePolicy(root, label) {
@@ -459,6 +474,26 @@ const additiveContradictions = [
   [
     "repository-content-guarantee-mixed-polarity",
     "The path budget cannot guarantee repository-internal files fit, but the path budget guarantees every repository-internal file fits within the limit.",
+    /contradictory worktree naming guidance for repository-content limitation/,
+  ],
+  [
+    "component-only-limit-coordinating-conjunction",
+    "`maxPathLength` does not limit a folder component, and `maxPathLength` limits only one folder component.",
+    /contradictory worktree naming guidance for full absolute destination scope/,
+  ],
+  [
+    "automatic-default-subordinate-clause",
+    "Arashi does not automatically set `maxPathLength`, while Arashi automatically chooses a platform default for `maxPathLength`.",
+    /contradictory worktree naming guidance for no automatic platform default/,
+  ],
+  [
+    "measurement-unit-contrasting-clause",
+    "`maxPathLength` is not measured in characters, whereas `maxPathLength` is measured in UTF-8 bytes.",
+    /contradictory worktree naming guidance for UTF-16 measurement/,
+  ],
+  [
+    "repository-content-guarantee-concessive-clause",
+    "Although the path budget cannot guarantee repository-internal files fit, the path budget guarantees every repository-internal file fits within the limit.",
     /contradictory worktree naming guidance for repository-content limitation/,
   ],
 ].map(([name, claim, diagnostic]) =>
