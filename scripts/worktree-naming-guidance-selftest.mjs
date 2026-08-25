@@ -170,28 +170,44 @@ const contradictionRules = [
   [
     /`maxPathLength`[^.\n]{0,100}(?:limits?|budgets?|measures?|applies to)[^.\n]{0,80}(?:folder|directory|path) component/i,
     "full absolute destination scope",
+    true,
   ],
   [
     /(?:Arashi|the platform|Windows)[^.\n]{0,80}(?:automatically|always)[^.\n]{0,40}(?:sets?|chooses?|persists?|uses?)[^.\n]{0,60}(?:`maxPathLength`|path (?:length )?(?:budget|limit)|platform default)/i,
     "no automatic platform default",
+    true,
   ],
   [
     /`maxPathLength`[^.\n]{0,120}(?:measured|counted)[^.\n]{0,50}(?:bytes?|Unicode code points?|characters?)/i,
     "UTF-16 measurement",
+    true,
   ],
   [
     /(?:path budget|shortened (?:path|name)|`maxPathLength`)[^.\n]{0,140}(?:numeric|incrementing|random) (?:collision )?suffix/i,
     "deterministic hash suffix",
+    true,
   ],
   [
     /(?:coordinated )?child(?:ren| paths?)?[^.\n]{0,100}(?:shorten|fit|size|calculate)[^.\n]{0,50}(?:independently|separately|their own parent)/i,
     "authoritative coordinated parent",
+    true,
   ],
   [
     /(?:`maxPathLength`|path (?:length )?(?:budget|limit))[^.\n]{0,140}(?:guarantees?|ensures?|makes certain)[^.\n]{0,100}(?:repository-internal|files? (?:inside|within|in) (?:the )?repository|every (?:repository )?file)[^.\n]{0,50}(?:fit|fits|within)/i,
     "repository-content limitation",
+    true,
   ],
 ];
+
+const truthfulNegation =
+  /\b(?:do|does|is|are|was|were|can|could|will|would|may|might|must|should)\s+not\b|\b(?:cannot|never)\b|n't\b/i;
+
+function containsContradiction(content, pattern, negationAware) {
+  if (!negationAware) return pattern.test(content);
+  return content
+    .split(/(?<=[.!?])\s+|\n+/u)
+    .some((fragment) => pattern.test(fragment) && !truthfulNegation.test(fragment));
+}
 
 function validatePackageWidePolicy(root, label) {
   const defects = [];
@@ -201,8 +217,10 @@ function validatePackageWidePolicy(root, label) {
     validateEnumClaims(content, "style", ["default", "branch", "repo-branch"], `${label}/${path}`);
     validateEnumClaims(content, "branchSlashes", ["preserve", "flatten"], `${label}/${path}`);
 
-    for (const [pattern, family] of contradictionRules) {
-      if (pattern.test(content)) defects.push(`${label}/${path} contains contradictory worktree naming guidance for ${family}`);
+    for (const [pattern, family, negationAware = false] of contradictionRules) {
+      if (containsContradiction(content, pattern, negationAware)) {
+        defects.push(`${label}/${path} contains contradictory worktree naming guidance for ${family}`);
+      }
     }
 
     if (
@@ -446,6 +464,46 @@ const ownershipDrifts = [
   ),
 ];
 
+const truthfulPathBudgetControls = [
+  "`maxPathLength` does not limit a folder component.",
+  "Arashi does not automatically set `maxPathLength` or a platform default.",
+  "`maxPathLength` is not measured in characters.",
+  "The path budget does not use a numeric suffix.",
+  "Coordinated children do not shorten their parents independently.",
+  "The path budget cannot guarantee repository-internal files fit.",
+];
+
+function validateTruthfulPathBudgetControls() {
+  const roots = [];
+  try {
+    for (const [index, claim] of truthfulPathBudgetControls.entries()) {
+      const root = mkdtempSync(join(tmpdir(), `arashi-worktree-naming-truthful-${index}-`));
+      roots.push(root);
+      const skillRoot = join(root, "skills", "arashi");
+      cpSync(sourceSkillRoot, skillRoot, { recursive: true });
+      const guidancePath = join(skillRoot, ownerPath);
+      const original = readFileSync(guidancePath, "utf8");
+      writeFileSync(guidancePath, `${original}\n${claim}\n`);
+
+      assert.doesNotThrow(
+        () => validateSkill(skillRoot, `truthful-${index}`),
+        `truthful control rejected by direct validation: ${claim}`,
+      );
+      const packaged = spawnSync(process.execPath, [checkerPath, "--skill-root", skillRoot], {
+        cwd: repositoryRoot,
+        encoding: "utf8",
+      });
+      assert.equal(
+        packaged.status,
+        0,
+        `truthful control rejected by --skill-root validation: ${claim}\n${output(packaged)}`,
+      );
+    }
+  } finally {
+    for (const root of roots) rmSync(root, { recursive: true, force: true });
+  }
+}
+
 function validateControlledDrift() {
   const roots = [];
   const falseGreens = [];
@@ -491,6 +549,7 @@ function main() {
   }
 
   validateSkill(sourceSkillRoot, "source");
+  validateTruthfulPathBudgetControls();
   validateControlledDrift();
   const fixtureCount = driftCases.length + additiveContradictions.length + ownershipDrifts.length;
   console.log(
