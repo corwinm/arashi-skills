@@ -205,7 +205,7 @@ const truthfulNegation =
 function containsContradiction(content, pattern, negationAware) {
   if (!negationAware) return pattern.test(content);
   return content
-    .split(/(?<=[.!?])\s+|\n+/u)
+    .split(/(?<=[.!?])\s+|\n+|\s*,?\s*\b(?:but|however|yet)\b\s*|;\s*/u)
     .some((fragment) => pattern.test(fragment) && !truthfulNegation.test(fragment));
 }
 
@@ -431,6 +431,36 @@ const additiveContradictions = [
   ["numeric-collision-suffix", "A shortened path budget uses an incrementing numeric collision suffix.", /contradictory worktree naming guidance for deterministic hash suffix/],
   ["independent-child-shortening", "Coordinated children shorten their parents independently.", /contradictory worktree naming guidance for authoritative coordinated parent/],
   ["repository-content-guarantee", "The `maxPathLength` budget guarantees every repository-internal file fits within the limit.", /contradictory worktree naming guidance for repository-content limitation/],
+  [
+    "component-only-limit-mixed-polarity",
+    "`maxPathLength` does not limit a folder component, but `maxPathLength` limits only one folder component.",
+    /contradictory worktree naming guidance for full absolute destination scope/,
+  ],
+  [
+    "automatic-default-mixed-polarity",
+    "Arashi does not automatically set `maxPathLength`, but Arashi automatically chooses a platform default for `maxPathLength`.",
+    /contradictory worktree naming guidance for no automatic platform default/,
+  ],
+  [
+    "measurement-unit-mixed-polarity",
+    "`maxPathLength` is not measured in characters, but `maxPathLength` is measured in UTF-8 bytes.",
+    /contradictory worktree naming guidance for UTF-16 measurement/,
+  ],
+  [
+    "numeric-collision-suffix-mixed-polarity",
+    "The path budget does not use a numeric suffix, but the path budget uses an incrementing numeric suffix.",
+    /contradictory worktree naming guidance for deterministic hash suffix/,
+  ],
+  [
+    "independent-child-shortening-mixed-polarity",
+    "Coordinated children do not shorten independently, but coordinated children shorten their own parent independently.",
+    /contradictory worktree naming guidance for authoritative coordinated parent/,
+  ],
+  [
+    "repository-content-guarantee-mixed-polarity",
+    "The path budget cannot guarantee repository-internal files fit, but the path budget guarantees every repository-internal file fits within the limit.",
+    /contradictory worktree naming guidance for repository-content limitation/,
+  ],
 ].map(([name, claim, diagnostic]) =>
   replacement(
     `additive-${name}-contradiction`,
