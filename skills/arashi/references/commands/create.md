@@ -12,7 +12,8 @@ For configured workspaces, edit `.arashi/config.json` directly; `aw configure` d
 {
   "worktreeNaming": {
     "style": "repo-branch",
-    "branchSlashes": "flatten"
+    "branchSlashes": "flatten",
+    "maxPathLength": 180
   }
 }
 ```
@@ -39,7 +40,11 @@ Omitting the `worktreeNaming` object or either individual field applies `default
 | non-bare | `repo-branch` | `preserve` | `example-feature/auth` |
 | non-bare | `repo-branch` | `flatten` | `example-feature-auth` |
 
-The Git branch remains the exact requested name; only the directory path is transformed. A path collision fails without generating an alternate suffix. Existing worktrees are never renamed, and recorded metadata remains authoritative for locating them. Coordinated child placement remains unchanged. Standalone `.worktrees/<branch>` placement remains unchanged.
+`maxPathLength` is optional and accepts a positive integer budget for the full absolute newly planned configured-worktree destination, measured in UTF-16 code units. Omitting `maxPathLength` preserves current paths and does not persist or migrate a default; Arashi does not select an automatic or platform default.
+
+If a configured destination would exceed the budget, Arashi shortens only the ordinary generated parent-relative namespace after normalizing it to a portable `/`-separated namespace. The fitted name uses a readable prefix, `-`, and the first eight lowercase SHA-256 hex characters over the portable ordinary namespace. One authoritative parent is sized against all selected coordinated child paths, with child-relative paths unchanged. `WORKTREE_PATH_LENGTH_EXCEEDED` is reported before any mutation when fixed topology cannot fit the collision-resistant suffix.
+
+The Git branch remains the exact requested name; only the directory path is transformed. A path collision fails without generating an alternate suffix. Existing worktrees are never renamed, existing registrations remain at their exact paths, and recorded metadata remains authoritative for locating them. Coordinated child placement remains unchanged. Standalone `.worktrees/<branch>` placement remains unchanged. This reserves worktree-root path space but cannot guarantee repository-internal files fit.
 
 ## Repository Worktree File Materialization
 

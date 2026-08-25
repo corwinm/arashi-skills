@@ -45,7 +45,8 @@ const canonicalJson = `\`\`\`json
 {
   "worktreeNaming": {
     "style": "repo-branch",
-    "branchSlashes": "flatten"
+    "branchSlashes": "flatten",
+    "maxPathLength": 180
   }
 }
 \`\`\``;
@@ -166,6 +167,30 @@ const contradictionRules = [
     /standalone[^.\n]{0,100}(?:placement|`\.worktrees\/<branch>`)[^.\n]{0,100}(?:follows?|uses?|applies?)[^.\n]{0,80}(?:worktree naming|`worktreeNaming`|naming style)/i,
     "standalone placement",
   ],
+  [
+    /`maxPathLength`[^.\n]{0,100}(?:limits?|budgets?|measures?|applies to)[^.\n]{0,80}(?:folder|directory|path) component/i,
+    "full absolute destination scope",
+  ],
+  [
+    /(?:Arashi|the platform|Windows)[^.\n]{0,80}(?:automatically|always)[^.\n]{0,40}(?:sets?|chooses?|persists?|uses?)[^.\n]{0,60}(?:`maxPathLength`|path (?:length )?(?:budget|limit)|platform default)/i,
+    "no automatic platform default",
+  ],
+  [
+    /`maxPathLength`[^.\n]{0,120}(?:measured|counted)[^.\n]{0,50}(?:bytes?|Unicode code points?|characters?)/i,
+    "UTF-16 measurement",
+  ],
+  [
+    /(?:path budget|shortened (?:path|name)|`maxPathLength`)[^.\n]{0,140}(?:numeric|incrementing|random) (?:collision )?suffix/i,
+    "deterministic hash suffix",
+  ],
+  [
+    /(?:coordinated )?child(?:ren| paths?)?[^.\n]{0,100}(?:shorten|fit|size|calculate)[^.\n]{0,50}(?:independently|separately|their own parent)/i,
+    "authoritative coordinated parent",
+  ],
+  [
+    /(?:`maxPathLength`|path (?:length )?(?:budget|limit))[^.\n]{0,140}(?:guarantees?|ensures?|makes certain)[^.\n]{0,100}(?:repository-internal|files? (?:inside|within|in) (?:the )?repository|every (?:repository )?file)[^.\n]{0,50}(?:fit|fits|within)/i,
+    "repository-content limitation",
+  ],
 ];
 
 function validatePackageWidePolicy(root, label) {
@@ -210,7 +235,13 @@ function validateSkill(root, label) {
   assert.equal(examples.length, 1, `${label}/${ownerPath} must contain exactly one direct JSON example`);
   assert.deepEqual(
     examples[0],
-    { worktreeNaming: { style: "repo-branch", branchSlashes: "flatten" } },
+    {
+      worktreeNaming: {
+        style: "repo-branch",
+        branchSlashes: "flatten",
+        maxPathLength: 180,
+      },
+    },
     `${label}/${ownerPath} must show worktreeNaming as a nested root JSON object`,
   );
   assert.deepEqual(
@@ -228,6 +259,37 @@ function validateSkill(root, label) {
     items,
     /omitting[^.\n]*(?:`worktreeNaming`|object)[^.\n]*or[^.\n]*(?:either|individual)[^.\n]*field[^.\n]*`default`[^.\n]*`preserve`[^.\n]*without[^.\n]*migrat[^.\n]*without[^.\n]*persist/i,
     `${label}/${ownerPath} must define omitted default/preserve behavior without migration and persistence`,
+  );
+
+  requireParagraph(
+    items,
+    /`maxPathLength`[^.\n]*(?:optional|may be omitted)[^.\n]*positive integer[^.\n]*full absolute[^.\n]*(?:newly planned )?configured(?:-worktree)? destination[^.\n]*UTF-16 code units/i,
+    `${label}/${ownerPath} must define the optional positive-integer full absolute configured destination budget in UTF-16 code units`,
+  );
+  requireParagraph(
+    items,
+    /omitting `maxPathLength`[^.\n]*preserves?[^.\n]*current paths[^.\n]*(?:does not|without)[^.\n]*(?:persist|migrat)[^.\n]*default/i,
+    `${label}/${ownerPath} must preserve current paths without persisting or migrating an omitted maxPathLength default`,
+  );
+  requireParagraph(
+    items,
+    /(?:ordinary|unshortened)[^\n]{0,300}portable[^\n]{0,100}namespace[^\n]{0,200}readable prefix[^\n]*`-`[^\n]*first eight[^\n]*lowercase[^\n]*SHA-256[^\n]*hex/i,
+    `${label}/${ownerPath} must define deterministic readable-prefix plus eight-hex SHA-256 shortening over the portable ordinary namespace`,
+  );
+  requireParagraph(
+    items,
+    /one authoritative parent[^.\n]*sized[^.\n]*all selected coordinated child paths[^.\n]*child-relative paths[^.\n]*unchanged/i,
+    `${label}/${ownerPath} must size one authoritative parent against all selected coordinated children without changing child-relative paths`,
+  );
+  requireParagraph(
+    items,
+    /`WORKTREE_PATH_LENGTH_EXCEEDED`[^.\n]*before[^.\n]*mutation[^.\n]*fixed topology[^.\n]*(?:cannot|can(?:not|'t))[^.\n]*fit/i,
+    `${label}/${ownerPath} must require WORKTREE_PATH_LENGTH_EXCEEDED before mutation when fixed topology cannot fit`,
+  );
+  requireParagraph(
+    items,
+    /(?:reserves?|reservation)[^.\n]*worktree-root[^.\n]*space[^.\n]*(?:cannot|does not)[^.\n]*guarantee[^.\n]*repository-internal files[^.\n]*fit/i,
+    `${label}/${ownerPath} must limit the promise to reserved worktree-root space without a repository-content guarantee`,
   );
 
   assert.deepEqual(
@@ -277,6 +339,8 @@ function replacement(name, from, to, diagnostic, path = ownerPath) {
 const driftCases = [
   replacement("direct-json-root", canonicalJson, canonicalJson.replace('  "worktreeNaming"', '  "defaults": {\n    "worktreeNaming"').replace('\n}', '\n  }\n}'), /nested root JSON object/),
   replacement("direct-json-removed", `${canonicalJson}\n\n`, "", /exactly one direct JSON example/),
+  replacement("path-budget-json-mutated", '    "maxPathLength": 180', '    "maxPathLength": 181', /nested root JSON object/),
+  replacement("path-budget-json-removed", ',\n    "maxPathLength": 180', "", /nested root JSON object/),
   replacement("style-default-mutated", "`default`, `branch`, and `repo-branch`", "`standard`, `branch`, and `repo-branch`", /style must accept exactly/),
   replacement("style-default-removed", "`default`, `branch`, and `repo-branch`", "`branch` and `repo-branch`", /style must accept exactly/),
   replacement("style-branch-mutated", "`default`, `branch`, and `repo-branch`", "`default`, `topic`, and `repo-branch`", /style must accept exactly/),
@@ -308,7 +372,7 @@ const driftCases = [
   replacement("collision-mutated", "A path collision fails without generating an alternate suffix", "A path collision generates an alternate suffix", /collisions to fail without an alternate suffix/),
   replacement("collision-removed", "A path collision fails without generating an alternate suffix. ", "", /collisions to fail without an alternate suffix/),
   replacement("no-rename-mutated", "Existing worktrees are never renamed", "Existing worktrees are renamed", /existing worktrees never to be renamed/),
-  replacement("no-rename-removed", "Existing worktrees are never renamed, and ", "", /existing worktrees never to be renamed/),
+  replacement("no-rename-removed", "Existing worktrees are never renamed, ", "", /existing worktrees never to be renamed/),
   replacement("metadata-mutated", "recorded metadata remains authoritative", "naming configuration is authoritative", /recorded metadata authoritative/),
   replacement("metadata-removed", "recorded metadata remains authoritative for locating them", "their locations are rediscovered", /recorded metadata authoritative/),
   replacement("coordinated-mutated", "Coordinated child placement remains unchanged", "Coordinated child placement follows the naming style", /coordinated child placement unchanged/),
@@ -317,6 +381,18 @@ const driftCases = [
   replacement("standalone-removed", "Standalone `.worktrees/<branch>` placement remains unchanged.", "", /standalone \.worktrees\/<branch> placement unchanged/),
   replacement("direct-authoring-mutated", "edit `.arashi/config.json` directly", "run `aw configure` interactively", /direct config authoring instead of aw configure/),
   replacement("direct-authoring-removed", "For configured workspaces, edit `.arashi/config.json` directly; `aw configure` does not expose worktree naming. ", "", /direct config authoring instead of aw configure/),
+  replacement("component-only-limit-mutated", "the full absolute newly planned configured-worktree destination", "only the generated directory component", /full absolute configured destination budget/),
+  replacement("component-only-limit-removed", "the full absolute newly planned configured-worktree destination", "the newly planned configured-worktree destination", /full absolute configured destination budget/),
+  replacement("automatic-default-mutated", "Omitting `maxPathLength` preserves current paths and does not persist or migrate a default", "Omitting `maxPathLength` selects and persists a platform default", /preserve current paths without persisting or migrating/),
+  replacement("automatic-default-removed", "Omitting `maxPathLength` preserves current paths and does not persist or migrate a default; ", "", /preserve current paths without persisting or migrating/),
+  replacement("measurement-unit-mutated", "measured in UTF-16 code units", "measured in Unicode code points", /UTF-16 code units/),
+  replacement("measurement-unit-removed", ", measured in UTF-16 code units", "", /UTF-16 code units/),
+  replacement("numeric-collision-suffix-mutated", "a readable prefix, `-`, and the first eight lowercase SHA-256 hex characters", "a readable prefix and an incrementing numeric collision suffix", /eight-hex SHA-256 shortening/),
+  replacement("numeric-collision-suffix-removed", " The fitted name uses a readable prefix, `-`, and the first eight lowercase SHA-256 hex characters over the portable ordinary namespace.", "", /eight-hex SHA-256 shortening/),
+  replacement("independent-child-shortening-mutated", "One authoritative parent is sized against all selected coordinated child paths, with child-relative paths unchanged", "Each selected child shortens its parent independently", /one authoritative parent/),
+  replacement("independent-child-shortening-removed", "One authoritative parent is sized against all selected coordinated child paths, with child-relative paths unchanged. ", "", /one authoritative parent/),
+  replacement("repository-content-guarantee-mutated", "cannot guarantee repository-internal files fit", "guarantees every repository-internal file fits", /without a repository-content guarantee/),
+  replacement("repository-content-guarantee-removed", " This reserves worktree-root path space but cannot guarantee repository-internal files fit.", "", /without a repository-content guarantee/),
 ];
 
 const additiveContradictions = [
@@ -331,6 +407,12 @@ const additiveContradictions = [
   ["metadata", "Naming configuration overrides recorded metadata.", /contradictory worktree naming guidance for metadata authority/],
   ["coordinated", "Coordinated child placement follows the naming style.", /contradictory worktree naming guidance for coordinated placement/],
   ["standalone", "Standalone `.worktrees/<branch>` placement follows worktree naming.", /contradictory worktree naming guidance for standalone placement/],
+  ["component-only-limit", "`maxPathLength` limits only the generated directory component.", /contradictory worktree naming guidance for full absolute destination scope/],
+  ["automatic-default", "Arashi automatically chooses and persists a platform default for `maxPathLength`.", /contradictory worktree naming guidance for no automatic platform default/],
+  ["measurement-unit", "`maxPathLength` is measured in Unicode code points.", /contradictory worktree naming guidance for UTF-16 measurement/],
+  ["numeric-collision-suffix", "A shortened path budget uses an incrementing numeric collision suffix.", /contradictory worktree naming guidance for deterministic hash suffix/],
+  ["independent-child-shortening", "Coordinated children shorten their parents independently.", /contradictory worktree naming guidance for authoritative coordinated parent/],
+  ["repository-content-guarantee", "The `maxPathLength` budget guarantees every repository-internal file fits within the limit.", /contradictory worktree naming guidance for repository-content limitation/],
 ].map(([name, claim, diagnostic]) =>
   replacement(
     `additive-${name}-contradiction`,
