@@ -74,8 +74,8 @@ const activeFilePaths = [
   "<workspace>/.arashi/hooks/post-remove<ext>",
   "<workspace>/.arashi/hooks/pre-create.<repo><ext>",
   "<workspace>/.arashi/hooks/post-create.<repo><ext>",
-  "<repo>/.arashi/hooks/pre-remove<ext>",
-  "<repo>/.arashi/hooks/post-remove<ext>",
+  "<configurationRoot>/.arashi/hooks/pre-remove.<repo><ext>",
+  "<configurationRoot>/.arashi/hooks/post-remove.<repo><ext>",
 ];
 
 function output(result) {

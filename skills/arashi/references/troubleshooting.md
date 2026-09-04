@@ -103,7 +103,7 @@ Verify the selected tool's current command contract and genuine managed context.
 
 ## Hook fails or prompts unexpectedly
 
-**First diagnostic:** identify lifecycle, scope/owner, source kind, execution path, interpreter, input mode, timeout, and exit status. Use [Hooks](hooks.md) for the lifecycle order and environment contract.
+**First diagnostic:** identify lifecycle, scope/owner, source kind, execution path, interpreter, input mode, timeout, and exit status. `aw doctor --json` reports inline, qualified, and child-local repository remove overlap or ambiguity, including every native candidate path, without repair or mutation. Use [Hooks](hooks.md) for the lifecycle order and environment contract.
 
 **Recovery:** review executable hook content, use the repository's package manager/lockfile, and reproduce the hook from its documented execution directory. Never enter secrets through lifecycle-hook prompts. Use `--no-hook-input` to execute eligible create/remove hooks with immediate EOF, or create-only `--no-hooks` to skip execution deliberately.
 

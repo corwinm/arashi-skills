@@ -114,7 +114,9 @@ Inspection labels a canonical persisted field `Configured` when present and `Not
 
 For each selected editable field, keep preserves the persisted field exactly through canonical serialization, edit sets or replaces it using the accepted shape, and clear removes only the selected optional field and empty owning containers. Required `reposDir` supports keep. It supports edit. Clear is forbidden. Empty input is not a substitute for an explicit action.
 
-A pre-existing active native file is external active state. Configure never offers clear. It never deletes the file. It never overwrites the file. It offers keep/skip instead. Workspace active files use the exact canonical paths `<workspace>/.arashi/hooks/pre-create<ext>`, `<workspace>/.arashi/hooks/post-create<ext>`, `<workspace>/.arashi/hooks/pre-remove<ext>`, and `<workspace>/.arashi/hooks/post-remove<ext>`; repository create files use `<workspace>/.arashi/hooks/pre-create.<repo><ext>` and `<workspace>/.arashi/hooks/post-create.<repo><ext>`, while repository remove files use `<repo>/.arashi/hooks/pre-remove<ext>` and `<repo>/.arashi/hooks/post-remove<ext>`.
+A pre-existing active native file is external active state. Configure never offers clear. It never deletes the file. It never overwrites the file. It offers keep/skip instead. Workspace active files use the exact canonical paths `<workspace>/.arashi/hooks/pre-create<ext>`, `<workspace>/.arashi/hooks/post-create<ext>`, `<workspace>/.arashi/hooks/pre-remove<ext>`, and `<workspace>/.arashi/hooks/post-remove<ext>`; repository create files use `<workspace>/.arashi/hooks/pre-create.<repo><ext>` and `<workspace>/.arashi/hooks/post-create.<repo><ext>`, while repository remove files use `<configurationRoot>/.arashi/hooks/pre-remove.<repo><ext>` and `<configurationRoot>/.arashi/hooks/post-remove.<repo><ext>`.
+
+For repository remove files, the canonical active path is `<configurationRoot>/.arashi/hooks/<lifecycle>.<repo><ext>`; add and configure create or install that canonical qualified file for a substantial script. A compatible child-local `<activeRepo>/.arashi/hooks/<lifecycle><ext>` is external active state and blocks duplicate creation or installation rather than being overwritten, adopted, or composed.
 
 Before any mutation, the final confirmation shows the exact serialized candidate JSON, including plaintext inline command bodies, and a separate active-file plan listing lifecycle, exact path, safe no-op state, and runtime-ready permissions; it does not put generated file contents into the JSON preview. Declining the final preview leaves configuration bytes and active files unchanged. Interrupting the final preview leaves configuration bytes and active files unchanged. Cancellation output does not repeat inline command bodies.
 
@@ -146,7 +148,7 @@ aw delete
 
 `aw delete` owns configured repository dependency deletion; `aw remove` owns branch/worktree removal. Do not substitute `aw remove`, hand-edit config, or broadly delete paths or hooks to imitate `aw delete`.
 
-The deletion plan covers the canonical clone, all owned linked worktrees, local refs, the exact `repos.<repository>` entry, and canonical local repository-targeted hook files/templates. It preserves unrelated config, managed-ignore policy, shared hooks, user-global hooks, remote repositories, and remote branches.
+The deletion plan covers the canonical clone, all owned linked worktrees, local refs, the exact `repos.<repository>` entry, and canonical local repository-targeted hook files/templates. Delete owns only the exact qualified `<configurationRoot>/.arashi/hooks/pre-remove.<repo><ext>` and `<configurationRoot>/.arashi/hooks/post-remove.<repo><ext>` files for that repository; it does not own, delete, or remove compatible `<activeRepo>/.arashi/hooks/<lifecycle><ext>` files. It preserves unrelated config, managed-ignore policy, shared hooks, user-global hooks, remote repositories, and remote branches.
 
 Treat dirty or unpublished work, ignored files, and local refs as data to preserve, publish, or clean rather than as automatically disposable. Obtain explicit acceptance before `--force`; force bypasses confirmation and disclosed Git data-loss guards only. Path and symlink, topology, identity, hook ambiguity, and concurrent-config safeguards remain mandatory and cannot be bypassed.
 
@@ -217,6 +219,8 @@ The committed Arashi remote can remain `git@github.com:acme/api.git`, while Git 
 Use `aw add <remote>` to add a repository to a configured workspace. When run interactively, the command walks through repository configuration and hook initialization.
 
 Direct the user to run `aw add <remote>` themselves when they want the guided flow or need to decide which files should be copied or symlinked and which repository hooks should be initialized. Do not suggest `--json` or `--force` for that flow; those options skip the interactive setup.
+
+For a substantial or reusable repository remove script, add creates or installs `<configurationRoot>/.arashi/hooks/<lifecycle>.<repo><ext>`. Compatible child-local files stay supported external state; do not create or duplicate a qualified file when `<activeRepo>/.arashi/hooks/<lifecycle><ext>` already claims that repository slot.
 
 If the user only wants the minimal repository entry and has supplied the remote and any required name, the agent can run `aw add` directly. Do not use `aw add` to edit an existing entry; use `aw configure` for supported edits and reserve direct editing of `.arashi/config.json` for unsupported canonical fields, following [Repository Worktree File Materialization](create.md#repository-worktree-file-materialization) and the [Lifecycle Hooks reference](../hooks.md), then validate with `aw doctor --json`.
 

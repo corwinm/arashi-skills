@@ -26,7 +26,7 @@ Expected outcomes:
 - no worktree directories are removed
 - no local branches are deleted
 - confirmation prompts are skipped because dry-run is non-mutating
-- `pre-remove` and `post-remove` hooks are discovered/reported but not executed
+- `pre-remove` and `post-remove` hooks are discovered/reported but not executed; hook previews preserve plain lifecycle/repository identity, report the exact selected source path for the qualified or child-local alias, and block overlap or ambiguity before mutation
 - JSON output includes `data.dryRun: true`, pending `operations`, `effectiveOptions`, dirty-worktree `blockers`, skipped main worktrees, missing branches, and hook previews
 
 For agent workflows, prefer a dry-run preview before `aw remove <branch> --force --json` unless the target was just created and is known disposable. Do not treat `--dry-run` as cleanup; run the real remove command only after confirming the plan matches the intended branch/worktrees.
