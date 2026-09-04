@@ -71,8 +71,12 @@ function validateContradictions(root, label) {
     [/delete\s+(?!(?:does not|never)\b)[^.\n]{0,160}(?:owns?|deletes?|removes?)[^.\n]{0,100}<activeRepo>\/.arashi\/hooks\/(?:pre|post)-remove<ext>/i, "must not teach delete ownership of compatible child-local files"],
     [/repository remove[^.\n]{0,180}(?:(?:cwd|working directory)[^.\n]{0,80}(?:configuration root|workspace root)|(?:configuration root|workspace root)[^.\n]{0,80}(?:cwd|working directory))[^.\n]{0,80}(?:because|when|if)[^.\n]{0,80}(?:stored|located)/i, "must not derive repository remove cwd from source storage"],
   ];
-  const affirmativeClause = /^(?![^\n]{0,220}\b(?:(?:does?|do|can)\s+not|cannot|never)\b)/i;
+  const affirmativeClause = /^(?![^\n]{0,220}\b(?:(?:does?|do|can|is|are)\s+not|cannot|never)\b)/i;
   const clausePatterns = [
+    [
+      /`?<activeRepo>`?[^\n]{0,100}(?:is|means|denotes|refers to)[^\n]{0,100}(?:canonical (?:clone|source checkout)|branch worktree[^\n]{0,60}(?:selected|chosen)[^\n]{0,40}(?:delet|remov))/i,
+      "activeRepo must identify the configured hook target, not the canonical source or branch worktree selected for deletion",
+    ],
     [
       /(?:repository remove|hook discovery|alias resolution|\bit\b)[^\n]{0,120}(?:inline[- ]first|file[- ]fallback|prefers?|prioriti[sz]es?|assigns? precedence|wins over|falls? back)/i,
       "must not assign precedence among repository remove aliases",
@@ -121,11 +125,20 @@ function validateSkill(root, label) {
     /`<configurationRoot>`.*configured workspace.*(?:authority|configuration).*owns.*\.arashi.*(?:configuration|hook files)/i,
     `${label}/${paths.hooks} must define configurationRoot as the configured workspace authority`,
   );
-  requireParagraph(
-    discovery,
-    /`<activeRepo>`.*(?:active|current) target.*checkout.*(?:may|can).*differ.*canonical.*(?:clone|source checkout)/i,
-    `${label}/${paths.hooks} must define activeRepo as the current target checkout independently from the canonical clone`,
-  );
+  const activeRepoDefinition = discovery.find((item) => /`<activeRepo>`/i.test(item));
+  assert.ok(activeRepoDefinition, `${label}/${paths.hooks} must define activeRepo`);
+  const activeRepoContract = activeRepoDefinition.slice(activeRepoDefinition.search(/`<activeRepo>`/i));
+  for (const [pattern, diagnostic] of [
+    [/\bactive\b/i, "as active"],
+    [/\bconfigured\b/i, "as configured"],
+    [/\btarget repository checkout\b/i, "as the target repository checkout"],
+    [/(?:discover(?:y|ing)?|resolution)[^.]*repository remove hooks?|repository remove hook[^.]*discover/i, "as the checkout used for repository remove hook discovery"],
+    [/(?:execut(?:e|ion)|run(?:ning)?)[^.]*repository remove hooks?|repository remove hook[^.]*execut|repository remove hooks?[^.]*run/i, "as the checkout used for repository remove hook execution"],
+    [/(?:distinct from|differ(?:s|ent)? from)[^.]*canonical[^.]*(?:clone|source checkout)/i, "as distinct from the canonical clone or source checkout"],
+    [/(?:is not|isn't|does not mean)[^.]*branch worktree[^.]*(?:selected|chosen)[^.]*delet/i, "as not the branch worktree selected for deletion"],
+  ]) {
+    assert.match(activeRepoContract, pattern, `${label}/${paths.hooks} must define activeRepo ${diagnostic}`);
+  }
   requireParagraph(
     discovery,
     /canonical configured repository remove script[^.\n]*`<configurationRoot>\/\.arashi\/hooks\/<lifecycle>\.<repo><ext>`[^.\n]*(?:substantial|reusable)[^.\n]*(?:alternative|counterpart)[^.\n]*`repos\.<repo>\.hooks\.<lifecycle>`/i,
@@ -203,7 +216,11 @@ function validateSkill(root, label) {
 
 const omissionCases = [
   [paths.hooks, "`<configurationRoot>` is the configured workspace authority", "`<configurationRoot>` is the current checkout", /define configurationRoot/],
-  [paths.hooks, "`<activeRepo>` is the current target checkout being removed and can differ from the canonical clone or source checkout", "`<activeRepo>` is the canonical clone", /define activeRepo/],
+  [paths.hooks, "active configured target repository checkout", "configured target repository checkout", /as active/],
+  [paths.hooks, "active configured target repository checkout", "active target repository checkout", /as configured/],
+  [paths.hooks, "used to discover and execute repository remove hooks", "used by repository remove hooks", /hook discovery/],
+  [paths.hooks, "It is distinct from the canonical clone or source checkout", "It is the canonical clone or source checkout", /distinct from the canonical/],
+  [paths.hooks, "and is not the branch worktree selected for deletion", "", /not the branch worktree/],
   [paths.hooks, "The canonical configured repository remove script", "The configured repository remove script", /canonical qualified file/],
   [paths.hooks, "Compatible child-local", "Legacy child-local", /compatible child-local/],
   [paths.hooks, "one repository slot", "separate repository slots", /all three aliases/],
@@ -219,6 +236,8 @@ const omissionCases = [
 ];
 
 const contradictionCases = [
+  [paths.hooks, "`<activeRepo>` denotes the canonical source checkout.", /configured hook target/],
+  [paths.hooks, "`<activeRepo>` refers to the branch worktree selected for deletion.", /configured hook target/],
   [paths.hooks, "Repository remove prefers the qualified file over inline and child-local aliases.", /precedence/],
   [paths.hooks, "Repository remove does not assign precedence among aliases, but it uses inline-first/file-fallback precedence.", /precedence/],
   [paths.hooks, "Repository remove composes and executes both qualified and child-local native files.", /compose/],
@@ -237,6 +256,8 @@ const contradictionCases = [
 ];
 
 const truthfulControls = [
+  [paths.hooks, "`<activeRepo>` does not mean the canonical source checkout or the branch worktree selected for deletion."],
+  [paths.hooks, "`<activeRepo>` is not the canonical source checkout or the branch worktree selected for deletion."],
   [paths.hooks, "Repository remove does not assign precedence among inline, qualified, and child-local aliases."],
   [paths.hooks, "Repository remove explicitly does not prefer the qualified file over inline and child-local aliases."],
   [paths.hooks, "Repository remove cannot prefer the qualified file over inline and child-local aliases."],
