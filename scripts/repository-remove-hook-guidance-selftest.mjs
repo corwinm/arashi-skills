@@ -56,8 +56,9 @@ function guidanceFiles(root, current = root) {
 function validateContradictions(root, label) {
   const failures = [];
   const patterns = [
-    [/repository remove\s+(?!(?:does not|never)\b)[^.\n]{0,180}(?:prefers?|assigns? precedence|wins over|falls? back)[^.\n]{0,160}(?:inline|qualified|child-local|native)/i, "must not assign precedence among repository remove aliases"],
-    [/repository remove\s+(?!(?:does not|never)\b)[^.\n]{0,180}(?:composes?|combines?|runs? both|executes? both)[^.\n]{0,120}(?:inline|qualified|child-local|native)/i, "must not compose repository remove aliases"],
+    [/repository remove\s+(?!(?:[a-z-]+\s+){0,4}(?:(?:does|can)\s+not|cannot|never)\s+(?:[a-z-]+\s+){0,4}(?:prefers?|assigns? precedence|wins over|falls? back))[^.\n]{0,180}(?:prefers?|assigns? precedence|wins over|falls? back)[^.\n]{0,160}(?:inline|qualified|child-local|native)/i, "must not assign precedence among repository remove aliases"],
+    [/repository remove\s+(?!(?:[a-z-]+\s+){0,4}(?:(?:does|can)\s+not|cannot|never)\s+(?:[a-z-]+\s+){0,4}(?:composes?|combines?|runs? both|executes? both))[^.\n]{0,180}(?:composes?|combines?|runs? both|executes? both)[^.\n]{0,120}(?:inline|qualified|child-local|native)/i, "must not compose repository remove aliases"],
+    [/(?:(?:default|canonical)\s+configured\s+(?:(?:location|path)\s+for\s+repository remove|repository remove\s+(?:location|path))\s+(?:is|remains)\s+`<repo>\/\.arashi\/hooks\/(?:pre|post)-remove<ext>`|`<repo>\/\.arashi\/hooks\/(?:pre|post)-remove<ext>`\s+(?:is|remains)\s+(?:the\s+)?(?:default|canonical)\s+configured\s+(?:repository remove\s+)?(?:location|path))/i, "must not claim the child-local path is the canonical configured location"],
     [/(?:only|sole) supported repository remove[^.\n]{0,100}(?:child-local|<activeRepo>)/i, "must not claim child-local is the only supported repository remove source"],
     [/(?:add|configure)\s+(?!(?:does not|never)\b)[^.\n]{0,140}(?:creates?|writes?|installs?)[^.\n]{0,120}<activeRepo>\/.arashi\/hooks\/(?:pre|post)-remove<ext>/i, "must not teach add/configure to create child-local repository remove files"],
     [/delete\s+(?!(?:does not|never)\b)[^.\n]{0,160}(?:owns?|deletes?|removes?)[^.\n]{0,100}<activeRepo>\/.arashi\/hooks\/(?:pre|post)-remove<ext>/i, "must not teach delete ownership of compatible child-local files"],
@@ -168,6 +169,9 @@ const omissionCases = [
 const contradictionCases = [
   [paths.hooks, "Repository remove prefers the qualified file over inline and child-local aliases.", /precedence/],
   [paths.hooks, "Repository remove composes and executes both qualified and child-local native files.", /compose/],
+  [paths.hooks, "The default configured location for repository remove is `<repo>/.arashi/hooks/pre-remove<ext>`.", /canonical configured location/],
+  [paths.workspace, "The canonical configured repository remove location is `<repo>/.arashi/hooks/pre-remove<ext>`.", /canonical configured location/],
+  [paths.remove, "`<repo>/.arashi/hooks/post-remove<ext>` is the default configured repository remove path.", /canonical configured location/],
   [paths.workspace, "Configure creates `<activeRepo>/.arashi/hooks/pre-remove<ext>` for repository remove scripts.", /add\/configure/],
   [paths.workspace, "Delete owns and removes `<activeRepo>/.arashi/hooks/post-remove<ext>`.", /delete ownership/],
   [paths.remove, "The only supported repository remove source is child-local `<activeRepo>/.arashi/hooks/pre-remove<ext>`.", /only supported/],
@@ -176,10 +180,32 @@ const contradictionCases = [
 
 const truthfulControls = [
   [paths.hooks, "Repository remove does not assign precedence among inline, qualified, and child-local aliases."],
+  [paths.hooks, "Repository remove explicitly does not prefer the qualified file over inline and child-local aliases."],
+  [paths.hooks, "Repository remove cannot prefer the qualified file over inline and child-local aliases."],
+  [paths.hooks, "Repository remove can not prefer the qualified file over inline and child-local aliases."],
+  [paths.hooks, "Repository remove cannot compose or execute both qualified and child-local aliases."],
+  [paths.hooks, "Repository remove can not compose or execute both qualified and child-local aliases."],
   [paths.hooks, "Repository remove never composes or executes both qualified and child-local aliases."],
+  [paths.workspace, "`<repo>/.arashi/hooks/pre-remove<ext>` is not the default or canonical configured repository remove location."],
   [paths.workspace, "Configure does not create `<activeRepo>/.arashi/hooks/pre-remove<ext>`."],
   [paths.workspace, "Delete never owns or removes `<activeRepo>/.arashi/hooks/post-remove<ext>`."],
 ];
+
+function runFixture(layout, skillRoot) {
+  if (layout === "source") {
+    try {
+      validateSkill(skillRoot, "source-fixture");
+      return { status: 0, stdout: "", stderr: "" };
+    } catch (error) {
+      return { status: 1, stdout: "", stderr: error.stack ?? String(error) };
+    }
+  }
+  return spawnSync(process.execPath, [checkerPath, "--skill-root", skillRoot], {
+    cwd: repositoryRoot,
+    encoding: "utf8",
+    env: { ...process.env, ARASHI_REPOSITORY_REMOVE_GUIDANCE_SKIP_FIXTURES: "1" },
+  });
+}
 
 function validateControlledFixtures() {
   const roots = [];
@@ -196,11 +222,7 @@ function validateControlledFixtures() {
         const original = readFileSync(target, "utf8");
         assert.equal(original.split(from).length - 1, 1, `omission fixture source must occur once: ${from}`);
         writeFileSync(target, original.replace(from, to));
-        const result = spawnSync(process.execPath, [checkerPath, "--skill-root", skillRoot], {
-          cwd: repositoryRoot,
-          encoding: "utf8",
-          env: { ...process.env, ARASHI_REPOSITORY_REMOVE_GUIDANCE_SKIP_FIXTURES: "1" },
-        });
+        const result = runFixture(layout, skillRoot);
         if (result.status === 0) falseAcceptances.push(`${layout}/omission-${index}`);
         else assert.match(output(result), diagnostic, `${layout}/omission-${index} wrong diagnostic`);
       }
@@ -211,11 +233,7 @@ function validateControlledFixtures() {
         cpSync(sourceSkillRoot, skillRoot, { recursive: true });
         const target = join(skillRoot, relativePath);
         writeFileSync(target, `${readFileSync(target, "utf8")}\n${addition}\n`);
-        const result = spawnSync(process.execPath, [checkerPath, "--skill-root", skillRoot], {
-          cwd: repositoryRoot,
-          encoding: "utf8",
-          env: { ...process.env, ARASHI_REPOSITORY_REMOVE_GUIDANCE_SKIP_FIXTURES: "1" },
-        });
+        const result = runFixture(layout, skillRoot);
         if (result.status === 0) falseAcceptances.push(`${layout}/contradiction-${index}`);
         else assert.match(output(result), diagnostic, `${layout}/contradiction-${index} wrong diagnostic`);
       }
@@ -226,11 +244,7 @@ function validateControlledFixtures() {
         cpSync(sourceSkillRoot, skillRoot, { recursive: true });
         const target = join(skillRoot, relativePath);
         writeFileSync(target, `${readFileSync(target, "utf8")}\n${addition}\n`);
-        const result = spawnSync(process.execPath, [checkerPath, "--skill-root", skillRoot], {
-          cwd: repositoryRoot,
-          encoding: "utf8",
-          env: { ...process.env, ARASHI_REPOSITORY_REMOVE_GUIDANCE_SKIP_FIXTURES: "1" },
-        });
+        const result = runFixture(layout, skillRoot);
         if (result.status !== 0) falseRejections.push(`${layout}/control-${index}`);
       }
     }
