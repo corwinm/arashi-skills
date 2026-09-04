@@ -11,6 +11,7 @@
   "scripts/kitty-session-guidance-selftest.mjs",
   "scripts/lifecycle-hook-guidance-selftest.mjs",
   "scripts/materialization-guidance-selftest.mjs",
+  "scripts/repository-remove-hook-guidance-selftest.mjs",
   "scripts/shell-completion-guidance-selftest.mjs",
   "scripts/ssh-host-alias-guidance-selftest.mjs",
   "scripts/standalone-guidance-selftest.mjs",

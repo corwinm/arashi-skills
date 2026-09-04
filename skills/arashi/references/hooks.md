@@ -22,11 +22,13 @@ Ordinary `aw init` generates inert `.example` hook files but does not activate t
 
 Configured create does not discover repository-local or user-global hooks. Native file ownership is explicit:
 
+`<configurationRoot>` is the configured workspace authority that owns the `.arashi` configuration and hook files. `<activeRepo>` is the active configured target repository checkout used to discover and execute repository remove hooks. It is distinct from the canonical clone or source checkout in bare-backed and linked topologies and is not the branch worktree selected for deletion.
+
 | Lifecycle scope | Native file location | Execution cwd |
 | --- | --- | --- |
 | Configured create, workspace | `<workspace>/.arashi/hooks/pre-create<ext>` and `post-create<ext>` | Configured workspace root |
 | Configured create, repository-specific | `<workspace>/.arashi/hooks/pre-create.<repo><ext>` and `post-create.<repo><ext>` | New child worktree |
-| Configured remove, repository | `<repo>/.arashi/hooks/pre-remove<ext>` and `post-remove<ext>`; the default configured path is `repos/<repo>/.arashi/hooks/` | Target child source checkout |
+| Configured remove, repository | `<configurationRoot>/.arashi/hooks/pre-remove.<repo><ext>` and `post-remove.<repo><ext>`; compatible child-local `<activeRepo>/.arashi/hooks/pre-remove<ext>` and `post-remove<ext>` remain supported | Active target child checkout |
 | Configured remove, workspace | `<workspace>/.arashi/hooks/pre-remove<ext>` and `post-remove<ext>` | Configured workspace root |
 | Configured remove, global targeted | `~/.arashi/hooks/<repo>/pre-remove<ext>` and `post-remove<ext>` | Target child source checkout |
 | Configured remove, global shared | `~/.arashi/hooks/pre-remove<ext>` and `post-remove<ext>` | Target child source checkout |
@@ -35,9 +37,13 @@ Configured create does not discover repository-local or user-global hooks. Nativ
 
 Configured remove repository, global-targeted, and global-shared hooks run from the target child source checkout. Configured remove workspace hooks run from the configured workspace root.
 
+The canonical configured repository remove script is `<configurationRoot>/.arashi/hooks/<lifecycle>.<repo><ext>`, the substantial or reusable script alternative to inline `repos.<repo>.hooks.<lifecycle>`. Compatible child-local `<activeRepo>/.arashi/hooks/<lifecycle><ext>` remains supported for existing installations.
+
+Inline `repos.<repo>.hooks.<lifecycle>`, the qualified native file, and the compatible child-local native file claim one repository slot. Any overlap, or multiple platform-native candidates at either file location, fails before hook execution or mutation and runs nothing; there is no precedence or composition. Logical identity stays a plain lifecycle name with repository scope and repository owner; source is the exact selected path, and cwd is the active target checkout regardless of where the script is stored.
+
 Standalone mode discovers only user-global targeted and shared hooks: `~/.arashi/hooks/<main-root-basename>/<lifecycle><ext>` before `~/.arashi/hooks/<lifecycle><ext>`. The main-root basename identifies the main repository; repository-local or workspace-root `.arashi/hooks` content is inactive without configured workspace state.
 
-POSIX discovers only `.sh`; Windows discovers `.ps1`, `.cmd`, and `.bat` case-insensitively. Multiple supported candidates for one logical location fail before lifecycle mutation. Windows does not run `.sh` lifecycle hooks through implicit Git Bash.
+POSIX discovers only `.sh`; Windows discovers `.ps1`, `.cmd`, and `.bat` case-insensitively. Multiple supported candidates for one logical location fail before lifecycle mutation. For both qualified and child-local repository remove locations, POSIX accepts only `.sh`; Windows scans qualified and child-local `.ps1`, `.cmd`, and `.bat` candidates case-insensitively, and multiple native candidates fail before hook execution or mutation. Windows does not run `.sh` lifecycle hooks through implicit Git Bash.
 
 Platform execution is fixed:
 
@@ -94,9 +100,9 @@ Configured-create dry-run performs no hook discovery, returns an empty hook ledg
 
 ## Remove lifecycle
 
-Remove discovery/execution order is repository → workspace → global-targeted → global-shared. Workspace and shared remove hooks therefore run once per target repository.
+Remove discovery/execution order is repository → workspace → global-targeted → global-shared. Inline, qualified, and child-local repository aliases occupy the same repository position; they do not add extra executions. Workspace and shared remove hooks therefore run once per target repository.
 
-A failing `pre-remove` aborts removal before destructive mutation. `post-remove` still runs after removal attempts, including partial failures. Remove dry-run previews discovery but does not spawn hooks or fabricate execution outcomes. Remove dry-run keeps source-aware previews; Configured-create dry-run performs no hook discovery, returns an empty hook ledger, and has no hook preview surface.
+A failing `pre-remove` aborts removal before destructive mutation. `post-remove` still runs after removal attempts, including partial failures. Remove dry-run previews discovery but does not spawn hooks or fabricate execution outcomes. Remove dry-run reports the exact selected source path without execution or mutation; `aw doctor --json` checks every inline, qualified, and child-local alias plus all platform-native candidates and reports overlap or ambiguity before repair or mutation. Remove dry-run keeps source-aware previews; Configured-create dry-run performs no hook discovery, returns an empty hook ledger, and has no hook preview surface.
 
 ## Terminal input contract
 
