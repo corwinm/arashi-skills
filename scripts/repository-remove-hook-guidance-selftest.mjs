@@ -118,6 +118,16 @@ function validateSkill(root, label) {
   const removeLifecycle = paragraphs(section(hooks, "Remove lifecycle"));
   requireParagraph(
     discovery,
+    /`<configurationRoot>`.*configured workspace.*(?:authority|configuration).*owns.*\.arashi.*(?:configuration|hook files)/i,
+    `${label}/${paths.hooks} must define configurationRoot as the configured workspace authority`,
+  );
+  requireParagraph(
+    discovery,
+    /`<activeRepo>`.*(?:active|current) target.*checkout.*(?:may|can).*differ.*canonical.*(?:clone|source checkout)/i,
+    `${label}/${paths.hooks} must define activeRepo as the current target checkout independently from the canonical clone`,
+  );
+  requireParagraph(
+    discovery,
     /canonical configured repository remove script[^.\n]*`<configurationRoot>\/\.arashi\/hooks\/<lifecycle>\.<repo><ext>`[^.\n]*(?:substantial|reusable)[^.\n]*(?:alternative|counterpart)[^.\n]*`repos\.<repo>\.hooks\.<lifecycle>`/i,
     `${label}/${paths.hooks} must define the canonical qualified file as the substantial-script alternative to inline repository hooks`,
   );
@@ -192,6 +202,8 @@ function validateSkill(root, label) {
 }
 
 const omissionCases = [
+  [paths.hooks, "`<configurationRoot>` is the configured workspace authority", "`<configurationRoot>` is the current checkout", /define configurationRoot/],
+  [paths.hooks, "`<activeRepo>` is the current target checkout being removed and can differ from the canonical clone or source checkout", "`<activeRepo>` is the canonical clone", /define activeRepo/],
   [paths.hooks, "The canonical configured repository remove script", "The configured repository remove script", /canonical qualified file/],
   [paths.hooks, "Compatible child-local", "Legacy child-local", /compatible child-local/],
   [paths.hooks, "one repository slot", "separate repository slots", /all three aliases/],
