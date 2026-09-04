@@ -123,8 +123,8 @@ function validateSkill(root, label) {
   );
   requireParagraph(
     discovery,
-    /`<activeRepo>`.*(?:active|current) target.*checkout.*(?:may|can).*differ.*canonical.*(?:clone|source checkout)/i,
-    `${label}/${paths.hooks} must define activeRepo as the current target checkout independently from the canonical clone`,
+    /`<activeRepo>`.*active configured target repository checkout.*(?:hook discovery.*execution|discovery.*hook execution).*(?:may|can).*differ.*canonical.*(?:clone|source checkout)/i,
+    `${label}/${paths.hooks} must define activeRepo as the active configured target repository checkout used for hook discovery and execution, independently from the canonical clone`,
   );
   requireParagraph(
     discovery,
@@ -203,7 +203,7 @@ function validateSkill(root, label) {
 
 const omissionCases = [
   [paths.hooks, "`<configurationRoot>` is the configured workspace authority", "`<configurationRoot>` is the current checkout", /define configurationRoot/],
-  [paths.hooks, "`<activeRepo>` is the current target checkout being removed and can differ from the canonical clone or source checkout", "`<activeRepo>` is the canonical clone", /define activeRepo/],
+  [paths.hooks, "`<activeRepo>` is the active configured target repository checkout used for repository remove hook discovery and execution; it can differ from the canonical clone or source checkout", "`<activeRepo>` is the canonical clone", /define activeRepo/],
   [paths.hooks, "The canonical configured repository remove script", "The configured repository remove script", /canonical qualified file/],
   [paths.hooks, "Compatible child-local", "Legacy child-local", /compatible child-local/],
   [paths.hooks, "one repository slot", "separate repository slots", /all three aliases/],
