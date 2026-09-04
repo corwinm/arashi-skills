@@ -64,7 +64,7 @@ function validateContradictions(root, label) {
   const failures = [];
   const patterns = [
     [
-      /`?<activeRepo>`?[^.\n]{0,140}\b(?:is|means|denotes|refers\s+to)\b(?![^.\n]{0,100}\b(?:not|never|distinct\s+from|different\s+from)\b)[^.\n]{0,100}(?:canonical (?:clone|source checkout)|branch worktree[^.\n]{0,60}(?:selected|chosen)[^.\n]{0,40}(?:delet|remov))/i,
+      /`?<activeRepo>`?[^.\n]{0,140}\b(?:is|means|denotes|refers\s+to)\b(?![^,.;\n]{0,100}\b(?:not|never|distinct\s+from|different\s+from)\b)[^,.;\n]{0,100}(?:canonical (?:clone|source checkout)|branch worktree[^,.;\n]{0,60}(?:selected|chosen)[^,.;\n]{0,40}(?:delet|remov))/i,
       "activeRepo must identify the configured hook target, not the canonical source or branch worktree selected for deletion",
     ],
     [/repository remove\s+(?!(?:[a-z-]+\s+){0,4}(?:(?:does|can)\s+not|cannot|never)\s+(?:[a-z-]+\s+){0,4}(?:prefers?|assigns? precedence|wins over|falls? back))[^.\n]{0,180}(?:prefers?|assigns? precedence|wins over|falls? back)[^.\n]{0,160}(?:inline|qualified|child-local|native)/i, "must not assign precedence among repository remove aliases"],
@@ -239,6 +239,7 @@ const contradictionCases = [
   [paths.hooks, "`<activeRepo>` denotes the canonical source checkout.", /configured hook target/],
   [paths.hooks, "`<activeRepo>` refers to the branch worktree selected for deletion.", /configured hook target/],
   [paths.hooks, "`<activeRepo>` is not the branch worktree selected for deletion but is the canonical source checkout.", /configured hook target/],
+  [paths.hooks, "`<activeRepo>` is the canonical source checkout, not the branch worktree selected for deletion.", /configured hook target/],
   [paths.hooks, "Repository remove prefers the qualified file over inline and child-local aliases.", /precedence/],
   [paths.hooks, "Repository remove does not assign precedence among aliases, but it uses inline-first/file-fallback precedence.", /precedence/],
   [paths.hooks, "Hook discovery is not optional and prioritizes inline repository remove hooks over qualified files.", /precedence/],
