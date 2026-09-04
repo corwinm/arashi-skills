@@ -63,6 +63,10 @@ function guidanceFiles(root, current = root) {
 function validateContradictions(root, label) {
   const failures = [];
   const patterns = [
+    [
+      /`?<activeRepo>`?[^.\n]{0,140}(?:is|means|denotes|refers to)(?!\s+(?:not|never)\b)[^.\n]{0,100}(?:canonical (?:clone|source checkout)|branch worktree[^.\n]{0,60}(?:selected|chosen)[^.\n]{0,40}(?:delet|remov))/i,
+      "activeRepo must identify the configured hook target, not the canonical source or branch worktree selected for deletion",
+    ],
     [/repository remove\s+(?!(?:[a-z-]+\s+){0,4}(?:(?:does|can)\s+not|cannot|never)\s+(?:[a-z-]+\s+){0,4}(?:prefers?|assigns? precedence|wins over|falls? back))[^.\n]{0,180}(?:prefers?|assigns? precedence|wins over|falls? back)[^.\n]{0,160}(?:inline|qualified|child-local|native)/i, "must not assign precedence among repository remove aliases"],
     [/repository remove\s+(?!(?:[a-z-]+\s+){0,4}(?:(?:does|can)\s+not|cannot|never)\s+(?:[a-z-]+\s+){0,4}(?:composes?|combines?|runs? both|executes? both))[^.\n]{0,180}(?:composes?|combines?|runs? both|executes? both)[^.\n]{0,120}(?:inline|qualified|child-local|native)/i, "must not compose repository remove aliases"],
     [/(?:(?:default|canonical)\s+configured\s+(?:(?:location|path)\s+for\s+repository remove|repository remove\s+(?:location|path))\s+(?:is|remains)\s+`<repo>\/\.arashi\/hooks\/(?:pre|post)-remove<ext>`|`<repo>\/\.arashi\/hooks\/(?:pre|post)-remove<ext>`\s+(?:is|remains)\s+(?:the\s+)?(?:default|canonical)\s+configured\s+(?:repository remove\s+)?(?:location|path))/i, "must not claim the child-local path is the canonical configured location"],
@@ -73,10 +77,6 @@ function validateContradictions(root, label) {
   ];
   const affirmativeClause = /^(?![^\n]{0,220}\b(?:(?:does?|do|can|is|are)\s+not|cannot|never)\b)/i;
   const clausePatterns = [
-    [
-      /`?<activeRepo>`?[^\n]{0,100}(?:is|means|denotes|refers to)[^\n]{0,100}(?:canonical (?:clone|source checkout)|branch worktree[^\n]{0,60}(?:selected|chosen)[^\n]{0,40}(?:delet|remov))/i,
-      "activeRepo must identify the configured hook target, not the canonical source or branch worktree selected for deletion",
-    ],
     [
       /(?:repository remove|hook discovery|alias resolution|\bit\b)[^\n]{0,120}(?:inline[- ]first|file[- ]fallback|prefers?|prioriti[sz]es?|assigns? precedence|wins over|falls? back)/i,
       "must not assign precedence among repository remove aliases",
@@ -238,6 +238,7 @@ const omissionCases = [
 const contradictionCases = [
   [paths.hooks, "`<activeRepo>` denotes the canonical source checkout.", /configured hook target/],
   [paths.hooks, "`<activeRepo>` refers to the branch worktree selected for deletion.", /configured hook target/],
+  [paths.hooks, "`<activeRepo>` is not the branch worktree selected for deletion but is the canonical source checkout.", /configured hook target/],
   [paths.hooks, "Repository remove prefers the qualified file over inline and child-local aliases.", /precedence/],
   [paths.hooks, "Repository remove does not assign precedence among aliases, but it uses inline-first/file-fallback precedence.", /precedence/],
   [paths.hooks, "Repository remove composes and executes both qualified and child-local native files.", /compose/],
