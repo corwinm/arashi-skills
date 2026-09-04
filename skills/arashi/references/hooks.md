@@ -22,7 +22,7 @@ Ordinary `aw init` generates inert `.example` hook files but does not activate t
 
 Configured create does not discover repository-local or user-global hooks. Native file ownership is explicit:
 
-`<configurationRoot>` is the configured workspace authority that owns the `.arashi` configuration and hook files. `<activeRepo>` is the active configured target repository checkout used for repository remove hook discovery and execution; it can differ from the canonical clone or source checkout in bare-backed and linked topologies.
+`<configurationRoot>` is the configured workspace authority that owns the `.arashi` configuration and hook files. `<activeRepo>` is the current target checkout being removed and can differ from the canonical clone or source checkout in bare-backed and linked topologies.
 
 | Lifecycle scope | Native file location | Execution cwd |
 | --- | --- | --- |
