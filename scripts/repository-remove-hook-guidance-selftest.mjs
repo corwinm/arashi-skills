@@ -37,6 +37,13 @@ function paragraphs(content) {
   return content.split(/\n\s*\n/).map((value) => value.replace(/\s+/g, " ").trim()).filter(Boolean);
 }
 
+function clauses(content) {
+  return content
+    .split(/\r?\n|[.!?](?:\s|$)|;\s*|,\s*(?=(?:but|however|yet)\b)/i)
+    .map((value) => value.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+}
+
 function requireParagraph(items, pattern, diagnostic) {
   assert.ok(items.some((item) => pattern.test(item)), diagnostic);
 }
@@ -64,9 +71,42 @@ function validateContradictions(root, label) {
     [/delete\s+(?!(?:does not|never)\b)[^.\n]{0,160}(?:owns?|deletes?|removes?)[^.\n]{0,100}<activeRepo>\/.arashi\/hooks\/(?:pre|post)-remove<ext>/i, "must not teach delete ownership of compatible child-local files"],
     [/repository remove[^.\n]{0,180}(?:(?:cwd|working directory)[^.\n]{0,80}(?:configuration root|workspace root)|(?:configuration root|workspace root)[^.\n]{0,80}(?:cwd|working directory))[^.\n]{0,80}(?:because|when|if)[^.\n]{0,80}(?:stored|located)/i, "must not derive repository remove cwd from source storage"],
   ];
+  const affirmativeClause = /^(?![^\n]{0,220}\b(?:(?:does?|do|can)\s+not|cannot|never)\b)/i;
+  const clausePatterns = [
+    [
+      /(?:repository remove|hook discovery|alias resolution|\bit\b)[^\n]{0,120}(?:inline[- ]first|file[- ]fallback|prefers?|prioriti[sz]es?|assigns? precedence|wins over|falls? back)/i,
+      "must not assign precedence among repository remove aliases",
+    ],
+    [
+      /repository remove hooks?[^\n]{0,100}(?:run|execute)[^\n]{0,100}(?:(?:configuration root|workspace root)[^\n]{0,60}(?:cwd|working directory)|(?:cwd|working directory)[^\n]{0,60}(?:configuration root|workspace root))/i,
+      "repository remove hooks must run from the active target checkout",
+    ],
+    [
+      /Windows[^\n]{0,120}qualified[^\n]{0,100}`?\.sh`?[^\n]{0,100}(?:Git Bash|bash)/i,
+      "Windows must not accept qualified .sh repository remove hooks through Git Bash",
+    ],
+    [
+      /remove dry-run[^\n]{0,100}(?:executes?|runs?|spawns?|invokes?)[^\n]{0,100}(?:pre-remove|repository remove hooks?)/i,
+      "remove dry-run must not execute repository pre-remove hooks",
+    ],
+    [
+      /(?:onboarding|setup)[^\n]{0,100}(?:creates?|writes?|installs?)[^\n]{0,120}(?:child-local|<activeRepo>\/\.arashi\/hooks\/(?:pre|post)-remove<ext>)/i,
+      "onboarding must put new repository remove scripts at the canonical config-root qualified path",
+    ],
+    [
+      /(?:delete|deletion|cleanup)[^\n]{0,100}(?:cleans?|deletes?|removes?)[^\n]{0,120}child-local[^\n]{0,80}(?:aliases?|lookalikes?)/i,
+      "delete must not clean child-local aliases and lookalikes",
+    ],
+  ];
   for (const file of guidanceFiles(root)) {
     for (const [pattern, diagnostic] of patterns) {
       if (pattern.test(file.content)) failures.push(`${label}/${file.relativePath} ${diagnostic}`);
+    }
+    for (const clause of clauses(file.content)) {
+      if (!affirmativeClause.test(clause)) continue;
+      for (const [pattern, diagnostic] of clausePatterns) {
+        if (pattern.test(clause)) failures.push(`${label}/${file.relativePath} ${diagnostic}`);
+      }
     }
   }
   assert.deepEqual(failures, [], failures.join("\n"));
@@ -168,14 +208,20 @@ const omissionCases = [
 
 const contradictionCases = [
   [paths.hooks, "Repository remove prefers the qualified file over inline and child-local aliases.", /precedence/],
+  [paths.hooks, "Repository remove does not assign precedence among aliases, but it uses inline-first/file-fallback precedence.", /precedence/],
   [paths.hooks, "Repository remove composes and executes both qualified and child-local native files.", /compose/],
   [paths.hooks, "The default configured location for repository remove is `<repo>/.arashi/hooks/pre-remove<ext>`.", /canonical configured location/],
   [paths.workspace, "The canonical configured repository remove location is `<repo>/.arashi/hooks/pre-remove<ext>`.", /canonical configured location/],
   [paths.remove, "`<repo>/.arashi/hooks/post-remove<ext>` is the default configured repository remove path.", /canonical configured location/],
   [paths.workspace, "Configure creates `<activeRepo>/.arashi/hooks/pre-remove<ext>` for repository remove scripts.", /add\/configure/],
+  [paths.workspace, "Onboarding installs new repository remove scripts in the child-local alias `<activeRepo>/.arashi/hooks/pre-remove<ext>`.", /onboarding/],
   [paths.workspace, "Delete owns and removes `<activeRepo>/.arashi/hooks/post-remove<ext>`.", /delete ownership/],
+  [paths.workspace, "Delete cleans child-local repository remove aliases and lookalikes instead of only the exact config-owned canonical file.", /child-local aliases and lookalikes/],
   [paths.remove, "The only supported repository remove source is child-local `<activeRepo>/.arashi/hooks/pre-remove<ext>`.", /only supported/],
   [paths.troubleshooting, "Repository remove uses the configuration root as cwd because the hook is stored there.", /derive repository remove cwd/],
+  [paths.troubleshooting, "Repository remove hooks run with the configuration root as their working directory.", /target checkout/],
+  [paths.hooks, "On Windows, qualified repository remove `.sh` hooks run through Git Bash.", /Git Bash/],
+  [paths.remove, "Remove dry-run executes pre-remove hooks to verify them before deletion.", /dry-run/],
 ];
 
 const truthfulControls = [
@@ -188,7 +234,12 @@ const truthfulControls = [
   [paths.hooks, "Repository remove never composes or executes both qualified and child-local aliases."],
   [paths.workspace, "`<repo>/.arashi/hooks/pre-remove<ext>` is not the default or canonical configured repository remove location."],
   [paths.workspace, "Configure does not create `<activeRepo>/.arashi/hooks/pre-remove<ext>`."],
+  [paths.workspace, "Onboarding does not install new repository remove scripts in the child-local alias `<activeRepo>/.arashi/hooks/pre-remove<ext>`."],
   [paths.workspace, "Delete never owns or removes `<activeRepo>/.arashi/hooks/post-remove<ext>`."],
+  [paths.workspace, "Delete does not clean child-local repository remove aliases or lookalikes."],
+  [paths.troubleshooting, "Repository remove hooks do not run with the configuration root as their working directory; they run from the active target checkout."],
+  [paths.hooks, "On Windows, qualified repository remove `.sh` hooks do not run through Git Bash."],
+  [paths.remove, "Remove dry-run does not execute pre-remove hooks."],
 ];
 
 function runFixture(layout, skillRoot) {
