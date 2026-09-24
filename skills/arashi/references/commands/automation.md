@@ -91,12 +91,15 @@ aw status --group docs
 aw create feat/docs-refresh --group docs --no-launch --no-switch
 aw exec --group docs -- bun run validate
 aw pull --group infra --json
+aw pull --only arashi-docs,arashi-skills --jobs 2
 aw setup --group extensions
 aw sync --group agents
 aw push --group core --set-upstream --dry-run
 ```
 
 `--group` composes with `--only` by intersection. If both are supplied, a repository must match the explicit name filter and belong to at least one requested group. For example, `aw exec --only arashi,arashi-docs --group docs -- bun run validate` runs only in `arashi-docs` when `arashi-docs` is the only named repository in the `docs` group. Unknown groups and valid filters that produce an empty intersection are reported as selection errors before mutating commands run.
+
+For `aw pull`, leave children serial by default (`--jobs 1`); use a positive safe integer with `--jobs <n>` only to bound independent child pulls. Parent pull, configuration reload, and managed-ignore reconciliation finish first. Uncertain Git identity falls back to serial execution; results keep configured order. With independent concurrent children, a failed child stops new starts while already-started pulls finish; serial mode continues through the selected children. See the canonical [pull command reference](https://arashi.haphazard.dev/commands/pull/) for selection and failure behavior.
 
 Unsupported launch, shell-code, or interactive modes return a structured error instead of mixing human output into JSON:
 
