@@ -73,7 +73,7 @@ Load only the reference needed:
 - Interactive selection, tmux, sesh, Herdr, Kitty, editor, or tab launch: [Switch and launch](commands/switch-and-launch.md)
 - Navigation composition: [Session shortcuts](session-shortcuts.md)
 - Lifecycle policy: [Hooks](hooks.md)
-- Removal or stale metadata: [Remove and maintenance](commands/remove-and-maintenance.md)
+- Coordinated completion assessment before retirement, removal without assessment, or stale metadata: [Finish, remove, and maintenance](commands/remove-and-maintenance.md)
 - Symptoms and recovery: [Troubleshooting](troubleshooting.md)
 
 Optional setup is not part of the successful configured journey. Review launcher, shell, and hook security boundaries before enabling those integrations.
