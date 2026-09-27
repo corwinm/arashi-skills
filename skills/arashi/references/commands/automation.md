@@ -89,7 +89,7 @@ Examples:
 ```bash
 aw status --group docs
 aw create feat/docs-refresh --group docs --no-launch --no-switch
-aw exec --group docs -- bun run validate
+aw exec --only arashi-docs --group docs -- pnpm run validate
 aw pull --group infra --json
 aw pull --only arashi-docs,arashi-skills --jobs 2
 aw setup --group extensions
@@ -97,7 +97,7 @@ aw sync --group agents
 aw push --group core --set-upstream --dry-run
 ```
 
-`--group` composes with `--only` by intersection. If both are supplied, a repository must match the explicit name filter and belong to at least one requested group. For example, `aw exec --only arashi,arashi-docs --group docs -- bun run validate` runs only in `arashi-docs` when `arashi-docs` is the only named repository in the `docs` group. Unknown groups and valid filters that produce an empty intersection are reported as selection errors before mutating commands run.
+`--group` composes with `--only` by intersection. If both are supplied, a repository must match the explicit name filter and belong to at least one requested group. For example, `aw exec --only arashi,arashi-docs --group docs -- pnpm run validate` runs only in `arashi-docs` when `arashi-docs` is the only named repository in the `docs` group. Unknown groups and valid filters that produce an empty intersection are reported as selection errors before mutating commands run.
 
 For `aw pull`, leave children serial by default (`--jobs 1`); use a positive safe integer with `--jobs <n>` only to bound independent child pulls. Parent pull, configuration reload, and managed-ignore reconciliation finish first. Uncertain Git identity falls back to serial execution; results keep configured order. With independent concurrent children, a failed child stops new starts while already-started pulls finish; serial mode continues through the selected children. See the canonical [pull command reference](https://arashi.haphazard.dev/commands/pull/) for selection and failure behavior.
 
@@ -165,21 +165,21 @@ aw exec -- git status --short
 aw exec --dirty -- git diff --stat
 
 # validate one known repository with structured output for agents/scripts
-aw exec --only arashi-docs --json -- bun run validate
+aw exec --only arashi-docs --json -- pnpm run validate
 
-# validate a known semantic group
-aw exec --group docs -- bun run validate
+# validate the package-based site within the docs group
+aw exec --only arashi-docs --group docs -- pnpm run validate
 
-# run tests with bounded concurrency and stop scheduling new repos after a failure
-aw exec --only arashi,arashi-docs --jobs 2 --fail-fast -- bun run test
+# inspect with bounded concurrency and stop scheduling new repos after a failure
+aw exec --only arashi-docs,arashi-skills --jobs 2 --fail-fast -- git diff --check
 
 # pass flags to the child command after the delimiter
-aw exec --only arashi -- bun run test -- --watch=false
+aw exec --only arashi-docs -- pnpm run lint:markdown --version
 ```
 
 Safety guidance for agents:
 
-- Prefer `aw exec` for repeated multi-repo validation and inspection (`git status --short`, `git diff --stat`, `bun run test`, `bun run lint`, docs validation).
+- Prefer `aw exec` for repeated multi-repo validation and inspection (`git status --short`, `git diff --stat`, `pnpm run test`, `pnpm run lint`, docs validation).
 - Use explicit filters for mutating, expensive, network-heavy, or long-running commands. Prefer `--group <group>` for known semantic sets and `--only <repo>` or a narrow comma-separated list for one-off selections. Do not fan out those commands to every managed repository unless the user asked for all repositories.
 - Remember that `--group` intersects with `--only` and narrows the explicit repository list when both are supplied.
 - Use `--dirty` when the command should inspect only repositories with local changes.
