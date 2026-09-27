@@ -73,6 +73,15 @@
       }
     },
     {
+      "name": "finish",
+      "status": "covered",
+      "reference": "references/commands/remove-and-maintenance.md",
+      "standalone": {
+        "support": "configured-only",
+        "reason": "Finish requires a configured coordinated workspace."
+      }
+    },
+    {
       "name": "handoff",
       "status": "covered",
       "reference": "references/commands/automation.md",
