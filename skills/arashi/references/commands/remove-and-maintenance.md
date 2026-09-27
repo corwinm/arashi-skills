@@ -17,9 +17,15 @@ aw finish feature-auth --dry-run --json
 aw finish feature-auth
 ```
 
-Review the **actual participating parent and configured children**, including children on other branches; absent children are nonparticipants. Inspect each participant's HEAD, branch, dirty/untracked state, upstream, and effective configured base (repository policy overrides workspace policy). An omitted base stays unknown, not a presumed default or remembered create-time override. Finish refreshes named base/upstream evidence; failed refresh or incomplete history cannot turn cached tracking refs into proof. Exact HEAD ancestry of a freshly fetched named base may prove integration, but does not detect later reverts. A matching GitHub squash/rebase PR is correlation, not proof of that exact HEAD without verifiable immutable merge-time head binding. Other uncertain cases need a named target and grouped **interactive manual completion judgment**, labeled manually confirmed rather than proven; non-TTY/JSON cannot supply that judgment.
+Before cleanup:
 
-Completion judgment and discard consent are distinct: dirty/untracked and unpublished (absent/ahead upstream) state each need discard consent. `--force` only covers discards and ordinary remove confirmation; it cannot waive unknown completion or topology/identity blockers. Preview reports reasons and an exact prospective remove/hook plan without cleanup prompts or managed worktree/ref/index/config writes; it may fetch network metadata. A blocked/unknown preview succeeding does **not** authorize cleanup. Execution rechecks the accepted state and exact remove plan before removal, including after pre-remove hooks, then reuses remove ordering, hooks, branch policy and partial-failure behavior. Hooks may already have side effects on invalidation; there is no rollback or cross-process atomicity guarantee. Use `aw finish --help` for current flags and output contract.
+- Review every participant, including children on different branches, its HEAD/local changes/upstream/base, and the exact ordered removal and hook plan. Absent children do not participate.
+- Treat omitted bases, failed refreshes, incomplete history, and PR correlation as unknown—not proof. Never infer completion from cached refs or create-time overrides; ancestry proof does not detect later reverts.
+- Unknown completion needs a named target and interactive manual judgment, not an agent-supplied assertion. JSON/non-TTY cannot provide it, and a successful preview is not cleanup authorization.
+- Obtain separate discard consent for dirty/untracked/ignored files and unpublished or unknown upstream state. `--force` covers discard and removal confirmation only, never unknown completion or topology/identity blockers.
+- If revalidation or hooks fail, inspect the reported outcome and survivors before retrying. Hook side effects and partial removal have no rollback or cross-process atomicity guarantee.
+
+See the canonical [finish guide](https://arashi.haphazard.dev/commands/finish/) for evidence, revalidation, flags, and output details; [Work on a Change](https://arashi.haphazard.dev/workflows/change-lifecycle/) covers the wider workflow.
 
 ## Remove Cleanup Hooks
 
