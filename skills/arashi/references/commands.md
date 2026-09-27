@@ -9,7 +9,7 @@ Choose only the command family needed for the task. The installed `aw --help` an
 - [Automation and coordinated execution](commands/automation.md) — run workflows or commands across selected repositories, parse JSON, create handoffs, use groups, and publish coordinated branches.
 - [Create worktrees](commands/create.md) — create coordinated worktrees, choose a base branch, move changes, and control post-create selection or launch.
 - [Switch and launch](commands/switch-and-launch.md) — select existing worktrees and choose shell, terminal, editor, tmux, sesh, cmux, Kitty, or Herdr behavior.
-- [Remove and maintenance](commands/remove-and-maintenance.md) — preview removal, run cleanup hooks, and prune stale Git worktree metadata.
+- [Finish, remove, and maintenance](commands/remove-and-maintenance.md) — assess coordinated completion, preview removal, run cleanup hooks, and prune stale Git worktree metadata.
 
 ## Global CLI conventions
 

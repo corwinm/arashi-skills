@@ -106,7 +106,7 @@ A failing `pre-remove` aborts removal before destructive mutation. `post-remove`
 
 ## Terminal input contract
 
-Interactive input applies only to eligible human `create` and `remove` invocations. In TTY mode hooks inherit terminal stdin. `--no-hook-input` disables terminal input for that invocation without skipping hooks and is shared by create and remove. `--json` always takes precedence and sets `ARASHI_HOOK_INPUT=disabled`. JSON owns quiet behavior, captures hook streams, and keeps stdout to exactly one JSON document. Disabled and unavailable hooks receive immediate EOF. There is no persistent `hooks.input` configuration.
+Interactive input applies only to eligible human `create`, `remove`, and `finish` invocations; finish reuses remove hooks. In TTY mode hooks inherit terminal stdin. `--no-hook-input` disables terminal input for that invocation without skipping hooks and is shared by create, remove, and finish. `--json` always takes precedence and sets `ARASHI_HOOK_INPUT=disabled`, including for finish. JSON owns quiet behavior, captures hook streams, and keeps stdout to exactly one JSON document. Disabled and unavailable hooks receive immediate EOF; prompt-reading hooks must fail closed on EOF. There is no persistent `hooks.input` configuration.
 
 `--no-hooks` skips execution, while create's unrelated `--interactive` option controls repository selection.
 

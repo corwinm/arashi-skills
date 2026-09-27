@@ -19,7 +19,7 @@ Focused command references live under `references/commands/`:
 - `automation.md`: inspect, filter, execute, hand off, pull, push, and sync
 - `create.md`: coordinated creation, base selection, launch precedence, and moving changes
 - `switch-and-launch.md`: worktree selection, launchers, tabs, tmux, Kitty, Herdr, and cmux
-- `remove-and-maintenance.md`: removal previews, cleanup, and pruning
+- `remove-and-maintenance.md`: coordinated finish assessment, removal previews, cleanup, and pruning
 
 Other optional references:
 

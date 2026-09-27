@@ -59,7 +59,7 @@ Coordinate Git worktrees across configured Arashi workspaces, or use Arashi ad h
 - **Run across repositories, parse JSON, hand off, or push**: [Automation commands](references/commands/automation.md)
 - **Create coordinated worktrees or move changes**: [Create commands](references/commands/create.md)
 - **Switch, launch, or select a session context**: [Switch and launch](references/commands/switch-and-launch.md) and [Session shortcuts](references/session-shortcuts.md)
-- **Remove or prune**: [Remove and maintenance](references/commands/remove-and-maintenance.md) and [Hooks](references/hooks.md)
+- **Finish a coordinated workspace, remove, or prune**: [Finish, remove, and maintenance](references/commands/remove-and-maintenance.md) and [Hooks](references/hooks.md)
 - **Choose an end-to-end goal**: [Workflows](references/workflows.md) or the [Tutorial](references/tutorial.md)
 - **Diagnose a failure or operational security boundary**: [Troubleshooting](references/troubleshooting.md) and [Prerequisites](references/prerequisites.md)
 

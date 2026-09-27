@@ -101,15 +101,17 @@ Managed Kitty is auto-detected only. Failure reports `LAUNCH_FAILED`, does not f
 
 Use [Session shortcuts](session-shortcuts.md) only when composing navigation with fzf, tmux, or sesh. Session shortcuts do not replace command semantics.
 
-## Remove or recover
+## Finish, remove, or recover
 
-Preview the exact scope first:
+For a configured coordinated workspace being retired, assess completion with `aw finish` before cleanup. If only removal is intended, use `aw remove`; it does not assess completion. Preview the chosen operation's scope first:
 
 ```bash
+aw finish feature/skill-integration --dry-run
+# removal without completion assessment
 aw remove feature/skill-integration --dry-run
 ```
 
-Use [Remove and maintenance](commands/remove-and-maintenance.md) for remove/prune behavior and [Hooks](hooks.md) for lifecycle order. A failing pre-remove hook stops destructive mutation; post-remove reports cleanup after attempted removal. Do not prune or remove unrelated worktrees while recovering one target.
+Use [Finish, remove, and maintenance](commands/remove-and-maintenance.md) for finish assessment, remove/prune behavior, and consent requirements; [Hooks](hooks.md) covers lifecycle order. A failing pre-remove hook stops destructive mutation; post-remove reports cleanup after attempted removal. Do not prune or remove unrelated worktrees while recovering one target.
 
 ## Completion handoff
 
