@@ -32,6 +32,16 @@ Prefer configured mode whenever the project needs persisted defaults, custom pat
 
 Completion means the expected configured worktree exists in each selected repository, the original worktree changes were preserved or deliberately moved, and status/validation succeeds. See [Workspace commands](commands/workspace.md), [Create commands](commands/create.md), and [Automation commands](commands/automation.md).
 
+### Optional T3 task handoff
+
+When the initiating conversation must remain in main while work starts in a new T3 Code thread, prepare a self-contained task and use the configured create integration:
+
+```bash
+aw create feature/skill-integration --t3 --prompt-file task.md
+```
+
+This runs on the repository/T3 host, uses the exact created parent checkout, defaults explicitly to full access, and opens no host UI. Report the returned workspace, permission, environment, project, thread, dispatch, and UI outcomes; the user manually selects the new thread in a connected desktop or mobile client. Preserve the created workspace after handoff failure and follow the safe-retry versus reconciliation result. See [Start a T3 Code task](commands/create.md#start-a-t3-code-task-in-the-exact-coordinated-workspace).
+
 ## Standalone Repository Workflow
 
 Use standalone mode only for ad hoc work in an unconfigured non-bare Git project. It does not create or persist `.arashi` configuration.

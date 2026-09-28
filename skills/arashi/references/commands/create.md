@@ -4,6 +4,40 @@ Create coordinated worktrees only after the effective repository set and base ar
 
 Installed `aw <command> --help` is the parameter authority.
 
+## Start a T3 Code task in the exact coordinated workspace
+
+Use this optional integration only in configured mode when the user wants Arashi to create a coordinated workspace and start a separate T3 Code thread there. Confirm the installed interface with `aw create --help`. The ordinary create workflow does not require T3 or Node.js.
+
+Install the evaluated community bridge explicitly on the repository host; never substitute an unpinned `npx ...@latest` invocation:
+
+```bash
+# Requires Node.js 22.16 or newer
+npm install --global @bvdm/t3code-cli@0.1.2
+t3code --json doctor
+```
+
+Arashi supports the bridge's reported 0.1.x contract, including the published 0.1.2 package's known embedded `0.1.0` version. Use exactly one nonempty prompt source:
+
+```bash
+aw create feature/example --t3 "Implement the accepted task"
+aw create feature/example --t3 --prompt-file task.md
+aw create feature/example --t3 "Implement the accepted task" --permission approval-required
+```
+
+For a task file, assemble self-contained UTF-8 context rather than asking Arashi to infer or scrape conversation history. Include the objective, accepted constraints and decisions, relevant issue/specification/repository context, and completion expectations such as tests, documentation, and reporting. The handoff initiates the new task; it does not complete or monitor it.
+
+`--permission` accepts only `approval-required`, `auto-accept-edits`, and `full-access`. Omission defaults to `full-access`; Arashi always passes and reports the effective value explicitly. It passes the exact created parent checkout with folder resolution, `--checkout current`, and `--open none`, so T3 does not create another worktree or open host UI. The original conversation remains attached to main. Report the exact parent path, effective permission, environment/project/thread identifiers, and the separate creation, dispatch, and UI outcomes. Tell the user to select the reported thread manually in a desktop or mobile client connected to the same reachable host environment; do not imply phone-local CLI execution or automatic mobile navigation.
+
+An explicit T3 handoff suppresses configured create launch/switch defaults and conflicts with explicit `--switch`, `--launch`, `--tab`, `--tmux`, `--sesh`, or `--herdr`. Missing, conflicting, unreadable, invalid-UTF-8, empty, or whitespace-only prompts and invalid permissions fail before workspace mutation. JSON mode returns sanitized T3 stages without prompt text, task-derived titles, credentials, URLs, or raw bridge output.
+
+If workspace creation succeeds and handoff fails, preserve the exact workspace. Retry only when Arashi marks the receipt safe, using the same prompt/permission and exact reusable target:
+
+```bash
+aw create feature/example --conflict REUSE_EXISTING --t3 --prompt-file task.md
+```
+
+A successful, active, or indeterminate receipt blocks blind duplication. Reconcile the workspace/project/thread in T3 before any retry when dispatch may have succeeded server-side. If reconciliation proves that no thread exists, remove only the exact reported receipt and its adjacent `.lock` file if present before rerunning against the reusable workspace. Current evidence is macOS end-to-end with T3 server 0.0.42; privacy branches and argv construction are automated across platform shapes, but do not claim Windows, Linux, or mobile end-to-end validation without running it.
+
 ## Configuring Worktree Naming
 
 For configured workspaces, edit `.arashi/config.json` directly; `aw configure` does not expose worktree naming. Add `worktreeNaming` as a root object, not beneath `defaults`, `meta`, or a repository entry:
