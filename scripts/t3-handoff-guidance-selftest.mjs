@@ -18,13 +18,15 @@ const requirements = new Map([
     [
       "aw create feature/example --t3 \"Implement the accepted task\"",
       "aw create feature/example --t3 --prompt-file task.md",
-      "@bvdm/t3code-cli@0.1.2",
-      "Node.js 22.16",
+      "official T3 0.0.43, orchestration protocol 1",
+      "t3 auth session issue",
+      "defaults.t3",
+      "--t3-model gpt-6.1-sol --t3-effort medium",
       "approval-required",
       "auto-accept-edits",
       "full-access",
-      "--checkout current",
-      "--open none",
+      "null thread worktree path",
+      "UI mode is `none`",
       "objective, accepted constraints and decisions",
       "original conversation remains attached to main",
       "desktop or mobile client",
@@ -48,6 +50,7 @@ const requirements = new Map([
 function validate(root, label) {
   for (const [relativePath, expected] of requirements) {
     const content = readFileSync(join(root, relativePath), "utf8");
+    assert.ok(!/npm install[^\n]*@bvdm|t3code config (?:set|show)/u.test(content), `${label}/${relativePath} must not restore bridge setup or preferences`);
     for (const text of expected) {
       assert.ok(content.includes(text), `${label}/${relativePath} is missing ${JSON.stringify(text)}`);
     }

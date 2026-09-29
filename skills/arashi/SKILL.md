@@ -9,7 +9,7 @@ license: MIT
 compatibility:
   os: [macos, linux, windows]
   required_commands: [git]
-  optional_commands: [npm, node, t3code, fzf, tmux, sesh, herdr]
+  optional_commands: [npm, node, t3, fzf, tmux, sesh, herdr]
 entry_commands:
   install_arashi: "see https://arashi.haphazard.dev for installation instructions"
   verify_arashi: aw --version
