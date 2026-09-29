@@ -27,15 +27,21 @@ If completion generation works but profile activation is missing, run `aw shell 
 
 ## Workspace configuration or status is unhealthy
 
-**First diagnostic:** if the workspace is discoverable, use `aw doctor --json`, then inspect `aw status` and `.arashi/config.json` only as directed. If configuration is absent in a fresh workspace, verify `aw --version`, choose the intended mode, and initialize it first.
+**First diagnostic:** run `aw config effective --json` to identify the user/workspace files and per-field sources. If the workspace is discoverable, use `aw doctor --json`, then inspect `aw status` and `.arashi/config.json` only as directed. If configuration is absent in a fresh workspace, verify `aw --version`, choose the intended mode, and initialize it first.
 
 **Recovery:** run ordinary `aw init` for a project adopting configured mode. Preserve an existing configured worktree directory and ignore scope unless the user deliberately changes it. For child repositories or custom paths, follow [Workspace and repositories](commands/workspace.md).
 
 **Escalate:** report the exact failed check and path classification rather than editing `.gitignore`, Git common excludes, or global configuration speculatively.
 
+### User configuration is invalid or surprising
+
+The personal file is `~/.arashi/config.json` and requires `version: "1.0.0"`. Use the schema `https://unpkg.com/arashi/schema/user-config.schema.json`; repository definitions and other project policy are invalid in this file. Malformed JSON or an invalid field must fail with the file path rather than being ignored.
+
+Inspect with `aw config effective --json`. Resolve a surprising value using CLI > workspace > user > built-in precedence at the individual leaf. Do not copy personal settings into tracked workspace configuration during recovery. Changing location or naming affects only future worktrees; use Git/Arashi discovery to manage existing worktrees at their recorded paths.
+
 ## Standalone destination is not ignored
 
-**Symptom:** the exact `.worktrees/<branch>` destination is not ignored.
+**Symptom:** the exact `.worktrees/<branch>` destination is not ignored under built-in layout, or the equivalent exact in-repository destination is exposed under a personal layout.
 
 **First diagnostic:** preview `aw init --zero-config --dry-run`, then verify the exact planned destination:
 
@@ -57,9 +63,9 @@ destination=".worktrees/$branch"
 git check-ignore --no-index -q -- "$destination"
 ```
 
-**Recovery:** run `aw init --zero-config` to append the literal `.worktrees/` rule to the repository-local exclude when safe. Passive discovery does not repair ignore coverage. Do not edit tracked `.gitignore` or global Git configuration automatically.
+**Recovery:** run `aw config effective` to identify the worktree root, then `aw init --zero-config`. Built-in layout appends the literal `.worktrees/` rule to the repository-local exclude when safe; a custom in-repository layout appends its effective repository-relative directory rule there. Passive discovery does not repair ignore coverage. Do not edit tracked `.gitignore`, global Git configuration, or either configuration file automatically.
 
-**Escalate:** if the destination is external, unsafe, or already affected by a different effective rule, stop and show the classification. Adopt configured mode when custom paths or persistent policy are needed.
+**Escalate:** if the destination is external, unsafe, or already affected by a different effective rule, stop and show the classification. Adopt configured mode when the path or policy must be shared with the project.
 
 ## SSH alias clone fails to resolve or authenticate
 

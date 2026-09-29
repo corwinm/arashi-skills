@@ -4,7 +4,7 @@ Choose the goal first, then open the linked command family for syntax and preced
 
 ## Configured workflow
 
-Prefer configured mode whenever the project needs persisted defaults, custom paths, child repositories, groups, hooks, or coordinated commands. Use ordinary `aw init`; a single-repository project may still benefit from configuration.
+Prefer configured mode whenever the project needs shared project policy, child repositories, groups, hooks, or coordinated commands. Personal create/switch/editor defaults and worktree location/naming may instead live in `~/.arashi/config.json` and apply to either mode. Use ordinary `aw init`; a single-repository project may still benefit from configuration.
 
 1. Initialize only when configuration is absent:
 
@@ -44,7 +44,7 @@ This runs on the repository/T3 host, uses the exact created parent checkout, def
 
 ## Standalone Repository Workflow
 
-Use standalone mode only for ad hoc work in an unconfigured non-bare Git project. It does not create or persist `.arashi` configuration.
+Use standalone mode only for ad hoc work in an unconfigured non-bare Git project. It does not create or persist workspace `.arashi` configuration, but it consumes an existing personal `~/.arashi/config.json`.
 
 1. Confirm whether the current checkout is the main worktree or a linked worktree.
 2. Preview the exact destination and ignore status:
@@ -66,9 +66,17 @@ Use standalone mode only for ad hoc work in an unconfigured non-bare Git project
    aw status
    ```
 
-Standalone worktrees use the discovered `.worktrees/<branch>` layout. Passive discovery does not repair ignore coverage. When the convention is not already ignored, bootstrap appends the literal `.worktrees/` rule to the repository-local exclude, covering the whole directory rather than one planned branch destination; it must not edit tracked `.gitignore` or global Git configuration automatically.
+Without a personal override, standalone worktrees use `.worktrees/<branch>` and bootstrap appends the literal `.worktrees/` rule when needed. A relative user `worktreesDir` anchors at the Git primary worktree; a shared absolute root receives a repository name plus stable eight-character path hash. Main and linked invocations therefore agree. Passive discovery does not repair ignore coverage. For a custom in-repository root, bootstrap appends the effective repository-relative directory rule; external roots require no ignore rule. It must not edit tracked `.gitignore`, global Git configuration, workspace config, or user config automatically.
 
-Configured-only repository coordination such as child `add`, `clone`, `pull`, `push`, `sync`, and `exec` remains unavailable. Adopt ordinary `aw init` when those capabilities, groups, custom paths, or local hooks are required. Full boundaries and recovery are owned by [Workspace commands](commands/workspace.md).
+Before relying on defaults, inspect the exact field-level merge and source:
+
+```bash
+aw config effective --json
+```
+
+Precedence is explicit CLI, explicit workspace field, user field, then built-in. Explicit `false` and `none` remain overrides. User configuration requires `version: "1.0.0"`, accepts only personal defaults plus `worktreesDir` and `worktreeNaming`, and never owns repositories, groups, base branches, materialization, or hooks.
+
+Configured-only repository coordination such as child `add`, `clone`, `pull`, `push`, `sync`, and `exec` remains unavailable. Adopt ordinary `aw init` when those capabilities, groups, shared project paths, or local hooks are required. Full boundaries and recovery are owned by [Workspace commands](commands/workspace.md).
 
 ## Inspect or update selected repositories
 

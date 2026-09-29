@@ -33,6 +33,22 @@
       }
     },
     {
+      "name": "config",
+      "status": "covered",
+      "reference": "references/workflows.md",
+      "standalone": {
+        "support": "supported"
+      }
+    },
+    {
+      "name": "config effective",
+      "status": "covered",
+      "reference": "references/workflows.md",
+      "standalone": {
+        "support": "supported"
+      }
+    },
+    {
       "name": "create",
       "status": "covered",
       "reference": "references/commands/create.md",

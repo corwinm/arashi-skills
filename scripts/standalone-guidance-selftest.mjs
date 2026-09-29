@@ -158,6 +158,8 @@ function validateCoverageContract() {
   const expectedSupport = new Map([
     ...[
       "completion",
+      "config",
+      "config effective",
       "create",
       "doctor",
       "handoff",
