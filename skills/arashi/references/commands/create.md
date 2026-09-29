@@ -37,13 +37,17 @@ Migration is explicit: copy chosen bridge provider/model into `defaults.t3.provi
 
 An explicit T3 handoff suppresses configured create launch/switch defaults and conflicts with explicit `--switch`, `--launch`, `--tab`, `--tmux`, `--sesh`, or `--herdr`. Missing, conflicting, unreadable, invalid-UTF-8, empty, or whitespace-only prompts and invalid permissions fail before workspace mutation. `--prompt-file`, `--permission`, and all `--t3-*` flags require `--t3`. With `--move-changes`, every attempted move must succeed before dispatch. JSON reports sanitized T3 stages without task text, task-derived titles, credentials, URLs, or raw transport output.
 
-If workspace creation succeeds and handoff fails, preserve the exact workspace. For a safe preparation retry, reuse the exact target and same prompt, permission, and selection:
+`--dry-run` checks only the installed CLI version and read-only runtime metadata; it issues no session, creates no worktrees, and dispatches no task. Authentication and live catalog validation happen on actual handoff.
+
+If workspace creation succeeds and handoff fails, preserve the exact workspace. For a safe preparation retry, reuse the exact target and same prompt, permission, and selection. Repeat the original overrides; for an original handoff using full access and the selection above:
 
 ```bash
-aw create feature/example --conflict REUSE_EXISTING --t3 --prompt-file task.md
+aw create feature/example --conflict REUSE_EXISTING --t3 --prompt-file task.md \
+  --permission full-access \
+  --t3-provider codex --t3-model gpt-6.1-sol --t3-effort medium
 ```
 
-A successful, active, or indeterminate receipt blocks blind duplication. Native retries reconcile saved project/thread identifiers; an uncertain task can only be confirmed by its saved message identifier, never resubmitted. A stale lock must be reconciled after its owning process stops; remove only that exact lock to allow reconciliation. Bridge-era receipts require manual reconciliation. Only when the original task was never accepted should you remove only the exact reported receipt and its stale `.lock` peer before a fresh handoff. Receipt-storage or auth/lock cleanup failure retains known remote success; never repeat a successful task. Arashi's unreclaimed sessions expire in five minutes.
+An existing native receipt retains its saved provider/model/effort selection. Conflicting flags or Arashi user/workspace defaults block retry and require reconciliation; repeat the original overrides to preserve intent. T3 default changes do not replace the saved selection. A successful, active, or indeterminate receipt blocks blind duplication. Native retries reconcile saved project/thread identifiers; an uncertain task can only be confirmed by its saved message identifier, never resubmitted. A stale lock must be reconciled after its owning process stops; remove only that exact lock to allow reconciliation. Bridge-era receipts require manual reconciliation. Only when the original task was never accepted should you remove only the exact reported receipt and its stale `.lock` peer before a fresh handoff. Receipt-storage or auth/lock cleanup failure retains known remote success; never repeat a successful task. Arashi's unreclaimed sessions expire in five minutes.
 
 Current evidence is macOS arm64 end-to-end with T3 0.0.43 and protocol 1. Transport/auth/discovery, native recovery, bridge-era receipts, and Windows ACL branches have automated coverage, but do not claim Windows, Linux, or mobile end-to-end validation without running it.
 
