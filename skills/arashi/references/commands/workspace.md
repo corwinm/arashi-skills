@@ -29,6 +29,8 @@ The child-coordination commands `add`, `clone`, `sync`, `pull`, `push`, `exec`, 
 
 For configured mode, run `aw init` from an existing repository root, or from a non-repository parent directory when you want Arashi to create the repository during setup.
 
+Fresh non-bare `aw init` leaves `worktreesDir` unset unless `--worktrees-dir` is supplied. Optional user defaults can then apply now or later without becoming shared repo settings. Supply the flag only when the project should own that directory choice; it takes priority over personal defaults.
+
 When an existing repository is bare, run init from the bare repository or a Git-discoverable descendant. Arashi canonicalizes the workspace to the absolute bare repository directory before it reads or writes configuration.
 
 Initialize an existing repository with defaults:
