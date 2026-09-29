@@ -53,7 +53,7 @@ const canonicalJson = `\`\`\`json
 const canonicalDefaults =
   "Omitting the `worktreeNaming` object or either individual field applies `default` and `preserve` without migrating and without persisting either default.";
 const invariants =
-  "The Git branch remains the exact requested name; only the directory path is transformed. A path collision fails without generating an alternate suffix. Existing worktrees are never renamed, and recorded metadata remains authoritative for locating them. Coordinated child placement remains unchanged. Standalone `.worktrees/<branch>` placement remains unchanged.";
+  "The Git branch remains the exact requested name; only the directory path is transformed. A path collision fails without generating an alternate suffix. Existing worktrees are never renamed, and recorded metadata remains authoritative for locating them. Coordinated child placement remains unchanged. Standalone create uses optional user `worktreeNaming` under the effective worktree root.";
 
 function output(result) {
   return `${result.stdout}${result.stderr}`;
@@ -164,7 +164,7 @@ const contradictionRules = [
     "coordinated placement",
   ],
   [
-    /standalone[^.\n]{0,100}(?:placement|`\.worktrees\/<branch>`)[^.\n]{0,100}(?:follows?|uses?|applies?)[^.\n]{0,80}(?:worktree naming|`worktreeNaming`|naming style)/i,
+    /standalone[^.\n]{0,100}`\.worktrees\/<branch>`[^.\n]{0,100}placement remains unchanged/i,
     "standalone placement",
   ],
   [
@@ -358,8 +358,8 @@ function validateSkill(root, label) {
   );
   requireParagraph(
     items,
-    /standalone[^.\n]*`\.worktrees\/<branch>`[^.\n]*(?:is|remains)[^.\n]*unchanged/i,
-    `${label}/${ownerPath} must keep standalone .worktrees/<branch> placement unchanged`,
+    /standalone create uses optional user `worktreeNaming` under the effective worktree root/i,
+    `${label}/${ownerPath} must describe standalone optional user naming`,
   );
 
   validatePackageWidePolicy(root, label);
@@ -410,8 +410,8 @@ const driftCases = [
   replacement("metadata-removed", "recorded metadata remains authoritative for locating them", "their locations are rediscovered", /recorded metadata authoritative/),
   replacement("coordinated-mutated", "Coordinated child placement remains unchanged", "Coordinated child placement follows the naming style", /coordinated child placement unchanged/),
   replacement("coordinated-removed", "Coordinated child placement remains unchanged. ", "", /coordinated child placement unchanged/),
-  replacement("standalone-mutated", "Standalone `.worktrees/<branch>` placement remains unchanged", "Standalone `.worktrees/<branch>` placement follows worktree naming", /standalone \.worktrees\/<branch> placement unchanged/),
-  replacement("standalone-removed", "Standalone `.worktrees/<branch>` placement remains unchanged.", "", /standalone \.worktrees\/<branch> placement unchanged/),
+  replacement("standalone-mutated", "Standalone create uses optional user `worktreeNaming` under the effective worktree root", "Standalone ignores user naming", /standalone optional user naming/),
+  replacement("standalone-removed", "Standalone create uses optional user `worktreeNaming` under the effective worktree root.", "", /standalone optional user naming/),
   replacement("direct-authoring-mutated", "edit `.arashi/config.json` directly", "run `aw configure` interactively", /direct config authoring instead of aw configure/),
   replacement("direct-authoring-removed", "For configured workspaces, edit `.arashi/config.json` directly; `aw configure` does not expose worktree naming. ", "", /direct config authoring instead of aw configure/),
   replacement("component-only-limit-mutated", "the full absolute newly planned configured-worktree destination", "only the generated directory component", /full absolute configured destination budget/),
@@ -439,7 +439,7 @@ const additiveContradictions = [
   ["no-rename", "Existing worktrees may be renamed when the style changes.", /contradictory worktree naming guidance for existing-worktree no-rename/],
   ["metadata", "Naming configuration overrides recorded metadata.", /contradictory worktree naming guidance for metadata authority/],
   ["coordinated", "Coordinated child placement follows the naming style.", /contradictory worktree naming guidance for coordinated placement/],
-  ["standalone", "Standalone `.worktrees/<branch>` placement follows worktree naming.", /contradictory worktree naming guidance for standalone placement/],
+  ["standalone", "Standalone `.worktrees/<branch>` placement remains unchanged.", /contradictory worktree naming guidance for standalone placement/],
   ["component-only-limit", "`maxPathLength` limits only the generated directory component.", /contradictory worktree naming guidance for full absolute destination scope/],
   ["automatic-default", "Arashi automatically chooses and persists a platform default for `maxPathLength`.", /contradictory worktree naming guidance for no automatic platform default/],
   ["measurement-unit", "`maxPathLength` is measured in Unicode code points.", /contradictory worktree naming guidance for UTF-16 measurement/],

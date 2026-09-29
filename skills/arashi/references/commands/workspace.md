@@ -6,10 +6,10 @@ Installed `aw <command> --help` is the parameter authority.
 
 ## Workspace Initialization
 
-Prefer configured mode whenever a project can adopt Arashi, including a single repository that needs repository/workspace hooks, persisted defaults, or custom paths. Choose initialization by workspace mode:
+Prefer configured mode for shared in-repo project policy, including repository/workspace hooks and coordinated repositories. A separate optional user configuration can supply personal defaults and custom worktree paths in either mode; explicit in-repo values take priority. Choose initialization by workspace mode:
 
 - Use ordinary `aw init` for configured child repositories, groups, hooks, defaults, custom managed paths, or coordinated commands.
-- Use `aw init --zero-config` for ad hoc work in an existing non-bare Git project that has not adopted Arashi, using the fixed root-level `.worktrees/<branch>` layout.
+- Use `aw init --zero-config` for ad hoc work in an existing non-bare Git project that has not adopted Arashi. With no user overrides, the default layout is `.worktrees/<branch>`.
 
 Preview or automate standalone bootstrap without changing its local-only policy:
 
@@ -19,9 +19,9 @@ aw init --zero-config --json
 aw init --zero-config --dry-run --json
 ```
 
-Zero-config init accepts its mode flag plus `--dry-run`, `--verbose`, and `--json`; do not combine it with configured-init options such as `--repos-dir`, `--worktrees-dir`, `--ignore-scope`, `--force`, or `--no-discover`. It creates no `.arashi/config.json`, does not edit tracked `.gitignore`, and does not create or modify global Git configuration. If no effective rule already covers the deterministic probe, it adds only the literal `.worktrees/` rule to the repository-local exclude file resolved by Git. Dry-run plans the same directory and rule actions without writes; JSON mode emits one structured envelope.
+Zero-config init accepts its mode flag plus `--dry-run`, `--verbose`, and `--json`; do not combine it with configured-init options such as `--repos-dir`, `--worktrees-dir`, `--ignore-scope`, `--force`, or `--no-discover`. It creates no `.arashi/config.json`, does not edit tracked `.gitignore`, and does not create or modify global Git configuration. For an in-repository root, if no effective rule already covers the deterministic probe, it adds the corresponding relative directory rule to the repository-local exclude file resolved by Git (the literal `.worktrees/` rule by default). External roots need no ignore rule. Dry-run plans the same directory and rule actions without writes; JSON mode emits one structured envelope.
 
-Passive standalone discovery requires an existing main-root `.worktrees/` directory and never repairs missing ignore coverage. `create`, including `create --dry-run`, checks the exact planned destination before mutation. A branch named `feature/auth` therefore requires `.worktrees/feature/auth` to be effectively ignored and is created at that exact path. To independently check the same gate from the main root, run `branch=feature/auth`, `destination=".worktrees/$branch"`, then `git check-ignore --no-index -q -- "$destination"` and require exit status `0` before creating.
+Passive standalone discovery requires the effective worktree root to exist and never repairs missing ignore coverage. `create`, including `create --dry-run`, checks the exact planned destination before mutation when it is inside the primary repository. Inspect `aw config effective --json` and `aw create feature/auth --dry-run --json` for the primary root and destination rather than inferring them from a `.worktrees` path. From that primary root, set `destination` to the reported absolute destination, then run `git check-ignore --no-index -q -- "$destination"` and require exit status `0` for an in-repository destination. External roots skip this gate.
 
 Supported standalone lifecycle commands are `create`, `list`, `status`, `switch`, `remove`, `prune`, `doctor`, `move`, and `handoff`. Invoking them from the main worktree or a linked worktree resolves the same sole main repository. Repository or group filters on these commands, including `create --only`, `create --group`, `status --group`, interactive multi-repository selection, and `switch --repos` or `switch --all`, have no standalone meaning and fail clearly.
 
