@@ -6,6 +6,8 @@ Installed `aw <command> --help` is the parameter authority.
 
 ## Start a T3 Code task in the exact coordinated workspace
 
+For the user-facing setup and recovery guide, see [T3 Code integration](https://arashi.haphazard.dev/workflows/t3-code/).
+
 Use this optional integration only in configured mode when the user wants Arashi to create a coordinated workspace and start a separate T3 Code thread there. Confirm the installed interface with `aw create --help`. The ordinary create workflow does not require T3 or Node.js.
 
 Install the evaluated community bridge explicitly on the repository host; never substitute an unpinned `npx ...@latest` invocation:
