@@ -8,6 +8,8 @@ Installed `aw <command> --help` is the parameter authority.
 
 For the user-facing setup and recovery guide, see [T3 Code integration](https://arashi.haphazard.dev/workflows/t3-code/).
 
+The required [`@bvdm/t3code-cli` bridge](https://github.com/MajesteitBart/t3code-cli) is third-party software maintained separately from Arashi and T3 Code, not the official T3 CLI. Explain this dependency before installing it; Arashi does not install it automatically.
+
 Use this optional integration only in configured mode when the user wants Arashi to create a coordinated workspace and start a separate T3 Code thread there. Confirm the installed interface with `aw create --help`. The ordinary create workflow does not require T3 or Node.js.
 
 Install the evaluated community bridge explicitly on the repository host; never substitute an unpinned `npx ...@latest` invocation:
