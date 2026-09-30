@@ -8,7 +8,7 @@ Installed `aw <command> --help` is the parameter authority.
 
 Prefer configured mode for shared in-repo project policy, including repository/workspace hooks and coordinated repositories. A separate optional user configuration can supply personal defaults and custom worktree paths in either mode; explicit in-repo values take priority. Choose initialization by workspace mode:
 
-- Use ordinary `aw init` for configured child repositories, groups, hooks, defaults, custom managed paths, or coordinated commands.
+- Use ordinary `aw init` for configured child repositories, groups, hooks, shared project defaults, shared managed paths, or coordinated commands. Personal defaults and worktree paths do not require repo configuration.
 - Use `aw init --zero-config` for ad hoc work in an existing non-bare Git project that has not adopted Arashi. With no user overrides, the default layout is `.worktrees/<branch>`.
 
 Preview or automate standalone bootstrap without changing its local-only policy:

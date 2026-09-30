@@ -54,6 +54,7 @@ const requirements = new Map([
     [
       "aw init --zero-config",
       "aw init --zero-config --dry-run",
+      "shared project defaults, shared managed paths",
       "leaves `worktreesDir` unset unless `--worktrees-dir` is explicit",
       "aw init --zero-config --json",
       ".worktrees/<branch>",
