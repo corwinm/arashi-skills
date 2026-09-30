@@ -18,7 +18,9 @@ const requirements = new Map([
     [
       "aw create feature/example --t3 \"Implement the accepted task\"",
       "aw create feature/example --t3 --prompt-file task.md",
-      "official T3 0.0.43, orchestration protocol 1",
+      "stable official T3 0.0.43 or later, orchestration protocol 1",
+      "matching installed CLI/server versions",
+      "rather than a patch whitelist",
       "t3 auth session issue",
       "defaults.t3",
       "--t3-model gpt-6.1-sol --t3-effort medium",
