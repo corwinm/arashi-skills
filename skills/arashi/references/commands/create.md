@@ -69,6 +69,8 @@ For configured workspaces, edit `.arashi/config.json` directly; `aw configure` d
 }
 ```
 
+For standalone personal naming, use the separate optional `~/.arashi/config.json` file. It requires a root `"version": "1.0.0"` alongside the root `worktreeNaming` object shown above; the workspace fragment alone is not a valid user file. These personal defaults also apply in configured mode, but explicit repo configuration takes priority. Ordinary `aw init` is not required for personal defaults.
+
 The fields use closed vocabularies:
 
 - `style` accepts exactly `default`, `branch`, and `repo-branch`.
@@ -95,7 +97,7 @@ Omitting the `worktreeNaming` object or either individual field applies `default
 
 If a configured destination would exceed the budget, Arashi shortens only the ordinary generated parent-relative namespace after normalizing it to a portable `/`-separated namespace. The fitted name uses a readable prefix, `-`, and the first eight lowercase SHA-256 hex characters over the portable ordinary namespace. One authoritative parent is sized against all selected coordinated child paths, with child-relative paths unchanged. `WORKTREE_PATH_LENGTH_EXCEEDED` is reported before any mutation when fixed topology cannot fit the collision-resistant suffix.
 
-The Git branch remains the exact requested name; only the directory path is transformed. A path collision fails without generating an alternate suffix. Existing worktrees are never renamed, existing registrations remain at their exact paths, and recorded metadata remains authoritative for locating them. Coordinated child placement remains unchanged. Standalone `.worktrees/<branch>` placement remains unchanged. This reserves worktree-root path space but cannot guarantee repository-internal files fit.
+The Git branch remains the exact requested name; only the directory path is transformed. A path collision fails without generating an alternate suffix. Existing worktrees are never renamed, existing registrations remain at their exact paths, and recorded metadata remains authoritative for locating them. Coordinated child placement remains unchanged. Standalone create uses optional user `worktreeNaming` under the effective worktree root. Without user overrides, its default remains `.worktrees/<branch>`. Standalone `maxPathLength` measures the full absolute destination in UTF-16 code units and rejects over-budget paths before mutation; it does not shorten names. This reserves worktree-root path space but cannot guarantee repository-internal files fit.
 
 ## Repository Worktree File Materialization
 
@@ -187,7 +189,7 @@ Use command defaults in `.arashi/config.json` to control post-create behavior an
 
 For `defaults.create.launch`, choose `none`, `auto`, `sesh`, or `herdr`. Omitting it has the built-in `none` behavior. The independent `switch` boolean still opts into or out of post-create selection, but launch implies switch: resolving `auto`, `sesh`, or `herdr` always selects the newly created primary worktree even when `switch` is false or `--no-switch` is present. Conversely, `launch: "none"` does not suppress an independently enabled switch.
 
-Scope create defaults to the invocation host. Terminal invocations use only `defaults.create`. Editor-hosted invocations use only `defaults.editors.<host>.create` for the matching `vscode`, `cursor`, or `kiro` host and do not fall back to generic defaults or another editor host when that scope is absent. Implicit standalone create has no configured defaults and continues to use explicit flags only.
+Scope create defaults to the invocation host. Terminal invocations use only `defaults.create`. Editor-hosted invocations use only `defaults.editors.<host>.create` for the matching `vscode`, `cursor`, or `kiro` host and do not fall back to generic defaults or another editor host when that scope is absent. Explicit in-repo configuration takes priority; the separate optional user configuration fills unset fields. Implicit standalone create can use those optional user defaults with the same host selection, without creating an in-repo configuration file.
 Use one-off CLI overrides when one `aw create` run should differ from its matching configured scope:
 
 ```bash

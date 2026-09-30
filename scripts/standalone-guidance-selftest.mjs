@@ -16,6 +16,11 @@ if (skillRootArgumentIndex >= 0 && !suppliedSkillRoot) {
 }
 
 const requirements = new Map([
+  ["references/tutorial.md", ["shared repo policy", "Optional personal defaults", "~/.arashi/config.json", "work in either mode", "do not require ordinary `aw init`"]],
+  [
+    "references/commands.md",
+    ["shared project policy", "Optional personal defaults", "~/.arashi/config.json", "work in either mode", "do not require ordinary `aw init`"],
+  ],
   [
     "SKILL.md",
     [
@@ -49,6 +54,8 @@ const requirements = new Map([
     [
       "aw init --zero-config",
       "aw init --zero-config --dry-run",
+      "shared project defaults, shared managed paths",
+      "leaves `worktreesDir` unset unless `--worktrees-dir` is explicit",
       "aw init --zero-config --json",
       ".worktrees/<branch>",
       "exact planned destination",
@@ -71,9 +78,11 @@ const requirements = new Map([
     [
       "exact `.worktrees/<branch>` destination is not ignored",
       "aw init --zero-config",
-      'current_root=$(git rev-parse --show-toplevel)',
-      'git_dir=$(git rev-parse --path-format=absolute --git-dir)',
-      'main_root=${current_root%/.worktrees/*}',
+      'aw config effective --json',
+      'workspaceRoot',
+      'worktreesBase',
+      'aw create feature/auth --dry-run --json',
+      'External worktree roots require no Git ignore rule',
       'cd "$main_root"',
       'git check-ignore --no-index -q -- "$destination"',
       "literal `.worktrees/` rule",
@@ -158,6 +167,8 @@ function validateCoverageContract() {
   const expectedSupport = new Map([
     ...[
       "completion",
+      "config",
+      "config effective",
       "create",
       "doctor",
       "handoff",

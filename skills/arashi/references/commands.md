@@ -20,8 +20,9 @@ Choose only the command family needed for the task. The installed `aw --help` an
 
 ## Safe defaults
 
-- Prefer configured mode for persisted defaults, groups, hooks, custom paths, or coordinated repositories. Use zero-config standalone mode only for ad hoc work in an unconfigured non-bare Git project; select and initialize the intended mode before workspace diagnostics when the workspace is fresh.
+- Prefer configured mode for shared project policy, groups, hooks, or coordinated repositories. Optional personal defaults in `~/.arashi/config.json`, including custom worktree paths and naming, work in either mode and do not require ordinary `aw init`. Use zero-config standalone mode for ad hoc work in an unconfigured non-bare Git project; select and initialize the intended mode before workspace diagnostics when the workspace is fresh.
 - Once the workspace is initialized or otherwise discoverable, diagnose first with `aw doctor --json`; use `aw status` when human-readable state is enough.
+- Inspect personal/workspace precedence and resolved paths read-only with `aw config effective --json`; do not infer values by reading only one file.
 - Before mutating, expensive, network-heavy, or long-running multi-repository work, apply `--group` or `--only` unless the user explicitly wants every managed repository.
 - Use `--json` only for non-interactive modes. Handle `JSON_UNSUPPORTED_FOR_MODE` as a structured refusal rather than scraping human output.
 - Preview broad removal with `aw remove --dry-run`; preserve existing worktrees and branches unless removal is explicitly requested.
