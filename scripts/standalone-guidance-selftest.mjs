@@ -16,6 +16,7 @@ if (skillRootArgumentIndex >= 0 && !suppliedSkillRoot) {
 }
 
 const requirements = new Map([
+  ["references/tutorial.md", ["shared repo policy", "Optional personal defaults", "~/.arashi/config.json", "work in either mode", "do not require ordinary `aw init`"]],
   [
     "references/commands.md",
     ["shared project policy", "Optional personal defaults", "~/.arashi/config.json", "work in either mode", "do not require ordinary `aw init`"],
@@ -53,6 +54,7 @@ const requirements = new Map([
     [
       "aw init --zero-config",
       "aw init --zero-config --dry-run",
+      "leaves `worktreesDir` unset unless `--worktrees-dir` is explicit",
       "aw init --zero-config --json",
       ".worktrees/<branch>",
       "exact planned destination",

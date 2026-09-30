@@ -87,7 +87,7 @@ aw init --ignore-scope local
 
 Expected outcomes:
 
-- `.arashi/config.json` includes `reposDir` and `worktreesDir`.
+- `.arashi/config.json` includes `reposDir`. Fresh non-bare init leaves `worktreesDir` unset unless `--worktrees-dir` is explicit; inspect the effective value with `aw config effective --json` rather than persisting a fallback. Bare init without a personal directory retains the repo-owned `..` default.
 - when `--worktrees-dir` is omitted, a canonical bare repository defaults to `..`, while a non-bare repository defaults to `.arashi/worktrees`.
 - an existing configured value remains authoritative for later commands and preference-only init. If the field is omitted and no optional user value exists, the built-in fallback is `..` for bare repositories and `.arashi/worktrees` for non-bare repositories, including after removing a personal default. This does not rewrite the repo configuration. Forced reinitialization recalculates the omitted default from repository type.
 - bootstrap mode accepts only `.` or a direct child directory name.

@@ -22,6 +22,10 @@ const requirements = new Map([
     "references/commands/switch-and-launch.md",
     [
       '"mode": "auto"',
+      "~/.arashi/config.json",
+      '"version": "1.0.0"',
+      "full `defaults.switch` nesting",
+      "Explicit repo configuration takes priority",
       "`auto`, `cd`, `launch`, `sesh`, and `herdr`",
       "tmux → Herdr → cmux → integrated IDE → Kitty → parent-shell `cd` → terminal application/platform fallback",
       "aw switch --launch feature-auth",

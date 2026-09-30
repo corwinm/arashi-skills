@@ -4,7 +4,7 @@ Complete one configured Arashi workflow, verify it, then load optional guidance 
 
 ## Choose a mode
 
-Use **configured mode** for persisted defaults, custom paths, child repositories, groups, hooks, or coordinated commands. This tutorial follows that path.
+Use **configured mode** for shared repo policy, child repositories, groups, hooks, or coordinated commands. This tutorial follows that path. Optional personal defaults in `~/.arashi/config.json`, including custom worktree paths and naming, work in either mode and do not require ordinary `aw init`.
 
 Use **zero-config standalone mode** only for ad hoc work in an unconfigured non-bare Git project. Preview with `aw init --zero-config --dry-run`, then follow [Workspace and repositories](commands/workspace.md). Standalone mode does not create `.arashi` configuration and supports a smaller command surface.
 

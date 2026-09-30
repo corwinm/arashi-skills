@@ -29,7 +29,7 @@ If completion generation works but profile activation is missing, run `aw shell 
 
 **First diagnostic:** run `aw config effective --json` to identify the user/workspace files and per-field sources. If the workspace is discoverable, use `aw doctor --json`, then inspect `aw status` and `.arashi/config.json` only as directed. If configuration is absent in a fresh workspace, verify `aw --version`, choose the intended mode, and initialize it first.
 
-**Recovery:** run ordinary `aw init` for a project adopting configured mode. Preserve an existing configured worktree directory and ignore scope unless the user deliberately changes it. For child repositories or custom paths, follow [Workspace and repositories](commands/workspace.md).
+**Recovery:** run ordinary `aw init` for a project adopting configured mode. Preserve an existing configured worktree directory and ignore scope unless the user deliberately changes it. For child repositories or shared repo policy, follow [Workspace and repositories](commands/workspace.md). Personal defaults and custom worktree paths do not require repo configuration.
 
 **Escalate:** report the exact failed check and path classification rather than editing `.gitignore`, Git common excludes, or global configuration speculatively.
 

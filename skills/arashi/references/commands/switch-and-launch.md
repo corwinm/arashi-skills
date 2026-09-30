@@ -130,6 +130,19 @@ Configured and implicit-standalone `switch --tab` and `create --tab` use the sam
 Default Herdr launch continues to use `herdr worktree open` and requires a non-bare source checkout. `--tab --herdr` instead runs `herdr tab create` in the active workspace identified by `HERDR_WORKSPACE_ID` and does not require a non-bare source checkout.
 Configure the default with `"switch": { "mode": "auto" }`. For `defaults.switch.mode`, choose exactly one of `auto`, `cd`, `launch`, `sesh`, and `herdr`:
 
+For a personal switch default in either mode, use the separate optional `~/.arashi/config.json` file with required root version metadata and the full `defaults.switch` nesting:
+
+```json
+{
+  "version": "1.0.0",
+  "defaults": {
+    "switch": { "mode": "auto" }
+  }
+}
+```
+
+Explicit repo configuration takes priority over user defaults. Do not create repo configuration merely to persist a personal preference; ordinary `aw init` is not required. Inspect resolution with `aw config effective --json`.
+
 - `auto` prefers strictly detected managed contexts in the order tmux → Herdr → cmux → integrated IDE → Kitty, then uses parent-shell `cd` when shell integration is active, and otherwise continues to terminal application/platform fallback.
 - `cd` requests parent-shell switching. A configured `cd` warns and falls back to automatic launch when shell integration is unavailable; an explicit `--cd` instead warns without launching another context.
 - `launch` always enters automatic launcher selection and does not prefer `cd`.
