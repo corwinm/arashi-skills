@@ -17,6 +17,10 @@ if (skillRootArgumentIndex >= 0 && !suppliedSkillRoot) {
 
 const requirements = new Map([
   [
+    "references/commands.md",
+    ["shared project policy", "Optional personal defaults", "~/.arashi/config.json", "work in either mode", "do not require ordinary `aw init`"],
+  ],
+  [
     "SKILL.md",
     [
       "zero-config standalone",

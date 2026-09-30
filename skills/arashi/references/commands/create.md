@@ -69,6 +69,8 @@ For configured workspaces, edit `.arashi/config.json` directly; `aw configure` d
 }
 ```
 
+For standalone personal naming, use the separate optional `~/.arashi/config.json` file. It requires a root `"version": "1.0.0"` alongside the root `worktreeNaming` object shown above; the workspace fragment alone is not a valid user file. These personal defaults also apply in configured mode, but explicit repo configuration takes priority. Ordinary `aw init` is not required for personal defaults.
+
 The fields use closed vocabularies:
 
 - `style` accepts exactly `default`, `branch`, and `repo-branch`.

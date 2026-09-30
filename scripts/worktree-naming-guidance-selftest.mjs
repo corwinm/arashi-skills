@@ -265,6 +265,11 @@ function validateSkill(root, label) {
   );
 
   const examples = parseExamples(guidance);
+  requireParagraph(
+    items,
+    /standalone personal naming[^\n]*`~\/\.arashi\/config\.json`[^\n]*root `"version": "1\.0\.0"`[^\n]*root `worktreeNaming`/i,
+    `${label}/${ownerPath} must identify the personal file and required version metadata`,
+  );
   assert.equal(examples.length, 1, `${label}/${ownerPath} must contain exactly one direct JSON example`);
   assert.deepEqual(
     examples[0],
@@ -370,6 +375,8 @@ function replacement(name, from, to, diagnostic, path = ownerPath) {
 }
 
 const driftCases = [
+  replacement("personal-version-removed", 'root `"version": "1.0.0"`', 'root metadata', /required version metadata/),
+  replacement("personal-path-removed", '`~/.arashi/config.json`', '`personal.json`', /required version metadata/),
   replacement("direct-json-root", canonicalJson, canonicalJson.replace('  "worktreeNaming"', '  "defaults": {\n    "worktreeNaming"').replace('\n}', '\n  }\n}'), /nested root JSON object/),
   replacement("direct-json-removed", `${canonicalJson}\n\n`, "", /exactly one direct JSON example/),
   replacement("path-budget-json-mutated", '    "maxPathLength": 180', '    "maxPathLength": 181', /nested root JSON object/),

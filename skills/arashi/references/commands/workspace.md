@@ -89,7 +89,7 @@ Expected outcomes:
 
 - `.arashi/config.json` includes `reposDir` and `worktreesDir`.
 - when `--worktrees-dir` is omitted, a canonical bare repository defaults to `..`, while a non-bare repository defaults to `.arashi/worktrees`.
-- an existing configured value remains authoritative for later commands and preference-only init; Arashi uses `.arashi/worktrees` only as the compatibility fallback for a legacy config that omits the field. Forced reinitialization recalculates the omitted default from repository type.
+- an existing configured value remains authoritative for later commands and preference-only init. If the field is omitted and no optional user value exists, the built-in fallback is `..` for bare repositories and `.arashi/worktrees` for non-bare repositories, including after removing a personal default. This does not rewrite the repo configuration. Forced reinitialization recalculates the omitted default from repository type.
 - bootstrap mode accepts only `.` or a direct child directory name.
 - in non-bare repositories, safe configured repository and worktree directories are checked against Git's effective tracked, repository-local, and global ignore sources before any write.
 - with no explicit or stored preference, missing rules are added to the repository-local exclude file resolved by Git; tracked `.gitignore` is unchanged.
