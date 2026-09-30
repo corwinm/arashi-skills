@@ -375,8 +375,8 @@ function replacement(name, from, to, diagnostic, path = ownerPath) {
 }
 
 const driftCases = [
-  replacement("personal-version-removed", 'root `"version": "1.0.0"`', 'root metadata', /required version metadata/),
-  replacement("personal-path-removed", '`~/.arashi/config.json`', '`personal.json`', /required version metadata/),
+  replacement("personal-version-removed", 'It requires a root `"version": "1.0.0"` alongside the root `worktreeNaming`', 'It requires root metadata alongside the root `worktreeNaming`', /required version metadata/),
+  replacement("personal-path-removed", 'For standalone personal naming, use the separate optional `~/.arashi/config.json` file.', 'For standalone personal naming, use the separate optional `personal.json` file.', /required version metadata/),
   replacement("direct-json-root", canonicalJson, canonicalJson.replace('  "worktreeNaming"', '  "defaults": {\n    "worktreeNaming"').replace('\n}', '\n  }\n}'), /nested root JSON object/),
   replacement("direct-json-removed", `${canonicalJson}\n\n`, "", /exactly one direct JSON example/),
   replacement("path-budget-json-mutated", '    "maxPathLength": 180', '    "maxPathLength": 181', /nested root JSON object/),
