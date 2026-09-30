@@ -6,6 +6,10 @@ Installed `aw <command> --help` is the parameter authority.
 
 ## Start a T3 Code task in the exact coordinated workspace
 
+For the user-facing setup and recovery guide, see [T3 Code integration](https://arashi.haphazard.dev/workflows/t3-code/).
+
+The required [`@bvdm/t3code-cli` bridge](https://github.com/MajesteitBart/t3code-cli) is third-party software maintained separately from Arashi and T3 Code, not the official T3 CLI. Explain this dependency before installing it; Arashi does not install it automatically.
+
 Use this optional integration only in configured mode when the user wants Arashi to create a coordinated workspace and start a separate T3 Code thread there. Confirm the installed interface with `aw create --help`. The ordinary create workflow does not require T3 or Node.js.
 
 Install the evaluated community bridge explicitly on the repository host; never substitute an unpinned `npx ...@latest` invocation:
@@ -25,6 +29,19 @@ aw create feature/example --t3 "Implement the accepted task" --permission approv
 ```
 
 For a task file, assemble self-contained UTF-8 context rather than asking Arashi to infer or scrape conversation history. Include the objective, accepted constraints and decisions, relevant issue/specification/repository context, and completion expectations such as tests, documentation, and reporting. The handoff initiates the new task; it does not complete or monitor it.
+
+Before dispatch, inspect `t3code config show` when model choice matters. Arashi passes no model or reasoning-effort override: saved T3 CLI preferences override the project's default selection for new handoffs, and otherwise the bridge uses the project selection or its fallback. Do not change persistent preferences unless the user asks.
+
+When the user requests a default, set their chosen provider, model, and effort through the T3 CLI. For example, for a Codex provider supporting these values:
+
+```sh
+t3code config set provider codex
+t3code config set model gpt-6.1-sol
+t3code config set thinkingEffort medium
+t3code config show
+```
+
+These values are examples, not recommended or required models. The preferences belong to the T3 CLI, separately from Arashi config and the T3 app's current model selection. They apply to future handoffs and do not change existing threads. See the [T3 CLI documentation](https://github.com/MajesteitBart/t3code-cli#readme) for complete configuration options.
 
 `--permission` accepts only `approval-required`, `auto-accept-edits`, and `full-access`. Omission defaults to `full-access`; Arashi always passes and reports the effective value explicitly. It passes the exact created parent checkout with folder resolution, `--checkout current`, and `--open none`, so T3 does not create another worktree or open host UI. The original conversation remains attached to main. Report the exact parent path, effective permission, environment/project/thread identifiers, and the separate creation, dispatch, and UI outcomes. Tell the user to select the reported thread manually in a desktop or mobile client connected to the same reachable host environment; do not imply phone-local CLI execution or automatic mobile navigation.
 
