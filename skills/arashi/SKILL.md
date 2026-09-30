@@ -40,8 +40,8 @@ Coordinate Git worktrees across configured Arashi workspaces, or use Arashi ad h
 
 ## Choose a mode
 
-- **Configured mode**: Prefer configured mode; use ordinary `aw init` for persisted defaults, custom paths, repository groups, workspace or repository hooks, child repositories, or coordinated commands. This is also the preferred mode for a single repository that needs those features.
-- **Zero-config standalone mode**: use `aw init --zero-config` only for ad hoc work in an unconfigured non-bare Git project. It does not create or persist `.arashi` configuration. Passive discovery does not repair ignore coverage, and bootstrap must not edit tracked `.gitignore` or global Git configuration automatically.
+- **Configured mode**: Prefer configured mode; use ordinary `aw init` for shared project settings, groups, workspace or repository hooks, child repositories, or coordinated commands. Explicit in-repo `.arashi/config.json` fields take priority over the separate optional user file at `~/.arashi/config.json`.
+- **Zero-config standalone mode**: use `aw init --zero-config` only for ad hoc work in an unconfigured non-bare Git project. It does not create or persist workspace `.arashi` configuration. Personal create/switch/editor and worktree location/naming preferences may use the optional user defaults file in either mode; see [Workflows](references/workflows.md). Passive discovery does not repair ignore coverage, and bootstrap must not edit tracked `.gitignore` or global Git configuration automatically.
 
 ## Universal operating rules
 
