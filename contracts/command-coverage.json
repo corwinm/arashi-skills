@@ -243,7 +243,16 @@
       "reference": "references/commands/switch-and-launch.md",
       "requiredOptions": [
         "--tab",
-        "--tmux"
+        "--tmux",
+        "--t3",
+        "--prompt-file",
+        "--permission",
+        "--t3-base-dir",
+        "--t3-cli",
+        "--t3-provider",
+        "--t3-model",
+        "--t3-effort",
+        "--t3-intent"
       ],
       "standalone": {
         "support": "supported"
