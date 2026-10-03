@@ -181,6 +181,8 @@ For switch, `--launch` forces launch while preserving a configured explicit laun
 - Canonical workflow reference: `https://arashi.haphazard.dev/workflows/herdr/`.
 ## T3 task in an existing checkout
 
+Before using these examples, run `aw switch --help` and confirm it lists `--t3`. If it does not, stop and upgrade to a CLI release that includes switch T3 support; this guidance does not make the option available in older releases. Do not substitute `aw create` for an existing checkout.
+
 Use explicit `--t3` to start a task rather than open a terminal:
 
 ```bash
