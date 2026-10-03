@@ -179,6 +179,47 @@ For switch, `--launch` forces launch while preserving a configured explicit laun
 - Arashi owns Git worktree creation and removal. Never substitute `herdr worktree create`, `herdr worktree remove`, or `herdr workspace create`.
 - `aw remove` intentionally leaves Herdr workspaces untouched. For opt-in cleanup, resolve the workspace ID before removal and use `herdr workspace close <workspace-id>` in a pre-remove hook; automatic closure is unsafe because the workspace may contain agents or unsaved terminal state.
 - Canonical workflow reference: `https://arashi.haphazard.dev/workflows/herdr/`.
+## T3 task in an existing checkout
+
+Before using these examples, run `aw switch --help` and confirm it lists `--t3`. If it does not, stop and upgrade to a CLI release that includes switch T3 support; this guidance does not make the option available in older releases. Do not substitute `aw create` for an existing checkout.
+
+Use explicit `--t3` to start a task rather than open a terminal:
+
+```bash
+aw switch --path /path/to/worktree --t3 --prompt-file task.md
+
+# Deliberate later session, only after the preceding handoff is resolved
+aw switch --path /path/to/worktree --t3 "Review the changes" --t3-intent review-1
+
+# Exact child checkout in a configured workspace
+aw switch --repos --path /path/to/child-worktree --t3 --prompt-file task.md
+```
+
+- Keep ordinary discovery: default parent scope, `--repos` child-only, `--all` both; reject `--repos --all`. Dispatch only to the selected physical checkout, never its parent or siblings. Main checkouts are valid when discovered. Standalone uses its own worktrees and rejects both scope flags. `--path` is a Boolean declaring the positional argument exact; arbitrary directories and checkout subdirectories are not candidates. Ambiguous noninteractive/JSON selection fails instead of silently choosing; human mode may prompt.
+- Supply exactly one nonempty inline task or non-whitespace UTF-8 `--prompt-file <path>`, resolved relative to the original invocation CWD. Include the objective, decisions, context, and completion expectations: no conversation history is inferred.
+- All T3-only options require `--t3`: `--prompt-file`, `--permission`, `--t3-base-dir`, `--t3-cli`, `--t3-provider`, `--t3-model`, `--t3-effort`, and `--t3-intent`. No switch `--dry-run`, default task, or `--t3-profile` exists. Do not use create-only flags here.
+- Reject `--cd`, `--launch`, `--tab`, `--tmux`, `--sesh`, `--herdr`, `--vscode`, `--cursor`, and `--kiro` with T3. `--ignore-configured-launcher` is an accepted redundant opt-out. T3 bypasses configured/personal `auto`, `cd`, `launch`, `sesh`, and `herdr`, managed context detection, and shell directory directives, with no launcher fallback. It creates no worktrees, moves no changes, installs no dependencies, and runs no create/setup hooks.
+- Deprecated compatibility metadata: T3 also rejects `--no-cd`; `--no-default-launch` is accepted but redundant. Prefer canonical spellings in automation.
+- Initial `--permission <mode>` accepts `approval-required`, `auto-accept-edits`, or `full-access`; omission is `full-access`, not the original conversation's permission or a T3 profile default. Other initial settings resolve per leaf CLI > invocation workspace > user configuration > native environment/catalog defaults, not destination configuration. Invalid applicable configuration fails even with overrides.
+- Select a running local environment with `--t3-base-dir <path>` or `defaults.t3.baseDir`; otherwise use `T3CODE_HOME`, then `~/.t3`. `--t3-cli <path>`/`defaults.t3.cli` overrides installed `t3`. Provider/model/effort follow live project > server selection and catalog defaults, with no hardcoded model; `--t3-provider <id>` must identify a configured instance or unambiguous driver, `--t3-model <model>` an available model/alias, and `--t3-effort <effort>` a supported effort.
+- Require stable official T3 CLI/server >=0.0.43 with matching versions, protocol 1, local runtime, authentication read/operate scopes, and live catalog. Official CLI session issue/revoke handles authentication; do not install T3, scan ports, guess another environment, read private databases, or invent a profile/bridge API.
+
+### Intent and retry safety
+
+Omitted `--t3-intent <id>` is the stable literal `default`; explicit `default` is identical. Preserve exact case and validate `[A-Za-z0-9][A-Za-z0-9._-]{0,63}` without normalization. IDs such as `CON`, `NUL.txt`, and `followup.` remain valid/portable; `Followup` and `followup` are distinct. This is local intent identity, not a T3 thread ID.
+
+Reusing any ID is a retry, even after success: return the accepted saved outcome with zero new submission. A deliberate fresh session uses a different ID, such as `review-2`, only after earlier checkout state is resolved. Changing task text under an existing ID is an error. Retries pin original environment, provider instance, model/options, and permission; omitted flags retain pinned values rather than new defaults, explicit changes reject reuse, and live catalog/identity validation still applies.
+
+Follow the reported exact path, scope, intent, task source/content, environment, and receipt guidance. Uncertain submission permits read-only positive saved-message reconciliation, never resend; absence or a missing/changed thread does not prove rejection or permit thread recreation. Preparation retries reconcile saved IDs before continuation. Unresolved create/switch receipts, stale locks, unsafe/corrupt state, and orphan temporary files block admission; unassignable root temps can block the repository. Do not choose a new ID or environment to bypass uncertainty. Preserve state for manual backup/reconciliation; retiring the exact state is a last resort, not proof of safe redispatch. Verify the lock owner stopped and reconcile before manual removal; there is no TTL takeover or automatic receipt eviction. Create's successful receipt still rejects duplicate create handoff; it is not switch retry success.
+
+### Output and client boundary
+
+`--json` is supported with T3 and emits one `command: switch` envelope containing selected-target and `t3Handoff` details, intent, known IDs (null when unknown), effective permission/selection, receipt/retry guidance, and UI `none`/`skipped`. Accepted and accepted-retry exit `0`; usage/config/selection errors exit `2`; native/receipt/lock/uncertainty/cleanup errors exit `1`. Proven acceptance remains dispatch success with IDs even when cleanup/persistence exits nonzero. Ordinary switch JSON guards remain unchanged; T3 launcher conflicts are structured errors. Never expose task text, tokens, authenticated URLs, or raw transport/configuration output.
+
+Manually select the reported project/thread in a desktop, web, or mobile client connected to the same host environment. No UI opens or focuses automatically. The original conversation remains attached to its original checkout; changing shell CWD does not move it. Do not claim fixture tests or create's prior macOS smoke establish real switch E2E on any platform.
+
+Canonical contract: `https://arashi.haphazard.dev/commands/switch/#hand-off-to-t3-code`; setup/model guidance: `https://arashi.haphazard.dev/workflows/t3-code/`.
+
 ## Session Navigation (Optional)
 
 For tmux/sesh and worktree jump shortcuts, use [Session Shortcuts](../session-shortcuts.md).
